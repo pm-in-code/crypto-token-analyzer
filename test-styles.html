@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Test Button Styles</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+      .btn-primary {
+        background: linear-gradient(135deg, #3b82f6, #2563eb, #1d4ed8);
+        color: white;
+        font-weight: bold;
+        padding: 1rem 2rem;
+        border-radius: 0.75rem;
+        transition: all 0.3s;
+        outline: none;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        position: relative;
+        overflow: hidden;
+        background-size: 200% 200%;
+        animation: gradient-shift 3s ease infinite;
+        border: none;
+        cursor: pointer;
+      }
+      
+      .btn-primary:hover {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8, #1e40af);
+        transform: translateY(-0.25rem);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      }
+      
+      .btn-primary:active {
+        transform: scale(0.95);
+      }
+      
+      .btn-primary:focus {
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3), 0 0 0 2px white;
+      }
+      
+      .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+      }
+      
+      .btn-primary:hover::before {
+        left: 100%;
+      }
+      
+      .btn-secondary {
+        background: linear-gradient(135deg, #f9fafb, #f3f4f6, #e5e7eb);
+        color: #1f2937;
+        font-weight: bold;
+        padding: 1rem 2rem;
+        border-radius: 0.75rem;
+        transition: all 0.3s;
+        outline: none;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        position: relative;
+        overflow: hidden;
+        background-size: 200% 200%;
+        animation: gradient-shift 4s ease infinite;
+        border: 1px solid #d1d5db;
+        cursor: pointer;
+      }
+      
+      .btn-secondary:hover {
+        background: linear-gradient(135deg, #f3f4f6, #e5e7eb, #d1d5db);
+        transform: translateY(-0.25rem);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      }
+      
+      .btn-secondary:active {
+        transform: scale(0.95);
+      }
+      
+      .btn-secondary:focus {
+        box-shadow: 0 0 0 4px rgba(107, 114, 128, 0.3), 0 0 0 2px white;
+      }
+      
+      .btn-secondary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(0,0,0,0.05), transparent);
+        transition: left 0.5s;
+      }
+      
+      .btn-secondary:hover::before {
+        left: 100%;
+      }
+      
+      .btn-success {
+        background: linear-gradient(135deg, #10b981, #059669, #047857);
+        color: white;
+        font-weight: bold;
+        padding: 1rem 2rem;
+        border-radius: 0.75rem;
+        transition: all 0.3s;
+        outline: none;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        position: relative;
+        overflow: hidden;
+        background-size: 200% 200%;
+        animation: gradient-shift 3s ease infinite;
+        border: none;
+        cursor: pointer;
+      }
+      
+      .btn-success:hover {
+        background: linear-gradient(135deg, #059669, #047857, #065f46);
+        transform: translateY(-0.25rem);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      }
+      
+      .btn-success:active {
+        transform: scale(0.95);
+      }
+      
+      .btn-success:focus {
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.3), 0 0 0 2px white;
+      }
+      
+      .btn-success::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+      }
+      
+      .btn-success:hover::before {
+        left: 100%;
+      }
+      
+      @keyframes gradient-shift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+      
+      .btn-scan {
+        background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899);
+        color: white;
+        font-weight: bold;
+        padding: 1rem 2rem;
+        border-radius: 0.75rem;
+        transition: all 0.3s;
+        outline: none;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        position: relative;
+        overflow: hidden;
+        background-size: 200% 200%;
+        animation: gradient-shift 2s ease infinite;
+        border: none;
+        cursor: pointer;
+      }
+      
+      .btn-scan:hover {
+        background: linear-gradient(135deg, #4f46e5, #7c3aed, #db2777);
+        transform: translateY(-0.25rem);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      }
+      
+      .btn-scan:active {
+        transform: scale(0.95);
+      }
+      
+      .btn-scan:focus {
+        box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.3), 0 0 0 2px white;
+      }
+      
+      .btn-scan::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: left 0.6s;
+      }
+      
+      .btn-scan:hover::before {
+        left: 100%;
+      }
+      
+      .btn-scan:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        animation: none;
+      }
+      
+      .btn-scan:disabled::before {
+        display: none;
+      }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto space-y-8">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">Test Button Styles</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="space-y-4">
+                <h2 class="text-xl font-semibold">Scan Button (btn-scan)</h2>
+                <button class="btn-scan">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    </svg>
+                    Scan Token
+                </button>
+            </div>
+            
+            <div class="space-y-4">
+                <h2 class="text-xl font-semibold">Download Button (btn-success)</h2>
+                <button class="btn-success">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Download PDF
+                </button>
+            </div>
+            
+            <div class="space-y-4">
+                <h2 class="text-xl font-semibold">Check Another Button (btn-secondary)</h2>
+                <button class="btn-secondary">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Check Another Token
+                </button>
+            </div>
+            
+            <div class="space-y-4">
+                <h2 class="text-xl font-semibold">Primary Button (btn-primary)</h2>
+                <button class="btn-primary">
+                    Primary Action
+                </button>
+            </div>
+        </div>
+        
+        <div class="mt-8 p-4 bg-blue-50 rounded-lg">
+            <h3 class="font-semibold text-blue-800 mb-2">Instructions:</h3>
+            <ul class="text-blue-700 space-y-1">
+                <li>• Hover over buttons to see shimmer effects</li>
+                <li>• Watch for animated gradients</li>
+                <li>• Click buttons to see active states</li>
+                <li>• Scan button should have rainbow gradient</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html> 
