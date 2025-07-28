@@ -3,10 +3,76 @@
 
 const { useState, useEffect, createContext, useContext } = React;
 
-// Mock data
-const trendingTokens = [
+// Real-time crypto data fetching
+const fetchCryptoData = async () => {
+  try {
+    const response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=15&page=1&sparkline=false&locale=en');
+    const data = await response.json();
+    
+    return data.map((coin, index) => ({
+      id: coin.id,
+      name: coin.name,
+      symbol: coin.symbol.toUpperCase(),
+      logo: getCryptoLogo(coin.symbol),
+      price: `$${coin.current_price.toLocaleString()}`,
+      change24h: parseFloat(coin.price_change_percentage_24h.toFixed(2)),
+      marketCap: `$${(coin.market_cap / 1e9).toFixed(1)}B`,
+      color: getCryptoColor(coin.symbol),
+      image: coin.image
+    }));
+  } catch (error) {
+    console.error('Error fetching crypto data:', error);
+    // Fallback to mock data if API fails
+    return getMockCryptoData();
+  }
+};
+
+// Helper function to get crypto logos
+const getCryptoLogo = (symbol) => {
+  const logos = {
+    'btc': '₿',
+    'eth': 'Ξ',
+    'ada': '₳',
+    'sol': '◎',
+    'dot': '●',
+    'link': '🔗',
+    'matic': '⬡',
+    'avax': '❄',
+    'bnb': '🟡',
+    'xrp': '✖',
+    'doge': '🐕',
+    'ltc': 'Ł',
+    'uni': '🦄',
+    'xlm': '★'
+  };
+  return logos[symbol.toLowerCase()] || '●';
+};
+
+// Helper function to get crypto colors
+const getCryptoColor = (symbol) => {
+  const colors = {
+    'btc': 'from-orange-400 to-orange-600',
+    'eth': 'from-purple-400 to-purple-600',
+    'ada': 'from-blue-400 to-blue-600',
+    'sol': 'from-green-400 to-green-600',
+    'dot': 'from-pink-400 to-pink-600',
+    'link': 'from-blue-500 to-blue-700',
+    'matic': 'from-purple-500 to-purple-700',
+    'avax': 'from-red-400 to-red-600',
+    'bnb': 'from-yellow-400 to-yellow-600',
+    'xrp': 'from-gray-400 to-gray-600',
+    'doge': 'from-yellow-500 to-yellow-700',
+    'ltc': 'from-gray-500 to-gray-700',
+    'uni': 'from-pink-500 to-pink-700',
+    'xlm': 'from-purple-600 to-purple-800'
+  };
+  return colors[symbol.toLowerCase()] || 'from-gray-400 to-gray-600';
+};
+
+// Fallback mock data
+const getMockCryptoData = () => [
   {
-    id: '1',
+    id: 'bitcoin',
     name: 'Bitcoin',
     symbol: 'BTC',
     logo: '₿',
@@ -16,7 +82,7 @@ const trendingTokens = [
     color: 'from-orange-400 to-orange-600'
   },
   {
-    id: '2',
+    id: 'ethereum',
     name: 'Ethereum',
     symbol: 'ETH',
     logo: 'Ξ',
@@ -26,7 +92,7 @@ const trendingTokens = [
     color: 'from-purple-400 to-purple-600'
   },
   {
-    id: '3',
+    id: 'cardano',
     name: 'Cardano',
     symbol: 'ADA',
     logo: '₳',
@@ -36,7 +102,7 @@ const trendingTokens = [
     color: 'from-blue-400 to-blue-600'
   },
   {
-    id: '4',
+    id: 'solana',
     name: 'Solana',
     symbol: 'SOL',
     logo: '◎',
@@ -46,7 +112,7 @@ const trendingTokens = [
     color: 'from-green-400 to-green-600'
   },
   {
-    id: '5',
+    id: 'polkadot',
     name: 'Polkadot',
     symbol: 'DOT',
     logo: '●',
@@ -56,7 +122,7 @@ const trendingTokens = [
     color: 'from-pink-400 to-pink-600'
   },
   {
-    id: '6',
+    id: 'chainlink',
     name: 'Chainlink',
     symbol: 'LINK',
     logo: '🔗',
@@ -66,7 +132,7 @@ const trendingTokens = [
     color: 'from-blue-500 to-blue-700'
   },
   {
-    id: '7',
+    id: 'polygon',
     name: 'Polygon',
     symbol: 'MATIC',
     logo: '⬡',
@@ -76,7 +142,7 @@ const trendingTokens = [
     color: 'from-purple-500 to-purple-700'
   },
   {
-    id: '8',
+    id: 'avalanche',
     name: 'Avalanche',
     symbol: 'AVAX',
     logo: '❄',
@@ -84,6 +150,66 @@ const trendingTokens = [
     change24h: -2.1,
     marketCap: '$12.3B',
     color: 'from-red-400 to-red-600'
+  },
+  {
+    id: 'binancecoin',
+    name: 'BNB',
+    symbol: 'BNB',
+    logo: '🟡',
+    price: '$312.50',
+    change24h: 1.8,
+    marketCap: '$48.2B',
+    color: 'from-yellow-400 to-yellow-600'
+  },
+  {
+    id: 'ripple',
+    name: 'XRP',
+    symbol: 'XRP',
+    logo: '✖',
+    price: '$0.52',
+    change24h: -0.5,
+    marketCap: '$28.1B',
+    color: 'from-gray-400 to-gray-600'
+  },
+  {
+    id: 'dogecoin',
+    name: 'Dogecoin',
+    symbol: 'DOGE',
+    logo: '🐕',
+    price: '$0.078',
+    change24h: 3.1,
+    marketCap: '$11.2B',
+    color: 'from-yellow-500 to-yellow-700'
+  },
+  {
+    id: 'litecoin',
+    name: 'Litecoin',
+    symbol: 'LTC',
+    logo: 'Ł',
+    price: '$68.40',
+    change24h: 2.3,
+    marketCap: '$5.1B',
+    color: 'from-gray-500 to-gray-700'
+  },
+  {
+    id: 'uniswap',
+    name: 'Uniswap',
+    symbol: 'UNI',
+    logo: '🦄',
+    price: '$6.85',
+    change24h: 4.7,
+    marketCap: '$4.2B',
+    color: 'from-pink-500 to-pink-700'
+  },
+  {
+    id: 'stellar',
+    name: 'Stellar',
+    symbol: 'XLM',
+    logo: '★',
+    price: '$0.12',
+    change24h: 1.9,
+    marketCap: '$3.3B',
+    color: 'from-purple-600 to-purple-800'
   }
 ];
 
@@ -578,15 +704,91 @@ const Logo = ({ onClick }) => {
 // Trending Tokens Component
 const TrendingTokens = () => {
   const { setState, setTokenAnalysis } = useAppContext();
+  const [trendingTokens, setTrendingTokens] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const scrollContainerRef = React.useRef(null);
+
+  // Fetch real-time crypto data
+  useEffect(() => {
+    const loadCryptoData = async () => {
+      setIsLoading(true);
+      try {
+        const data = await fetchCryptoData();
+        setTrendingTokens(data);
+      } catch (error) {
+        console.error('Error loading crypto data:', error);
+        setTrendingTokens(getMockCryptoData());
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadCryptoData();
+    
+    // Refresh data every 30 seconds
+    const interval = setInterval(loadCryptoData, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Auto-scroll functionality
+  useEffect(() => {
+    if (!scrollContainerRef.current || trendingTokens.length === 0) return;
+
+    const scrollContainer = scrollContainerRef.current;
+    let currentScroll = 0;
+    const scrollStep = 2; // Pixels per frame
+    const scrollSpeed = 50; // Milliseconds per frame
+
+    console.log('Starting auto-scroll with', trendingTokens.length, 'tokens');
+
+    const autoScroll = () => {
+      // Get current scroll width
+      const scrollWidth = scrollContainer.scrollWidth;
+      const clientWidth = scrollContainer.clientWidth;
+      const maxScroll = scrollWidth - clientWidth;
+
+      console.log('Scroll debug:', { scrollWidth, clientWidth, maxScroll, currentScroll });
+
+      if (maxScroll <= 0) {
+        console.log('No scroll needed - container fits');
+        return;
+      }
+
+      currentScroll += scrollStep;
+
+      // Reset to beginning when reaching the end
+      if (currentScroll >= maxScroll) {
+        currentScroll = 0;
+        console.log('Reset scroll to beginning');
+      }
+
+      // Apply scroll directly
+      scrollContainer.scrollLeft = currentScroll;
+    };
+
+    // Start scrolling after a short delay to ensure DOM is ready
+    const startDelay = setTimeout(() => {
+      const interval = setInterval(autoScroll, scrollSpeed);
+      
+      // Store interval ID for cleanup
+      scrollContainer._scrollInterval = interval;
+    }, 1000);
+
+    return () => {
+      clearTimeout(startDelay);
+      if (scrollContainer._scrollInterval) {
+        clearInterval(scrollContainer._scrollInterval);
+      }
+    };
+  }, [trendingTokens]);
 
   const handleTokenClick = (token) => {
-    // Simulate analysis for the clicked token
     setState('loading');
     
     setTimeout(() => {
       const mockAnalysis = {
         token: token.symbol,
-        score: Math.floor(Math.random() * 4) + 6, // Higher scores for trending tokens
+        score: Math.floor(Math.random() * 4) + 6,
         summary: `${token.name} is a trending cryptocurrency with strong market presence and active community. The token shows promising growth potential and solid fundamentals.`,
         metrics: {
           marketCap: token.marketCap,
@@ -602,6 +804,19 @@ const TrendingTokens = () => {
     }, 2000);
   };
 
+  if (isLoading) {
+    return (
+      <div className="max-w-6xl mx-auto mb-12">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+          Trending now:
+        </h2>
+        <div className="flex justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-6xl mx-auto mb-12">
       <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
@@ -613,18 +828,34 @@ const TrendingTokens = () => {
         <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-gray-50 to-transparent z-10 pointer-events-none"></div>
         <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-gray-50 to-transparent z-10 pointer-events-none"></div>
         
-        {/* Scrollable container */}
-        <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 px-4">
+        {/* Scrollable container with auto-scroll */}
+        <div 
+          ref={scrollContainerRef}
+          className="flex gap-4 auto-scroll-container pb-4 px-4"
+        >
           {trendingTokens.map((token) => (
             <div 
               key={token.id} 
               className="flex-shrink-0 w-48 group cursor-pointer"
               onClick={() => handleTokenClick(token)}
             >
-              <div className="card hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 bg-gradient-to-br from-white to-gray-50 border-2 border-transparent hover:border-primary-200">
-                {/* Logo */}
-                <div className={`w-12 h-12 bg-gradient-to-br ${token.color} rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300`}>
-                  <span className="text-white text-xl font-bold">{token.logo}</span>
+              <div className="card hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 bg-gradient-to-br from-white to-gray-50 border-2 border-transparent hover:border-primary-200 relative overflow-hidden">
+                {/* Logo with real image if available */}
+                <div className={`w-12 h-12 bg-gradient-to-br ${token.color} rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300 relative`}>
+                  {token.image ? (
+                    <img 
+                      src={token.image} 
+                      alt={token.name}
+                      className="w-8 h-8 rounded-full"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'block';
+                      }}
+                    />
+                  ) : null}
+                  <span className="text-white text-xl font-bold" style={{ display: token.image ? 'none' : 'block' }}>
+                    {token.logo}
+                  </span>
                 </div>
                 
                 {/* Token Info */}
@@ -648,9 +879,20 @@ const TrendingTokens = () => {
                 
                 {/* Hover effect overlay */}
                 <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                
+                {/* Live indicator */}
+                <div className="absolute top-2 right-2 w-2 h-2 bg-crypto-green rounded-full animate-pulse"></div>
               </div>
             </div>
           ))}
+        </div>
+        
+        {/* Auto-scroll indicator */}
+        <div className="text-center mt-2">
+          <span className="text-xs text-gray-500 flex items-center justify-center gap-1">
+            <div className="w-2 h-2 bg-crypto-green rounded-full animate-pulse"></div>
+            Auto-scrolling • Live data
+          </span>
         </div>
       </div>
     </div>

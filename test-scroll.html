@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scroll Test</title>
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        
+        .scroll-container {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            padding: 16px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .scroll-container::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .item {
+            flex-shrink: 0;
+            width: 200px;
+            height: 150px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 8px;
+            background: #3b82f6;
+            color: white;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #2563eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Auto Scroll Test</h1>
+        <div class="scroll-container" id="scrollContainer">
+            <div class="item">Item 1</div>
+            <div class="item">Item 2</div>
+            <div class="item">Item 3</div>
+            <div class="item">Item 4</div>
+            <div class="item">Item 5</div>
+            <div class="item">Item 6</div>
+            <div class="item">Item 7</div>
+            <div class="item">Item 8</div>
+            <div class="item">Item 9</div>
+            <div class="item">Item 10</div>
+        </div>
+        
+        <div class="controls">
+            <button onclick="startScroll()">Start Auto Scroll</button>
+            <button onclick="stopScroll()">Stop Auto Scroll</button>
+            <button onclick="resetScroll()">Reset</button>
+        </div>
+        
+        <div id="debug" style="margin-top: 20px; font-family: monospace; font-size: 12px;"></div>
+    </div>
+
+    <script>
+        const scrollContainer = document.getElementById('scrollContainer');
+        const debug = document.getElementById('debug');
+        let scrollInterval = null;
+        let currentScroll = 0;
+        
+        function updateDebug() {
+            const scrollWidth = scrollContainer.scrollWidth;
+            const clientWidth = scrollContainer.clientWidth;
+            const maxScroll = scrollWidth - clientWidth;
+            const currentScrollLeft = scrollContainer.scrollLeft;
+            
+            debug.innerHTML = `
+                Scroll Width: ${scrollWidth}<br>
+                Client Width: ${clientWidth}<br>
+                Max Scroll: ${maxScroll}<br>
+                Current Scroll Left: ${currentScrollLeft}<br>
+                Auto Scroll Position: ${currentScroll}<br>
+                Can Scroll: ${maxScroll > 0}
+            `;
+        }
+        
+        function startScroll() {
+            if (scrollInterval) return;
+            
+            const scrollStep = 2;
+            const scrollSpeed = 50;
+            
+            scrollInterval = setInterval(() => {
+                const scrollWidth = scrollContainer.scrollWidth;
+                const clientWidth = scrollContainer.clientWidth;
+                const maxScroll = scrollWidth - clientWidth;
+                
+                if (maxScroll <= 0) {
+                    console.log('No scroll needed');
+                    return;
+                }
+                
+                currentScroll += scrollStep;
+                
+                if (currentScroll >= maxScroll) {
+                    currentScroll = 0;
+                    console.log('Reset to beginning');
+                }
+                
+                scrollContainer.scrollLeft = currentScroll;
+                updateDebug();
+            }, scrollSpeed);
+            
+            console.log('Auto scroll started');
+        }
+        
+        function stopScroll() {
+            if (scrollInterval) {
+                clearInterval(scrollInterval);
+                scrollInterval = null;
+                console.log('Auto scroll stopped');
+            }
+        }
+        
+        function resetScroll() {
+            stopScroll();
+            currentScroll = 0;
+            scrollContainer.scrollLeft = 0;
+            updateDebug();
+        }
+        
+        // Update debug on load
+        updateDebug();
+        
+        // Update debug on scroll
+        scrollContainer.addEventListener('scroll', updateDebug);
+    </script>
+</body>
+</html> 
