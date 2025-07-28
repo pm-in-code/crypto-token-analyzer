@@ -1,13 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Test Button Styles</title>
+    <meta name="theme-color" content="#000000" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta
+      name="description"
+      content="Crypto Token Analyzer - Get detailed analysis reports for any cryptocurrency token"
+    />
+    <title>Crypto Token Analyzer</title>
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                50: '#eff6ff',
+                500: '#3b82f6',
+                600: '#2563eb',
+                700: '#1d4ed8',
+              },
+              crypto: {
+                green: '#00ff88',
+                red: '#ff4444',
+                yellow: '#ffbb33',
+              }
+            },
+            animation: {
+              'spin-slow': 'spin 2s linear infinite',
+              'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            }
+          },
+        }
+      }
+    </script>
     
+    <!-- React CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- jsPDF CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <!-- Stripe.js -->
+    <script src="https://js.stripe.com/v3/"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Custom styles -->
     <style>
       .btn-primary {
         background: linear-gradient(135deg, #3b82f6, #2563eb, #1d4ed8);
@@ -208,60 +255,112 @@
       .btn-scan:disabled::before {
         display: none;
       }
+      
+      .btn-premium {
+        background: linear-gradient(135deg, #f59e0b, #d97706, #b45309);
+        color: white;
+        font-weight: bold;
+        padding: 1rem 2rem;
+        border-radius: 0.75rem;
+        transition: all 0.3s;
+        outline: none;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        position: relative;
+        overflow: hidden;
+        background-size: 200% 200%;
+        animation: gradient-shift 2.5s ease infinite;
+        border: none;
+        cursor: pointer;
+      }
+      
+      .btn-premium:hover {
+        background: linear-gradient(135deg, #d97706, #b45309, #92400e);
+        transform: translateY(-0.25rem);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      }
+      
+      .btn-premium:active {
+        transform: scale(0.95);
+      }
+      
+      .btn-premium:focus {
+        box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.3), 0 0 0 2px white;
+      }
+      
+      .btn-premium::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: left 0.6s;
+      }
+      
+      .btn-premium:hover::before {
+        left: 100%;
+      }
+      
+      .input-field {
+        @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200;
+      }
+      
+      .card {
+        @apply bg-white rounded-xl shadow-lg p-6 border border-gray-100;
+      }
+      
+      /* Hide scrollbar for webkit browsers */
+      .scrollbar-hide {
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;  /* Firefox */
+      }
+      .scrollbar-hide::-webkit-scrollbar {
+        display: none;  /* Chrome, Safari and Opera */
+      }
+      
+      /* Smooth scrolling */
+      .scrollbar-hide {
+        scroll-behavior: smooth;
+      }
+      
+      /* Enhanced hover animations */
+      .group:hover .group-hover\:scale-110 {
+        transform: scale(1.1);
+      }
+      
+      .group:hover .group-hover\:scale-105 {
+        transform: scale(1.05);
+      }
+      
+      .group:hover .group-hover\:-translate-y-1 {
+        transform: translateY(-0.25rem);
+      }
+      
+      /* Auto-scroll container styles */
+      .auto-scroll-container {
+        overflow-x: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      .auto-scroll-container::-webkit-scrollbar {
+        display: none;
+      }
+      
+      /* Ensure flex items don't shrink */
+      .flex-shrink-0 {
+        flex-shrink: 0;
+      }
     </style>
-</head>
-<body class="bg-gray-100 p-8">
-    <div class="max-w-4xl mx-auto space-y-8">
-        <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">Test Button Styles</h1>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="space-y-4">
-                <h2 class="text-xl font-semibold">Scan Button (btn-scan)</h2>
-                <button class="btn-scan">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                    </svg>
-                    Scan Token
-                </button>
-            </div>
-            
-            <div class="space-y-4">
-                <h2 class="text-xl font-semibold">Download Button (btn-success)</h2>
-                <button class="btn-success">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    Download PDF
-                </button>
-            </div>
-            
-            <div class="space-y-4">
-                <h2 class="text-xl font-semibold">Check Another Button (btn-secondary)</h2>
-                <button class="btn-secondary">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    Check Another Token
-                </button>
-            </div>
-            
-            <div class="space-y-4">
-                <h2 class="text-xl font-semibold">Primary Button (btn-primary)</h2>
-                <button class="btn-primary">
-                    Primary Action
-                </button>
-            </div>
-        </div>
-        
-        <div class="mt-8 p-4 bg-blue-50 rounded-lg">
-            <h3 class="font-semibold text-blue-800 mb-2">Instructions:</h3>
-            <ul class="text-blue-700 space-y-1">
-                <li>• Hover over buttons to see shimmer effects</li>
-                <li>• Watch for animated gradients</li>
-                <li>• Click buttons to see active states</li>
-                <li>• Scan button should have rainbow gradient</li>
-            </ul>
-        </div>
-    </div>
-</body>
-</html> 
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    
+    <!-- App Script -->
+    <script type="text/babel" src="app.js?v=16"></script>
+  </body>
+</html>
