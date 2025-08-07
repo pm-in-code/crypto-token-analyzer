@@ -52,13 +52,23 @@ For each category, provide:
 - Key strengths and weaknesses
 
 Format the response as:
-Category 1: [Name] - Score: [X]/100
+Category 1: Market Metrics - Score: [X]/100
 [Detailed analysis]
 
-Category 2: [Name] - Score: [X]/100
+Category 2: Tokenomics - Score: [X]/100
 [Detailed analysis]
 
-...
+Category 3: Development Activity - Score: [X]/100
+[Detailed analysis]
+
+Category 4: Social Metrics - Score: [X]/100
+[Detailed analysis]
+
+Category 5: Team & Investors - Score: [X]/100
+[Detailed analysis]
+
+Category 6: Risk Assessment - Score: [X]/100
+[Detailed analysis]
 
 Overall Score: [Average of all scores]/100
 
