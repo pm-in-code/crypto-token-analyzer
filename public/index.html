@@ -56,46 +56,334 @@
     
     <!-- Custom styles -->
     <style>
-      .btn-primary {
-        background: linear-gradient(135deg, #3b82f6, #2563eb, #1d4ed8);
-        color: white;
+      /* Worth OS Design System */
+      :root {
+        /* Main Colors */
+        --main-100: #FFFFFF;
+        --main-200: #F8F7F0;
+        --main-300: #EAE7D6;
+        --main-400: #F0F0E0;
+        --main-500: #D4D4D4;
+        --main-600: #4A4A4A;
+        
+        /* Accent Colors */
+        --accent-green: #D9FF00;
+        --accent-blue: #87CEEB;
+        --accent-pink: #FF69B4;
+        --accent-yellow: #FFD700;
+        --accent-red: #FF0000;
+        
+        /* System Colors */
+        --system-red: #FF6B6B;
+        
+        /* Background */
+        --bg-primary: #E6F3FF;
+        --bg-secondary: #F0F8FF;
+        
+        /* Text Colors */
+        --text-primary: #2C2C2C;
+        --text-secondary: #666666;
+        --text-light: #999999;
+      }
+      
+      body {
+        background: var(--bg-primary);
+        background-image: 
+          radial-gradient(circle at 20% 20%, rgba(255,255,255,0.1) 1px, transparent 1px),
+          radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 1px, transparent 1px);
+        background-size: 20px 20px;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        color: var(--text-primary);
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+      }
+      
+      /* Logo */
+      .logo {
+        width: 40px;
+        height: 40px;
+        background: var(--accent-green);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         font-weight: bold;
-        padding: 1rem 2rem;
-        border-radius: 0.75rem;
-        transition: all 0.3s;
-        outline: none;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        position: relative;
-        overflow: hidden;
-        background-size: 200% 200%;
-        animation: gradient-shift 3s ease infinite;
-        border: none;
-        cursor: pointer;
+        font-size: 20px;
+        color: white;
+        text-decoration: none;
       }
       
-      .btn-primary:hover {
-        background: linear-gradient(135deg, #2563eb, #1d4ed8, #1e40af);
-        transform: translateY(-0.25rem);
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-      }
-      
-      .btn-primary:active {
-        transform: scale(0.95);
-      }
-      
-      .btn-primary:focus {
-        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3), 0 0 0 2px white;
-      }
-      
-      .btn-primary::before {
-        content: '';
-        position: absolute;
+      /* Header */
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 40px;
+        position: fixed;
         top: 0;
-        left: -100%;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        background: transparent;
+      }
+      
+      .social-links {
+        display: flex;
+        gap: 20px;
+      }
+      
+      .social-links a {
+        color: var(--text-primary);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        transition: color 0.2s;
+      }
+      
+      .social-links a:hover {
+        color: var(--accent-green);
+      }
+      
+      /* Main Container */
+      .main-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 120px 20px 40px;
+        gap: 20px;
+      }
+      
+      /* Cards */
+      .card {
+        background: var(--main-200);
+        border-radius: 16px;
+        padding: 32px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        border: 1px solid var(--main-300);
+        max-width: 600px;
         width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-        transition: left 0.5s;
+      }
+      
+      /* Worth OS Badge */
+      .worth-badge {
+        font-size: 12px;
+        color: var(--text-secondary);
+        margin-bottom: 24px;
+        font-weight: 500;
+      }
+      
+      /* Main Question */
+      .main-question {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        margin-bottom: 32px;
+        flex-wrap: wrap;
+      }
+      
+      .question-part {
+        padding: 12px 24px;
+        border-radius: 24px;
+        font-weight: bold;
+        font-size: 18px;
+      }
+      
+      .question-worth {
+        background: var(--accent-green);
+        color: var(--text-primary);
+      }
+      
+      .question-invest {
+        background: var(--accent-blue);
+        color: white;
+      }
+      
+      .question-to {
+        color: var(--text-primary);
+        font-size: 16px;
+      }
+      
+      /* Input Field */
+      .input-container {
+        position: relative;
+        margin-bottom: 20px;
+      }
+      
+      .input-field {
+        width: 100%;
+        padding: 16px 20px;
+        border: 1px solid var(--main-300);
+        border-radius: 12px;
+        background: var(--main-100);
+        font-size: 16px;
+        color: var(--text-primary);
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      
+      .input-field:focus {
+        border-color: var(--accent-green);
+      }
+      
+      .input-field::placeholder {
+        color: var(--text-light);
+      }
+      
+      .clear-button {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--main-500);
+        border: none;
+        color: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+      }
+      
+      /* Token List */
+      .token-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      
+      .token-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px;
+        background: var(--main-100);
+        border-radius: 12px;
+        border: 1px solid var(--main-300);
+      }
+      
+      .token-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      
+      .token-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--main-400);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        color: var(--text-secondary);
+      }
+      
+      .token-details h3 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+      
+      .token-details p {
+        margin: 0;
+        font-size: 12px;
+        color: var(--text-light);
+      }
+      
+      .token-rank {
+        background: var(--accent-yellow);
+        color: var(--text-primary);
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 500;
+      }
+      
+      .analyse-button {
+        background: var(--main-300);
+        color: var(--text-primary);
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      
+      .analyse-button:hover {
+        background: var(--main-400);
+      }
+      
+      /* Error State */
+      .error-card {
+        text-align: center;
+        padding: 40px 20px;
+      }
+      
+      .error-title {
+        font-size: 24px;
+        font-weight: bold;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+      }
+      
+      .error-message {
+        color: var(--text-secondary);
+        font-size: 16px;
+      }
+      
+      /* Loading State */
+      .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid var(--main-300);
+        border-top: 4px solid var(--accent-green);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 20px auto;
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      /* Responsive */
+      @media (max-width: 768px) {
+        .header {
+          padding: 20px;
+        }
+        
+        .main-container {
+          padding: 100px 20px 40px;
+        }
+        
+        .card {
+          padding: 24px;
+        }
+        
+        .main-question {
+          flex-direction: column;
+          gap: 8px;
+        }
+        
+        .question-part {
+          font-size: 16px;
+          padding: 10px 20px;
+        }
       }
       
       .btn-primary:hover::before {
@@ -358,9 +646,23 @@
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
+    
+    <!-- Header -->
+    <header class="header">
+      <a href="#" class="logo">W</a>
+      <div class="social-links">
+        <a href="#" target="_blank">Twitter</a>
+        <a href="#" target="_blank">Reddit</a>
+        <a href="#" target="_blank">Telegram</a>
+      </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+      <div id="root"></div>
+    </main>
     
     <!-- App Script -->
-    <script type="text/babel" src="app.js?v=16"></script>
+    <script type="text/babel" src="app.js?v=17"></script>
   </body>
 </html>
