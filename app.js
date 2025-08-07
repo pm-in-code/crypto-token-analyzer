@@ -932,12 +932,14 @@ const TokenSearch = () => {
   const { setState, setTokenAnalysis } = useAppContext();
   const [tokenInput, setTokenInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showError, setShowError] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!tokenInput.trim()) return;
 
     setIsSubmitting(true);
+    setShowError(false);
     setState('loading');
 
     // PROMPT ДЛЯ OPENAI
@@ -967,12 +969,12 @@ const TokenSearch = () => {
         setState('result');
       } else {
         console.error('Backend error:', data);
-        alert(`Ошибка: ${data.error || 'Неизвестная ошибка'}`);
+        setShowError(true);
         setState('search');
       }
     } catch (error) {
       console.error('Network error:', error);
-      alert('Ошибка сети: ' + error.message);
+      setShowError(true);
       setState('search');
     } finally {
       setIsSubmitting(false);
@@ -985,49 +987,89 @@ const TokenSearch = () => {
     }
   };
 
-  return (
-    <div className="max-w-2xl mx-auto text-center">
-      <h1 className="text-4xl font-bold text-gray-900 mb-8">
-        Check any Token
-      </h1>
-      
-      <form onSubmit={handleSubmit} className="mb-8">
-        <div className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
-          <input
-            type="text"
-            value={tokenInput}
-            onChange={(e) => setTokenInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Enter token name or address (e.g., BTC, ETH, ADA)"
-            className="input-field flex-1"
-            disabled={isSubmitting}
-          />
-          <button
-            type="submit"
-            disabled={isSubmitting || !tokenInput.trim()}
-            className="btn-scan whitespace-nowrap flex items-center justify-center gap-2 group"
-          >
-            {isSubmitting ? (
-              <>
-                <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span>Scanning...</span>
-              </>
-            ) : (
-              <>
-                <svg className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                </svg>
-                <span>Scan</span>
-              </>
-            )}
-          </button>
+  const handleClearInput = () => {
+    setTokenInput('');
+    setShowError(false);
+  };
+
+  // Mock trending tokens for demo
+  const trendingTokens = [
+    { name: 'Ethereum', symbol: 'ETH', rank: '#9999 CMC' },
+    { name: 'Bitcoin', symbol: 'BTC', rank: '#9999 CMC' },
+    { name: 'Cardano', symbol: 'ADA', rank: '#9999 CMC' },
+    { name: 'Solana', symbol: 'SOL', rank: '#9999 CMC' }
+  ];
+
+  if (showError) {
+    return (
+      <div className="card">
+        <div className="error-card">
+          <div className="error-title">Oops</div>
+          <div className="error-message">WE CAN'T FIND THIS TOKEN</div>
         </div>
-      </form>
-      
-      {/* Trending Tokens Section */}
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full">
+      {/* Main Search Card */}
+      <div className="card">
+        <div className="worth-badge">WORTH OS 1.0</div>
+        
+        <div className="main-question">
+          <div className="question-part question-worth">worth</div>
+          <div className="question-to">to</div>
+          <div className="question-part question-invest">invest?</div>
+        </div>
+        
+        <form onSubmit={handleSubmit}>
+          <div className="input-container">
+            <input
+              type="text"
+              value={tokenInput}
+              onChange={(e) => setTokenInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Enter Token name or address"
+              className="input-field"
+              disabled={isSubmitting}
+            />
+            {tokenInput && (
+              <button
+                type="button"
+                onClick={handleClearInput}
+                className="clear-button"
+              >
+                ×
+              </button>
+            )}
+          </div>
+        </form>
+      </div>
+
+      {/* Trending Tokens Card */}
+      <div className="card">
+        <div className="token-list">
+          {trendingTokens.map((token, index) => (
+            <div key={index} className="token-item">
+              <div className="token-info">
+                <div className="token-icon">{token.symbol[0]}</div>
+                <div className="token-details">
+                  <h3>{token.name}</h3>
+                  <p>{token.symbol}</p>
+                </div>
+              </div>
+              <div className="token-rank">{token.rank}</div>
+              <button className="analyse-button">
+                Analyse →
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
       <TrendingTokens />
     </div>
   );
@@ -1059,30 +1101,82 @@ const LoadingScreen = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto text-center">
-      <div className="mb-8">
-        <div className="animate-spin-slow w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+    <div className="card">
+      <div className="text-center">
+        <div className="loading-spinner"></div>
+        
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">
           Analyzing token...
         </h2>
-        <p className="text-gray-600">
+        
+        <p className="text-gray-600 mb-8">
           Our AI is processing market data, social sentiment, and technical indicators
         </p>
-      </div>
-
-      <div className="card max-w-md mx-auto">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Get notified when ready
-        </h3>
         
         <div className="space-y-4">
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <span className="text-gray-700">Market Metrics</span>
+            <div className="w-8 h-8 bg-crypto-green rounded-full flex items-center justify-center">
+              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+          </div>
+          
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <span className="text-gray-700">Tokenomics</span>
+            <div className="w-8 h-8 bg-crypto-green rounded-full flex items-center justify-center">
+              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+          </div>
+          
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <span className="text-gray-700">Development Activity</span>
+            <div className="w-8 h-8 bg-crypto-green rounded-full flex items-center justify-center">
+              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+          </div>
+          
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <span className="text-gray-700">Social Metrics</span>
+            <div className="w-8 h-8 bg-crypto-green rounded-full flex items-center justify-center">
+              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+          </div>
+          
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <span className="text-gray-700">Team & Investors</span>
+            <div className="w-8 h-8 bg-crypto-green rounded-full flex items-center justify-center">
+              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+          </div>
+          
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <span className="text-gray-700">Risk Assessment</span>
+            <div className="w-8 h-8 bg-crypto-green rounded-full flex items-center justify-center">
+              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+          </div>
+        </div>
+        
+        <div className="mt-8 space-y-4">
           <div>
             <input
               type="email"
               value={email}
               onChange={handleEmailChange}
               placeholder="Enter your email address"
-              className={`input-field ${emailError ? 'border-red-500' : ''}`}
+              className={`input-field w-full ${emailError ? 'border-red-500' : ''}`}
             />
             {emailError && (
               <p className="text-red-500 text-sm mt-1">{emailError}</p>
@@ -1091,7 +1185,7 @@ const LoadingScreen = () => {
           
           <button
             onClick={handleNotifyClick}
-            className="btn-primary w-full"
+            className="analyse-button w-full"
           >
             Notify me when ready
           </button>
@@ -1672,19 +1766,8 @@ const AppContent = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Logo onClick={handleLogoClick} />
-            <div className="text-sm text-gray-500">
-              Powered by AI
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="w-full">
+      <main className="w-full">
         {state === 'search' && (
           <TokenSearch />
         )}
@@ -1697,17 +1780,6 @@ const AppContent = () => {
           <ResultScreen />
         )}
       </main>
-
-      <footer className="bg-white border-t border-gray-200 mt-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="text-center text-sm text-gray-500">
-            <p>&copy; 2024 Crypto Token Analyzer. All rights reserved.</p>
-            <p className="mt-1">
-              This is a demo application. Data is for educational purposes only.
-            </p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };
