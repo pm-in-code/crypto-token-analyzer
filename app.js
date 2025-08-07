@@ -366,30 +366,52 @@ const generatePDFReport = (analysis, email, isPremium = false) => {
       const categories = [];
       let overallScore = null;
       
-      // Try to find categories with names
-      const categoryPatterns = [
-        /Category 1[^:]*?–\s*([^:]+?):\s*(\d+)/gi,
-        /Category 2[^:]*?–\s*([^:]+?):\s*(\d+)/gi,
-        /Category 3[^:]*?–\s*([^:]+?):\s*(\d+)/gi,
-        /Category 4[^:]*?–\s*([^:]+?):\s*(\d+)/gi,
-        /Category 5[^:]*?–\s*([^:]+?):\s*(\d+)/gi,
-        /Category 6[^:]*?–\s*([^:]+?):\s*(\d+)/gi,
-        /Category (\d+)[^:]*?:\s*(\d+)/gi
+      const expectedCategories = [
+        'Market Metrics',
+        'Tokenomics',
+        'Development Activity', 
+        'Social Metrics',
+        'Team & Investors',
+        'Risk Assessment'
       ];
       
+      // Try to find categories with exact names
       let foundCategories = false;
-      for (let pattern of categoryPatterns) {
-        const matches = [...summary.matchAll(pattern)];
-        if (matches.length > 0) {
-          matches.forEach(match => {
-            const categoryName = match[1] ? match[1].trim() : `Category ${match[1] || match[2]}`;
-            const score = parseInt(match[2] || match[3]);
-            if (!isNaN(score)) {
-              categories.push({ name: categoryName, score });
-            }
-          });
+      for (let i = 0; i < 6; i++) {
+        const pattern = new RegExp(`Category ${i + 1}:\\s*${expectedCategories[i].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*-\\s*Score:\\s*(\\d+)`, 'gi');
+        const match = summary.match(pattern);
+        if (match) {
+          const score = parseInt(match[0].match(/(\d+)/)[1]);
+          categories.push({ name: expectedCategories[i], score });
           foundCategories = true;
-          break;
+        }
+      }
+      
+      // Fallback to other formats
+      if (!foundCategories) {
+        const categoryPatterns = [
+          /Category 1[^:]*?–\s*([^:]+?):\s*(\d+)/gi,
+          /Category 2[^:]*?–\s*([^:]+?):\s*(\d+)/gi,
+          /Category 3[^:]*?–\s*([^:]+?):\s*(\d+)/gi,
+          /Category 4[^:]*?–\s*([^:]+?):\s*(\d+)/gi,
+          /Category 5[^:]*?–\s*([^:]+?):\s*(\d+)/gi,
+          /Category 6[^:]*?–\s*([^:]+?):\s*(\d+)/gi,
+          /Category (\d+)[^:]*?:\s*(\d+)/gi
+        ];
+        
+        for (let pattern of categoryPatterns) {
+          const matches = [...summary.matchAll(pattern)];
+          if (matches.length > 0) {
+            matches.forEach(match => {
+              const categoryName = match[1] ? match[1].trim() : `Category ${match[1] || match[2]}`;
+              const score = parseInt(match[2] || match[3]);
+              if (!isNaN(score)) {
+                categories.push({ name: categoryName, score });
+              }
+            });
+            foundCategories = true;
+            break;
+          }
         }
       }
       
@@ -416,35 +438,16 @@ const generatePDFReport = (analysis, email, isPremium = false) => {
       
       // Fallback categories if none found
       if (categories.length === 0) {
-        const categoryNames = [
-          'Market Metrics',
-          'Tokenomics',
-          'Development Activity',
-          'Social Metrics',
-          'Team & Investors',
-          'Risk Assessment'
-        ];
-        
-        const numberMatches = summary.match(/(\d+)/g);
+        const numberMatches = summary.match(/\b([0-9]{1,2}|100)\b/g);
         if (numberMatches && numberMatches.length >= 6) {
           for (let i = 0; i < Math.min(6, numberMatches.length); i++) {
             const score = parseInt(numberMatches[i]);
             if (score >= 0 && score <= 100) {
-              categories.push({ name: categoryNames[i], score });
+              categories.push({ name: expectedCategories[i], score });
             }
           }
         }
       }
-      
-      // Ensure we have all 6 categories with proper names
-      const expectedCategories = [
-        'Market Metrics',
-        'Tokenomics',
-        'Development Activity', 
-        'Social Metrics',
-        'Team & Investors',
-        'Risk Assessment'
-      ];
       
       // If we have less than 6 categories, add missing ones
       if (categories.length < 6) {
@@ -453,6 +456,13 @@ const generatePDFReport = (analysis, email, isPremium = false) => {
           categories.push({ name: expectedCategories[i], score });
         }
       }
+      
+      // Sort categories by order
+      categories.sort((a, b) => {
+        const aIndex = expectedCategories.indexOf(a.name);
+        const bIndex = expectedCategories.indexOf(b.name);
+        return aIndex - bIndex;
+      });
       
       return { categories, overallScore };
     };
@@ -1248,36 +1258,65 @@ const ResultScreen = () => {
     return 'text-red-600';
   };
 
-  const parseAnalysisSummary = (summary) => {
+    const parseAnalysisSummary = (summary) => {
     const categories = [];
     let overallScore = null;
     
-    // Улучшенный парсинг категорий с названиями
+    // Улучшенный парсинг категорий с точными названиями
     const categoryPatterns = [
+      /Category 1:\s*Market Metrics\s*-\s*Score:\s*(\d+)/gi,
+      /Category 2:\s*Tokenomics\s*-\s*Score:\s*(\d+)/gi,
+      /Category 3:\s*Development Activity\s*-\s*Score:\s*(\d+)/gi,
+      /Category 4:\s*Social Metrics\s*-\s*Score:\s*(\d+)/gi,
+      /Category 5:\s*Team & Investors\s*-\s*Score:\s*(\d+)/gi,
+      /Category 6:\s*Risk Assessment\s*-\s*Score:\s*(\d+)/gi,
+      // Fallback для других форматов
       /Category 1[^:]*?–\s*([^:]+?):\s*(\d+)/gi,
       /Category 2[^:]*?–\s*([^:]+?):\s*(\d+)/gi,
       /Category 3[^:]*?–\s*([^:]+?):\s*(\d+)/gi,
       /Category 4[^:]*?–\s*([^:]+?):\s*(\d+)/gi,
       /Category 5[^:]*?–\s*([^:]+?):\s*(\d+)/gi,
       /Category 6[^:]*?–\s*([^:]+?):\s*(\d+)/gi,
-      // Fallback для случаев без тире
+      // Простой парсинг
       /Category (\d+)[^:]*?:\s*(\d+)/gi
     ];
     
-    // Попробуем найти категории с названиями
+    const expectedCategories = [
+      'Market Metrics',
+      'Tokenomics',
+      'Development Activity', 
+      'Social Metrics',
+      'Team & Investors',
+      'Risk Assessment'
+    ];
+    
+    // Попробуем найти категории с точными названиями
     let foundCategories = false;
-    for (let pattern of categoryPatterns) {
-      const matches = [...summary.matchAll(pattern)];
-      if (matches.length > 0) {
-        matches.forEach(match => {
-          const categoryName = match[1] ? match[1].trim() : `Category ${match[1] || match[2]}`;
-          const score = parseInt(match[2] || match[3]);
-          if (!isNaN(score)) {
-            categories.push({ name: categoryName, score });
-          }
-        });
+    for (let i = 0; i < 6; i++) {
+      const pattern = new RegExp(`Category ${i + 1}:\\s*${expectedCategories[i].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*-\\s*Score:\\s*(\\d+)`, 'gi');
+      const match = summary.match(pattern);
+      if (match) {
+        const score = parseInt(match[0].match(/(\d+)/)[1]);
+        categories.push({ name: expectedCategories[i], score });
         foundCategories = true;
-        break;
+      }
+    }
+    
+    // Если не нашли точные совпадения, попробуем другие форматы
+    if (!foundCategories) {
+      for (let pattern of categoryPatterns) {
+        const matches = [...summary.matchAll(pattern)];
+        if (matches.length > 0) {
+          matches.forEach(match => {
+            const categoryName = match[1] ? match[1].trim() : `Category ${match[1] || match[2]}`;
+            const score = parseInt(match[2] || match[3]);
+            if (!isNaN(score)) {
+              categories.push({ name: categoryName, score });
+            }
+          });
+          foundCategories = true;
+          break;
+        }
       }
     }
     
@@ -1302,38 +1341,19 @@ const ResultScreen = () => {
       overallScore = parseInt(overallMatch[1]);
     }
     
-    // Если категории не найдены, создадим заглушки с правильными названиями
+    // Если категории не найдены, попробуем извлечь числа из текста
     if (categories.length === 0) {
-      const categoryNames = [
-        'Market Metrics',
-        'Tokenomics', 
-        'Development Activity',
-        'Social Metrics',
-        'Team & Investors',
-        'Risk Assessment'
-      ];
-      
-      // Попробуем найти любые числа в тексте
-      const numberMatches = summary.match(/(\d+)/g);
+      // Ищем числа от 0 до 100 в тексте
+      const numberMatches = summary.match(/\b([0-9]{1,2}|100)\b/g);
       if (numberMatches && numberMatches.length >= 6) {
         for (let i = 0; i < Math.min(6, numberMatches.length); i++) {
           const score = parseInt(numberMatches[i]);
           if (score >= 0 && score <= 100) {
-            categories.push({ name: categoryNames[i], score });
+            categories.push({ name: expectedCategories[i], score });
           }
         }
       }
     }
-    
-    // Убедимся, что у нас есть все 6 категорий с правильными названиями
-    const expectedCategories = [
-      'Market Metrics',
-      'Tokenomics',
-      'Development Activity', 
-      'Social Metrics',
-      'Team & Investors',
-      'Risk Assessment'
-    ];
     
     // Если у нас меньше 6 категорий, добавим недостающие
     if (categories.length < 6) {
@@ -1342,6 +1362,13 @@ const ResultScreen = () => {
         categories.push({ name: expectedCategories[i], score });
       }
     }
+    
+    // Сортируем категории по порядку
+    categories.sort((a, b) => {
+      const aIndex = expectedCategories.indexOf(a.name);
+      const bIndex = expectedCategories.indexOf(b.name);
+      return aIndex - bIndex;
+    });
     
     return { categories, overallScore };
   };
@@ -1695,3 +1722,4 @@ const App = () => {
 
 // Render the app
 ReactDOM.render(<App />, document.getElementById('root'));
+
