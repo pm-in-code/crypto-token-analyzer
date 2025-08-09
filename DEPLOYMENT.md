@@ -2,30 +2,43 @@
 
 ## 🔐 Безопасная публикация на GitHub Pages
 
-### Вариант 1: Backend на отдельном сервере (Рекомендуемый)
+### Вариант 1: Backend на Vercel + Frontend на GitHub Pages (Рекомендуемый)
 
-#### 1. Настройка Backend на Vercel/Railway/Heroku
+#### 1. Настройка Backend на Vercel
+
+**Важно:** Развертывайте только backend на Vercel!
 
 1. **Создайте аккаунт на Vercel** (бесплатно): https://vercel.com
 2. **Подключите ваш GitHub репозиторий**
-3. **Настройте переменные окружения в Vercel:**
+3. **В настройках проекта Vercel:**
+   - **Framework Preset**: Node.js
+   - **Root Directory**: `vercel-backend` (или `backend`)
+   - **Build Command**: `npm install`
+   - **Output Directory**: оставьте пустым
+   - **Install Command**: `npm install`
+
+4. **Настройте переменные окружения в Vercel:**
    - `OPENAI_API_KEY` = ваш ключ OpenAI
    - `STRIPE_SECRET_KEY` = ваш ключ Stripe (если используете)
    - `STRIPE_PUBLISHABLE_KEY` = ваш публичный ключ Stripe
 
+5. **Нажмите "Deploy"**
+
 #### 2. Обновите frontend для использования нового backend URL
 
-В файле `app.js` замените:
+После успешного деплоя Vercel даст вам URL (например: `https://crypto-token-analyzer-backend.vercel.app`)
+
+В файлах `app.js` и `public/app.js` замените:
 ```javascript
-const BACKEND_API_URL = 'http://localhost:3001';
+const BACKEND_API_URL = 'http://localhost:3001/api';
 ```
 
 На:
 ```javascript
-const BACKEND_API_URL = 'https://your-backend-url.vercel.app';
+const BACKEND_API_URL = 'https://your-backend-url.vercel.app/api';
 ```
 
-#### 3. Публикация на GitHub Pages
+#### 3. Публикация Frontend на GitHub Pages
 
 1. **Сделайте репозиторий публичным**
 2. **Перейдите в Settings → Pages**
@@ -98,7 +111,7 @@ OPENAI_API_KEY = "your-key-here"
    OPENAI_API_KEY=sk-your-actual-key-here
    ```
 
-2. **Разверните backend** на Vercel/Netlify/Cloudflare
+2. **Разверните backend** на Vercel (используйте папку `vercel-backend`)
 
 3. **Обновите URL backend** в frontend коде
 
@@ -114,6 +127,16 @@ OPENAI_API_KEY = "your-key-here"
 - ✅ Проект полностью функционален
 
 ## 🆘 Если что-то не работает
+
+### Ошибка Vercel: "No Output Directory named 'public' found"
+
+**Решение:**
+1. Убедитесь, что в Vercel выбран **Root Directory**: `vercel-backend`
+2. **Output Directory** оставьте пустым
+3. **Build Command**: `npm install`
+4. **Install Command**: `npm install`
+
+### Другие проблемы:
 
 1. **Проверьте переменные окружения** на сервере
 2. **Проверьте CORS настройки** в backend
