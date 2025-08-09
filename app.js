@@ -313,7 +313,7 @@ const isValidEmail = (email) => {
 };
 
 // Global configuration
-const BACKEND_API_URL = 'https://YOUR-ACTUAL-VERCEL-URL.vercel.app/api'; // Замените YOUR-ACTUAL-VERCEL-URL на ваш реальный URL
+const BACKEND_API_URL = 'https://crypto-token-analyzer-1jk2jqp0z-dimas-projects-2177cff0.vercel.app/api';
 
 // PDF Generation
 const generatePDFReport = (analysis, email, isPremium = false) => {
