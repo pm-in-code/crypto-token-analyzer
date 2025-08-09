@@ -14,6 +14,15 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const STRIPE_PUBLISHABLE_KEY = process.env.STRIPE_PUBLISHABLE_KEY;
 
+// Simple test endpoint (no auth required)
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Crypto Token Analyzer Backend is running!',
+    timestamp: new Date().toISOString(),
+    status: 'ok'
+  });
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({
