@@ -186,4 +186,4 @@ MIT License - see LICENSE file for details
 - OpenAI for GPT-4 API
 - Stripe for payment processing
 - Vercel for hosting
-- GitHub for version control 
+- GitHub for version control # Force redeploy
