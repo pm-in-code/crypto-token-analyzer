@@ -313,7 +313,7 @@ const isValidEmail = (email) => {
 };
 
 // Global configuration
-const BACKEND_API_URL = 'https://your-backend-url.vercel.app/api'; // Замените на ваш URL от Vercel
+const BACKEND_API_URL = 'https://crypto-token-analyzer-backend.vercel.app/api'; // Обновите на ваш реальный URL
 
 // PDF Generation
 const generatePDFReport = (analysis, email, isPremium = false) => {

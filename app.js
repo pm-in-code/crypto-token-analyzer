@@ -313,7 +313,7 @@ const isValidEmail = (email) => {
 };
 
 // Global configuration
-const BACKEND_API_URL = 'https://your-backend-url.vercel.app/api'; // Замените на ваш URL от Vercel
+const BACKEND_API_URL = 'https://YOUR-ACTUAL-VERCEL-URL.vercel.app/api'; // Замените YOUR-ACTUAL-VERCEL-URL на ваш реальный URL
 
 // PDF Generation
 const generatePDFReport = (analysis, email, isPremium = false) => {
