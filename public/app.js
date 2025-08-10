@@ -313,7 +313,7 @@ const isValidEmail = (email) => {
 };
 
 // Global configuration
-const BACKEND_API_URL = 'https://your-netlify-url.netlify.app/api'; // Замените на ваш Netlify URL
+const BACKEND_API_URL = 'https://dainty-malasada-96ee00.netlify.app/api';
 
 // PDF Generation
 const generatePDFReport = (analysis, email, isPremium = false) => {
