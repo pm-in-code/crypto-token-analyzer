@@ -313,7 +313,7 @@ const isValidEmail = (email) => {
 };
 
 // Global configuration
-const BACKEND_API_URL = 'https://crypto-token-analyzer-1jk2jqp0z-dimas-projects-2177cff0.vercel.app/api';
+const BACKEND_API_URL = 'https://your-netlify-url.netlify.app/api'; // Замените на ваш Netlify URL
 
 // PDF Generation
 const generatePDFReport = (analysis, email, isPremium = false) => {
