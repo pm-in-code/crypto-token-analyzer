@@ -186,6 +186,7 @@ app.post('/api/create-payment-intent', async (req, res) => {
     console.log('Stripe response status:', stripeResponse.status);
     const paymentIntent = await stripeResponse.json();
     console.log('Stripe response:', paymentIntent);
+    console.log('Publishable key:', STRIPE_PUBLISHABLE_KEY);
 
     if (paymentIntent.error) {
       console.error('Stripe error:', paymentIntent.error);
