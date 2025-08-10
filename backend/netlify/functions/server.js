@@ -117,15 +117,21 @@ Provide actionable insights and recommendations.`;
 // Stripe payment intent endpoint
 app.post('/api/create-payment-intent', async (req, res) => {
   try {
+    console.log('Stripe endpoint called with body:', req.body);
+    
     if (!STRIPE_SECRET_KEY) {
+      console.log('Stripe secret key not configured');
       return res.status(500).json({ error: 'Stripe not configured' });
     }
 
     const { amount, currency = 'usd' } = req.body;
 
     if (!amount) {
+      console.log('Amount is missing');
       return res.status(400).json({ error: 'Amount is required' });
     }
+
+    console.log('Creating payment intent with:', { amount, currency });
 
     // Create payment intent with Stripe
     const stripeResponse = await fetch('https://api.stripe.com/v1/payment_intents', {
@@ -141,7 +147,9 @@ app.post('/api/create-payment-intent', async (req, res) => {
       }),
     });
 
+    console.log('Stripe response status:', stripeResponse.status);
     const paymentIntent = await stripeResponse.json();
+    console.log('Stripe response:', paymentIntent);
 
     if (paymentIntent.error) {
       console.error('Stripe error:', paymentIntent.error);
