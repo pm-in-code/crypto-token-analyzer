@@ -1194,7 +1194,7 @@ const LoadingScreen = () => {
 
 // Result Screen Component
 const ResultScreen = () => {
-  const { tokenAnalysis, email, setState } = useAppContext();
+  const { tokenAnalysis, email, setState, setCurrentScreen, setTokenAnalysis } = useAppContext();
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [tempEmail, setTempEmail] = useState('');
   const [emailError, setEmailError] = useState('');
@@ -1204,43 +1204,62 @@ const ResultScreen = () => {
   const [elements, setElements] = useState(null);
   const [cardElement, setCardElement] = useState(null);
   const [clientSecret, setClientSecret] = useState(null);
+  const [newTokenInput, setNewTokenInput] = useState('');
+  const [isAnalyzingNew, setIsAnalyzingNew] = useState(false);
 
   if (!tokenAnalysis) {
     return null;
   }
 
-  const handleDownloadPDF = () => {
-    if (!email.trim()) {
-      setShowEmailModal(true);
-      setTempEmail('');
-      setEmailError('');
-    } else {
-      generatePDFReport(tokenAnalysis, email);
+  const handleNewTokenSubmit = async (e) => {
+    e.preventDefault();
+    if (!newTokenInput.trim()) return;
+
+    setIsAnalyzingNew(true);
+    setCurrentScreen('loading');
+
+    // PROMPT ДЛЯ OPENAI
+    const prompt = `Execute In‑depth token analysis\nAfter receiving the token name, carry out a sequential deep‑dive analysis across the following categories and criteria. Prioritize data from CoinMarketCap and LunarCrush, but also consult other authoritative sources (CoinGecko, DefiLlama, Dune Analytics, Etherscan, etc.). Where figures conflict, perform cross‑validation.\n\nCategories and criteria of analysis\n📊 Category 1 – Market metrics\nCriteria for Category 1\n\nCoinMarketCap rank\nMarket cap\nCurrent price\nAll‑time high (ATH)\nCurrent price relative to ATH\nAll‑time low (ATL)\nCurrent price relative to ATL\nMax supply\nCirculating supply\nFully diluted valuation (FDV)\nCirculating supply vs total supply\n24 h volume\n24 h volume relative to market cap\nPrice volatility (short‑term and long‑term)\nLiquidity on key exchanges\nOrder‑book depth\n\n💰 Category 2 – Tokenomics\nCriteria for Category 2\n\nToken Generation Event and total supply at launch\nToken distribution (team, investors, founders, etc.)\nToken emission (inflationary or deflationary)\nVesting schedule\nUtility (Why does the token exist? How useful and forward‑looking is it? Governance? Fees? Staking? Collateral? If none—this is negative.)\n\n👨‍💻 Category 3 – Development & GitHub activity\nCriteria for Category 3\n\nCommit frequency over the last 30 days\nDeveloper activity (number of contributors, open issues)\n\n📣 Category 4 – Social metrics\nCriteria for Category 4\n\nMention count (LunarCrush)\nTwitterScore\nSocial sentiment\n\n🧑‍💼 Category 5 – Team & investors\nCriteria for Category 5\n\nReputation and experience of founders and key team members\nPresence of significant investors (funds, public figures)\nFund entry price (token price at the time investors/funds entered, based on TradingView data for that month)\n\n⚠️ Category 6 – Risks\nCriteria for Category 6\n\nRegulatory risks\nTechnological risks\nFinancial risks\n\nStage 3: Findings for each criterion\nFor every criterion, provide a short summary (1–3 sentences), cite your sources, and assign a score from 0 to 100 (at your discretion, based on the quality, reliability, and timeliness of the data).\n\nStage 4: Category‑level analysis\nCombine the criteria into their respective categories and:\n\nAssign each criterion a weight, using current market conditions and best practices.\nCalculate the final score for each category (weighted average of its criteria).\nProvide a concise, actionable conclusion for each category (3–5 sentences).\n\nStage 5: Overall analysis\nAssign each category a weight, using current market conditions and best practices.\nCalculate the token's overall score from 0 to 100 (weighted average of the categories).\nOffer a brief, practical conclusion (3–5 sentences) on the token's reliability and investment appeal, taking into account current market conditions and Web3 trends.`;
+
+    try {
+      const response = await fetch(`${BACKEND_API_URL}/analyze-token`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          tokenName: newTokenInput.trim(),
+          prompt: prompt
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setTokenAnalysis({
+          token: data.token,
+          summary: data.analysis,
+          usage: data.usage
+        });
+        setCurrentScreen('result');
+      } else {
+        console.error('Backend error:', data);
+        alert('Error analyzing token. Please try again.');
+        setCurrentScreen('result');
+      }
+    } catch (error) {
+      console.error('Network error:', error);
+      alert('Network error. Please try again.');
+      setCurrentScreen('result');
+    } finally {
+      setIsAnalyzingNew(false);
     }
   };
 
-  const handleEmailSubmit = () => {
-    if (!tempEmail.trim()) {
-      setEmailError('Email is required');
-      return;
+  const handleNewTokenKeyPress = (e) => {
+    if (e.key === 'Enter' && !isAnalyzingNew) {
+      handleNewTokenSubmit(e);
     }
-    if (!isValidEmail(tempEmail.trim())) {
-      setEmailError('Please enter a valid email address');
-      return;
-    }
-    generatePDFReport(tokenAnalysis, tempEmail.trim());
-    setShowEmailModal(false);
-  };
-
-  const handleEmailCancel = () => {
-    setShowEmailModal(false);
-    setTempEmail('');
-    setEmailError('');
-  };
-
-  const handleCheckAnother = () => {
-    console.log('handleCheckAnother called, setting currentScreen to home');
-    setCurrentScreen('home');
   };
 
   // Initialize Stripe Elements when payment modal opens
@@ -1370,33 +1389,34 @@ const ResultScreen = () => {
       /Category 4[^:]*?–\s*([^:]+?):\s*(\d+)/gi,
       /Category 5[^:]*?–\s*([^:]+?):\s*(\d+)/gi,
       /Category 6[^:]*?–\s*([^:]+?):\s*(\d+)/gi,
-      // Простой парсинг
-      /Category (\d+)[^:]*?:\s*(\d+)/gi
     ];
-    
+
     const expectedCategories = [
       'Market Metrics',
-      'Tokenomics',
-      'Development Activity', 
+      'Tokenomics', 
+      'Development Activity',
       'Social Metrics',
       'Team & Investors',
       'Risk Assessment'
     ];
-    
-    // Попробуем найти категории с точными названиями
+
     let foundCategories = false;
-    for (let i = 0; i < 6; i++) {
-      const pattern = new RegExp(`Category ${i + 1}:\\s*${expectedCategories[i].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*-\\s*Score:\\s*(\\d+)`, 'gi');
-      const match = summary.match(pattern);
-      if (match) {
-        // Извлекаем число после "Score: "
-        const scoreMatch = match[0].match(/Score:\s*(\d+)/);
-        const score = scoreMatch ? parseInt(scoreMatch[1]) : 0;
-        console.log(`Found category ${i + 1}: ${expectedCategories[i]} with score ${score}`);
-        if (score > 0) {
-          categories.push({ name: expectedCategories[i], score });
-          foundCategories = true;
-        }
+
+    // Сначала попробуем найти точные совпадения
+    for (let i = 0; i < categoryPatterns.length; i++) {
+      const pattern = categoryPatterns[i];
+      const matches = [...summary.matchAll(pattern)];
+      
+      if (matches.length > 0) {
+        matches.forEach(match => {
+          const categoryName = match[1] ? match[1].trim() : expectedCategories[i];
+          const score = parseInt(match[2] || match[3]);
+          if (!isNaN(score) && score >= 0 && score <= 100) {
+            categories.push({ name: categoryName, score });
+          }
+        });
+        foundCategories = true;
+        break;
       }
     }
     
@@ -1488,6 +1508,39 @@ const ResultScreen = () => {
 
   return (
     <div className="max-w-4xl mx-auto">
+      {/* New Token Search Bar */}
+      <div className="mb-6">
+        <form onSubmit={handleNewTokenSubmit}>
+          <div className="relative">
+            <input
+              type="text"
+              value={newTokenInput}
+              onChange={(e) => setNewTokenInput(e.target.value)}
+              onKeyPress={handleNewTokenKeyPress}
+              placeholder="Enter Token name or address"
+              className="w-full px-4 py-3 pr-12 bg-white rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-gray-900 placeholder-gray-500"
+              disabled={isAnalyzingNew}
+            />
+            <button
+              type="submit"
+              disabled={isAnalyzingNew || !newTokenInput.trim()}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 text-gray-400 hover:text-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isAnalyzingNew ? (
+                <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+
       <div className="text-center mb-8">
         <div className="w-16 h-16 bg-crypto-green rounded-full flex items-center justify-center mx-auto mb-4">
           <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1608,19 +1661,9 @@ const ResultScreen = () => {
           
           <div className="space-y-4">
             <button
-              onClick={handleDownloadPDF}
-              className="btn-download-free"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <span>Download Free Report</span>
-            </button>
-            
-            <button
               onClick={handlePremiumDownload}
               disabled={paymentProcessing}
-              className="btn-download-premium"
+              className="btn-download-premium w-full"
             >
               {paymentProcessing ? (
                 <>
@@ -1639,92 +1682,21 @@ const ResultScreen = () => {
                 </>
               )}
             </button>
-            
-            <button
-              onClick={handleCheckAnother}
-              className="btn-check-another"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              <span>Check another token</span>
-            </button>
           </div>
-
-
         </div>
       </div>
-
-      {/* Email Modal */}
-      {showEmailModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">
-              Enter Email for PDF Report
-            </h3>
-            
-            <div className="mb-4">
-              <input
-                type="email"
-                value={tempEmail}
-                onChange={(e) => {
-                  setTempEmail(e.target.value);
-                  setEmailError('');
-                }}
-                placeholder="Enter your email address"
-                className={`input-field w-full ${emailError ? 'border-red-500' : ''}`}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    handleEmailSubmit();
-                  }
-                }}
-              />
-              {emailError && (
-                <p className="text-red-500 text-sm mt-1">{emailError}</p>
-              )}
-            </div>
-            
-            <div className="flex gap-3">
-              <button
-                onClick={handleEmailSubmit}
-                className="btn-download-free flex-1"
-              >
-                <svg className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <span>Download PDF</span>
-              </button>
-              <button
-                onClick={handleEmailCancel}
-                className="btn-check-another flex-1"
-              >
-                <svg className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-                <span>Cancel</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Payment Modal */}
       {showPaymentModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <h3 className="text-lg font-bold text-gray-900 mb-4">
-              Premium Report - $9.99
+              Complete Payment
             </h3>
             
-            <div className="mb-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-              <h4 className="font-semibold text-yellow-900 mb-2">Premium Features:</h4>
-              <ul className="text-sm text-yellow-800 space-y-1">
-                <li>• Enhanced analysis with additional metrics</li>
-                <li>• Detailed investment recommendations</li>
-                <li>• Risk assessment breakdown</li>
-                <li>• Market trend analysis</li>
-              </ul>
-            </div>
+            <p className="text-gray-600 mb-4">
+              Enter your card details to download the premium report.
+            </p>
             
             <form onSubmit={handlePaymentSubmit} className="space-y-4">
               <div className="p-4 border border-gray-200 rounded-lg">
@@ -1776,15 +1748,22 @@ const ResultScreen = () => {
 
 // Main App Component
 const AppContent = () => {
-  const { currentScreen } = useAppContext();
+  const { currentScreen, setCurrentScreen } = useAppContext();
   console.log('AppContent rendered, currentScreen:', currentScreen);
 
   const handleLogoClick = () => {
-    window.location.reload();
+    setCurrentScreen('home');
   };
 
   return (
     <div className="w-full">
+      {/* Header with Logo */}
+      <header className="w-full bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-4xl mx-auto px-4 py-4">
+          <Logo onClick={handleLogoClick} />
+        </div>
+      </header>
+
       <main className="w-full">
         {currentScreen === 'home' && (
           <TokenSearch />
