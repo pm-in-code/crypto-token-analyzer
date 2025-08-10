@@ -204,4 +204,4 @@ app.post('/api/create-payment-intent', async (req, res) => {
 });
 
 // Export the serverless function
-module.exports.handler = serverless(app); 
+module.exports.handler = serverless(app); # Trigger Netlify redeploy: Sun Aug 10 15:21:44 CEST 2025
