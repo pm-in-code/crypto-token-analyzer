@@ -169,17 +169,18 @@ app.post('/api/create-payment-intent', async (req, res) => {
     console.log('Creating payment intent with:', { amount, currency });
 
     // Create payment intent with Stripe
+    const formData = new URLSearchParams();
+    formData.append('amount', amount.toString());
+    formData.append('currency', currency);
+    formData.append('automatic_payment_methods[enabled]', 'true');
+
     const stripeResponse = await fetch('https://api.stripe.com/v1/payment_intents', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${STRIPE_SECRET_KEY}`,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: new URLSearchParams({
-        amount: amount.toString(),
-        currency: currency,
-        automatic_payment_methods: 'enabled',
-      }),
+      body: formData,
     });
 
     console.log('Stripe response status:', stripeResponse.status);
