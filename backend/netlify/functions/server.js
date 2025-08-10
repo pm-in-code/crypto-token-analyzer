@@ -123,6 +123,10 @@ app.post('/api/create-payment-intent', async (req, res) => {
 
     const { amount, currency = 'usd' } = req.body;
 
+    if (!amount) {
+      return res.status(400).json({ error: 'Amount is required' });
+    }
+
     // Create payment intent with Stripe
     const stripeResponse = await fetch('https://api.stripe.com/v1/payment_intents', {
       method: 'POST',
@@ -140,6 +144,7 @@ app.post('/api/create-payment-intent', async (req, res) => {
     const paymentIntent = await stripeResponse.json();
 
     if (paymentIntent.error) {
+      console.error('Stripe error:', paymentIntent.error);
       return res.status(400).json({ error: paymentIntent.error.message });
     }
 
