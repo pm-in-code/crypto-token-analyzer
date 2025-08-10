@@ -187,3 +187,4 @@ MIT License - see LICENSE file for details
 - Stripe for payment processing
 - Vercel for hosting
 - GitHub for version control # Force redeploy
+# Fix Vercel deployment with proper author
