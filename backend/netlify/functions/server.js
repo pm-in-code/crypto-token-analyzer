@@ -114,6 +114,41 @@ Provide actionable insights and recommendations.`;
   }
 });
 
+// Test Stripe API endpoint
+app.get('/api/test-stripe', async (req, res) => {
+  try {
+    if (!STRIPE_SECRET_KEY) {
+      return res.status(500).json({ error: 'Stripe not configured' });
+    }
+
+    // Test Stripe API with a simple request
+    const stripeResponse = await fetch('https://api.stripe.com/v1/account', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${STRIPE_SECRET_KEY}`,
+      },
+    });
+
+    const accountData = await stripeResponse.json();
+    
+    if (accountData.error) {
+      return res.status(400).json({ 
+        error: 'Stripe API error', 
+        details: accountData.error 
+      });
+    }
+
+    res.json({
+      status: 'ok',
+      stripe_configured: true,
+      account_id: accountData.id
+    });
+  } catch (error) {
+    console.error('Error testing Stripe:', error);
+    res.status(500).json({ error: 'Failed to test Stripe API' });
+  }
+});
+
 // Stripe payment intent endpoint
 app.post('/api/create-payment-intent', async (req, res) => {
   try {
