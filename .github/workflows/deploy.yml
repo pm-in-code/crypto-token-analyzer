@@ -18,9 +18,17 @@ jobs:
       with:
         node-version: '18'
         
+    - name: Create deployment directory
+      run: |
+        mkdir -p deploy
+        cp index.html deploy/
+        cp app.js deploy/
+        cp favicon.ico deploy/ 2>/dev/null || true
+        cp README.md deploy/
+        
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: .
+        publish_dir: ./deploy
         publish_branch: gh-pages
