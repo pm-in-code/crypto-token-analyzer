@@ -88,16 +88,30 @@
       
       body {
         background: var(--bg-primary);
-        background-image: url('https://www.unicorn.studio/embed/h93rnM1nt2hDWf5p8hA3');
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
-        background-repeat: no-repeat;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         color: var(--text-primary);
         margin: 0;
         padding: 0;
         min-height: 100vh;
+        position: relative;
+      }
+
+      /* Animated Background */
+      .animated-background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        pointer-events: none;
+      }
+
+      .animated-background iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        opacity: 0.3;
       }
       
       /* Logo */
@@ -716,6 +730,11 @@
     </style>
   </head>
   <body>
+    <!-- Animated Background -->
+    <div class="animated-background">
+      <iframe src="https://www.unicorn.studio/embed/h93rnM1nt2hDWf5p8hA3" frameborder="0"></iframe>
+    </div>
+
     <noscript>You need to enable JavaScript to run this app.</noscript>
     
     <!-- Header -->
@@ -734,6 +753,6 @@
     </main>
     
     <!-- App Script -->
-    <script type="text/babel" src="app.js?v=29"></script>
+    <script type="text/babel" src="app.js?v=30"></script>
   </body>
 </html>

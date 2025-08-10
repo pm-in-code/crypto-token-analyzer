@@ -992,6 +992,10 @@ const TokenSearch = () => {
     setShowError(false);
   };
 
+  const handleLogoClick = () => {
+    setCurrentScreen('home');
+  };
+
   // Mock trending tokens for demo
   const trendingTokens = [
     { name: 'Ethereum', symbol: 'ETH', rank: '#9999 CMC' },
@@ -1068,35 +1072,21 @@ const TokenSearch = () => {
           ))}
         </div>
       </div>
+
+      {/* Logo Button - Fixed Position */}
+      <button
+        onClick={handleLogoClick}
+        className="fixed top-4 left-4 w-12 h-12 bg-green-400 rounded-lg flex items-center justify-center hover:bg-green-500 transition-colors duration-200 z-50"
+        style={{ backgroundColor: '#D9FF00' }}
+      >
+        <span className="text-white text-xl font-bold">W</span>
+      </button>
     </div>
   );
 };
 
 // Loading Screen Component
 const LoadingScreen = () => {
-  const { email, setEmail } = useAppContext();
-  const [emailError, setEmailError] = useState('');
-
-  const handleEmailChange = (e) => {
-    const value = e.target.value;
-    setEmail(value);
-    setEmailError('');
-  };
-
-  const handleNotifyClick = () => {
-    if (!email.trim()) {
-      setEmailError('Email is required');
-      return;
-    }
-    
-    if (!isValidEmail(email)) {
-      setEmailError('Please enter a valid email address');
-      return;
-    }
-
-    alert('You will be notified when the report is ready!');
-  };
-
   return (
     <div className="card">
       <div className="text-center">
@@ -1164,28 +1154,6 @@ const LoadingScreen = () => {
               </svg>
             </div>
           </div>
-        </div>
-        
-        <div className="mt-8 space-y-4">
-          <div>
-            <input
-              type="email"
-              value={email}
-              onChange={handleEmailChange}
-              placeholder="Enter your email address"
-              className={`input-field w-full ${emailError ? 'border-red-500' : ''}`}
-            />
-            {emailError && (
-              <p className="text-red-500 text-sm mt-1">{emailError}</p>
-            )}
-          </div>
-          
-          <button
-            onClick={handleNotifyClick}
-            className="analyse-button w-full"
-          >
-            Notify me when ready
-          </button>
         </div>
       </div>
     </div>
@@ -1751,19 +1719,8 @@ const AppContent = () => {
   const { currentScreen, setCurrentScreen } = useAppContext();
   console.log('AppContent rendered, currentScreen:', currentScreen);
 
-  const handleLogoClick = () => {
-    setCurrentScreen('home');
-  };
-
   return (
     <div className="w-full">
-      {/* Header with Logo */}
-      <header className="w-full bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <Logo onClick={handleLogoClick} />
-        </div>
-      </header>
-
       <main className="w-full">
         {currentScreen === 'home' && (
           <TokenSearch />
