@@ -933,6 +933,37 @@ const TokenSearch = () => {
   const [tokenInput, setTokenInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showError, setShowError] = useState(false);
+  const [trendingTokens, setTrendingTokens] = useState([]);
+  const [isLoadingTokens, setIsLoadingTokens] = useState(true);
+
+  // Load trending tokens on component mount
+  useEffect(() => {
+    const loadTrendingTokens = async () => {
+      setIsLoadingTokens(true);
+      try {
+        const data = await fetchCryptoData();
+        // Take first 4 tokens for trending section
+        const topTokens = data.slice(0, 4).map(token => ({
+          ...token,
+          rank: `#${Math.floor(Math.random() * 100) + 1} CMC` // Mock rank for now
+        }));
+        setTrendingTokens(topTokens);
+      } catch (error) {
+        console.error('Error loading trending tokens:', error);
+        // Fallback to mock data
+        setTrendingTokens([
+          { name: 'Ethereum', symbol: 'ETH', rank: '#2 CMC', image: 'https://assets.coingecko.com/coins/images/279/large/ethereum.png' },
+          { name: 'Bitcoin', symbol: 'BTC', rank: '#1 CMC', image: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png' },
+          { name: 'Cardano', symbol: 'ADA', rank: '#8 CMC', image: 'https://assets.coingecko.com/coins/images/975/large/Cardano.png' },
+          { name: 'Solana', symbol: 'SOL', rank: '#5 CMC', image: 'https://assets.coingecko.com/coins/images/4128/large/solana.png' }
+        ]);
+      } finally {
+        setIsLoadingTokens(false);
+      }
+    };
+
+    loadTrendingTokens();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -996,13 +1027,49 @@ const TokenSearch = () => {
     setCurrentScreen('home');
   };
 
-  // Mock trending tokens for demo
-  const trendingTokens = [
-    { name: 'Ethereum', symbol: 'ETH', rank: '#9999 CMC' },
-    { name: 'Bitcoin', symbol: 'BTC', rank: '#9999 CMC' },
-    { name: 'Cardano', symbol: 'ADA', rank: '#9999 CMC' },
-    { name: 'Solana', symbol: 'SOL', rank: '#9999 CMC' }
-  ];
+  const handleTokenAnalyze = async (token) => {
+    setTokenInput(token.name);
+    setIsSubmitting(true);
+    setShowError(false);
+    setCurrentScreen('loading');
+
+    // PROMPT ДЛЯ OPENAI
+    const prompt = `Execute In‑depth token analysis\nAfter receiving the token name, carry out a sequential deep‑dive analysis across the following categories and criteria. Prioritize data from CoinMarketCap and LunarCrush, but also consult other authoritative sources (CoinGecko, DefiLlama, Dune Analytics, Etherscan, etc.). Where figures conflict, perform cross‑validation.\n\nCategories and criteria of analysis\n📊 Category 1 – Market metrics\nCriteria for Category 1\n\nCoinMarketCap rank\nMarket cap\nCurrent price\nAll‑time high (ATH)\nCurrent price relative to ATH\nAll‑time low (ATL)\nCurrent price relative to ATL\nMax supply\nCirculating supply\nFully diluted valuation (FDV)\nCirculating supply vs total supply\n24 h volume\n24 h volume relative to market cap\nPrice volatility (short‑term and long‑term)\nLiquidity on key exchanges\nOrder‑book depth\n\n💰 Category 2 – Tokenomics\nCriteria for Category 2\n\nToken Generation Event and total supply at launch\nToken distribution (team, investors, founders, etc.)\nToken emission (inflationary or deflationary)\nVesting schedule\nUtility (Why does the token exist? How useful and forward‑looking is it? Governance? Fees? Staking? Collateral? If none—this is negative.)\n\n👨‍💻 Category 3 – Development & GitHub activity\nCriteria for Category 3\n\nCommit frequency over the last 30 days\nDeveloper activity (number of contributors, open issues)\n\n📣 Category 4 – Social metrics\nCriteria for Category 4\n\nMention count (LunarCrush)\nTwitterScore\nSocial sentiment\n\n🧑‍💼 Category 5 – Team & investors\nCriteria for Category 5\n\nReputation and experience of founders and key team members\nPresence of significant investors (funds, public figures)\nFund entry price (token price at the time investors/funds entered, based on TradingView data for that month)\n\n⚠️ Category 6 – Risks\nCriteria for Category 6\n\nRegulatory risks\nTechnological risks\nFinancial risks\n\nStage 3: Findings for each criterion\nFor every criterion, provide a short summary (1–3 sentences), cite your sources, and assign a score from 0 to 100 (at your discretion, based on the quality, reliability, and timeliness of the data).\n\nStage 4: Category‑level analysis\nCombine the criteria into their respective categories and:\n\nAssign each criterion a weight, using current market conditions and best practices.\nCalculate the final score for each category (weighted average of its criteria).\nProvide a concise, actionable conclusion for each category (3–5 sentences).\n\nStage 5: Overall analysis\nAssign each category a weight, using current market conditions and best practices.\nCalculate the token's overall score from 0 to 100 (weighted average of the categories).\nOffer a brief, practical conclusion (3–5 sentences) on the token's reliability and investment appeal, taking into account current market conditions and Web3 trends.`;
+
+    try {
+      const response = await fetch(`${BACKEND_API_URL}/analyze-token`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          tokenName: token.name,
+          prompt: prompt
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setTokenAnalysis({
+          token: data.token,
+          summary: data.analysis,
+          usage: data.usage
+        });
+        setCurrentScreen('result');
+      } else {
+        console.error('Backend error:', data);
+        setShowError(true);
+        setCurrentScreen('home');
+      }
+    } catch (error) {
+      console.error('Network error:', error);
+      setShowError(true);
+      setCurrentScreen('home');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (showError) {
     return (
@@ -1055,21 +1122,47 @@ const TokenSearch = () => {
       {/* Trending Tokens Card */}
       <div className="card">
         <div className="token-list">
-          {trendingTokens.map((token, index) => (
-            <div key={index} className="token-item">
-              <div className="token-info">
-                <div className="token-icon">{token.symbol[0]}</div>
-                <div className="token-details">
-                  <h3>{token.name}</h3>
-                  <p>{token.symbol}</p>
-                </div>
-              </div>
-              <div className="token-rank">{token.rank}</div>
-              <button className="analyse-button">
-                Analyse →
-              </button>
+          {isLoadingTokens ? (
+            <div className="flex justify-center items-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
             </div>
-          ))}
+          ) : (
+            trendingTokens.map((token, index) => (
+              <div key={index} className="token-item">
+                <div className="token-info">
+                  <div className="token-icon">
+                    {token.image ? (
+                      <img 
+                        src={token.image} 
+                        alt={token.name}
+                        className="w-8 h-8 rounded-full"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 font-bold" 
+                         style={{ display: token.image ? 'none' : 'flex' }}>
+                      {token.symbol[0]}
+                    </div>
+                  </div>
+                  <div className="token-details">
+                    <h3>{token.name}</h3>
+                    <p>{token.symbol}</p>
+                  </div>
+                </div>
+                <div className="token-rank">{token.rank}</div>
+                <button 
+                  className="analyse-button"
+                  onClick={() => handleTokenAnalyze(token)}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Analyzing...' : 'Analyse →'}
+                </button>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
