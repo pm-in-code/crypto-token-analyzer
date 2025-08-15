@@ -1208,6 +1208,11 @@ const TokenSearch = () => {
       >
         <span className="text-white text-xl font-bold">W</span>
       </button>
+
+      {/* Smiley in bottom right corner */}
+      <div className="fixed bottom-4 right-4 text-4xl z-50 animate-bounce">
+        😊
+      </div>
     </div>
   );
 };
