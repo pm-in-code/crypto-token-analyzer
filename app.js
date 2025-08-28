@@ -1193,14 +1193,16 @@ const TokenSearch = () => {
                     <p>{token.symbol}</p>
                   </div>
                 </div>
-                <div className="token-rank">{token.rank}</div>
-                <button 
-                  className="analyse-button"
-                  onClick={() => handleTokenAnalyze(token)}
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? 'Analyzing...' : 'Analyse →'}
-                </button>
+                <div className="token-actions">
+                  <div className="token-rank">{token.rank}</div>
+                  <button 
+                    className="analyse-button"
+                    onClick={() => handleTokenAnalyze(token)}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? 'Analyzing...' : 'Analyse →'}
+                  </button>
+                </div>
               </div>
             ))
           )}
