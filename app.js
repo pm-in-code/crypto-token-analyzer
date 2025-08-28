@@ -18,7 +18,8 @@ const fetchCryptoData = async () => {
       change24h: parseFloat(coin.price_change_percentage_24h.toFixed(2)),
       marketCap: `$${(coin.market_cap / 1e9).toFixed(1)}B`,
       color: getCryptoColor(coin.symbol),
-      image: coin.image
+      image: coin.image,
+      market_cap_rank: coin.market_cap_rank
     }));
   } catch (error) {
     console.error('Error fetching crypto data:', error);
@@ -976,10 +977,10 @@ const TokenSearch = () => {
       setIsLoadingTokens(true);
       try {
         const data = await fetchCryptoData();
-        // Take first 4 tokens for trending section
+        // Take first 4 tokens for trending section with real ranks
         const topTokens = data.slice(0, 4).map(token => ({
           ...token,
-          rank: `#${Math.floor(Math.random() * 100) + 1} CMC` // Mock rank for now
+          rank: token.market_cap_rank ? `#${token.market_cap_rank} CMC` : '#— CMC'
         }));
         setTrendingTokens(topTokens);
       } catch (error) {
@@ -1155,6 +1156,12 @@ const TokenSearch = () => {
 
       {/* Trending Tokens Card */}
       <div className="card">
+        {/* Social links top-right */}
+        <div className="absolute right-6 -top-10 flex gap-3 z-40">
+          <a href="#" className="px-4 py-2 rounded-xl bg-amber-50 border border-amber-100 text-gray-800 shadow-sm">Twitter</a>
+          <a href="#" className="px-4 py-2 rounded-xl bg-amber-50 border border-amber-100 text-gray-800 shadow-sm">Reddit</a>
+          <a href="#" className="px-4 py-2 rounded-xl bg-amber-50 border border-amber-100 text-gray-800 shadow-sm">Telegram</a>
+        </div>
         <div className="token-list">
           {isLoadingTokens ? (
             <div className="flex justify-center items-center py-8">
@@ -1208,11 +1215,6 @@ const TokenSearch = () => {
       >
         <span className="text-white text-xl font-bold">W</span>
       </button>
-
-      {/* Smiley in bottom right corner */}
-      <div className="fixed bottom-4 right-4 text-4xl z-50 animate-bounce">
-        😊
-      </div>
     </div>
   );
 };
