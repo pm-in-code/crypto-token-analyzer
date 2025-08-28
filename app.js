@@ -1193,6 +1193,7 @@ const TokenSearch = () => {
                     <p>{token.symbol}</p>
                   </div>
                 </div>
+                <div className="token-spacer"></div>
                 <div className="token-actions">
                   <div className="token-rank">{token.rank}</div>
                   <button 
