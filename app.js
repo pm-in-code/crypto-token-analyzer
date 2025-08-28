@@ -1206,9 +1206,9 @@ const TokenSearch = () => {
 
       {/* Social links - Fixed Position Top Right */}
       <div className="fixed top-4 right-4 flex gap-3 z-40">
-        <a href="#" className="px-4 py-2 rounded-xl bg-amber-50 border border-amber-100 text-gray-800 shadow-sm">Twitter</a>
-        <a href="#" className="px-4 py-2 rounded-xl bg-amber-50 border border-amber-100 text-gray-800 shadow-sm">Reddit</a>
-        <a href="#" className="px-4 py-2 rounded-xl bg-amber-50 border border-amber-100 text-gray-800 shadow-sm">Telegram</a>
+        <a href="https://x.com/itsworth_app" target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-xl bg-amber-50 border border-amber-100 text-gray-800 shadow-sm hover:bg-amber-100 transition-colors">Twitter</a>
+        <a href="https://www.reddit.com/r/Its_worth_app/" target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-xl bg-amber-50 border border-amber-100 text-gray-800 shadow-sm hover:bg-amber-100 transition-colors">Reddit</a>
+        <a href="https://t.me" target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-xl bg-amber-50 border border-amber-100 text-gray-800 shadow-sm hover:bg-amber-100 transition-colors">Telegram</a>
       </div>
 
       {/* Logo Button - Fixed Position */}
