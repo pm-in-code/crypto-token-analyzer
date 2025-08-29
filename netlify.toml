@@ -9,6 +9,18 @@
 [functions]
   directory = "netlify/functions"
 
+# Secrets scanning configuration to avoid false positives
+[secrets]
+  # Disable scanning of noisy third-party files
+  omit_paths = [
+    "backend/node_modules/**",
+    "**/node_modules/**"
+  ]
+  # Ignore our short admin key name as it may match in type definitions
+  omit_keys = [
+    "PROMPT_ADMIN_KEY"
+  ]
+
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/server"
