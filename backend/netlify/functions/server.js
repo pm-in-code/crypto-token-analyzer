@@ -12,6 +12,7 @@ app.use(express.json());
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const STRIPE_PUBLISHABLE_KEY = process.env.STRIPE_PUBLISHABLE_KEY;
+const ANALYSIS_PROMPT = process.env.ANALYSIS_PROMPT; // NEW: secure prompt storage
 
 // Simple test endpoint
 app.get('/', (req, res) => {
@@ -28,7 +29,8 @@ app.get('/api/health', (req, res) => {
     status: 'ok',
     timestamp: new Date().toISOString(),
     openai_configured: !!OPENAI_API_KEY,
-    stripe_configured: !!STRIPE_SECRET_KEY
+    stripe_configured: !!STRIPE_SECRET_KEY,
+    prompt_configured: !!ANALYSIS_PROMPT,
   });
 });
 
@@ -40,47 +42,18 @@ app.post('/api/analyze-token', async (req, res) => {
     if (!OPENAI_API_KEY) {
       return res.status(500).json({ error: 'OpenAI API key not configured' });
     }
+    if (!ANALYSIS_PROMPT) {
+      return res.status(500).json({ error: 'Analysis prompt not configured' });
+    }
+    if (!tokenName || typeof tokenName !== 'string') {
+      return res.status(400).json({ error: 'tokenName is required' });
+    }
 
-    const prompt = `📌 Execute this prompt: 🧠 Prompt for detailed cryptocurrency token analysis
-
-Please provide a comprehensive analysis of the cryptocurrency token "${tokenName}". 
-
-Analysis should include:
-
-1. Market Metrics (0-100 score)
-2. Tokenomics (0-100 score) 
-3. Development Activity (0-100 score)
-4. Social Metrics (0-100 score)
-5. Team & Investors (0-100 score)
-6. Risk Assessment (0-100 score)
-
-For each category, provide:
-- Detailed analysis with specific data points
-- Score from 0-100 with justification
-- Key strengths and weaknesses
-
-Format the response as:
-Category 1: Market Metrics - Score: [X]/100
-[Detailed analysis]
-
-Category 2: Tokenomics - Score: [X]/100
-[Detailed analysis]
-
-Category 3: Development Activity - Score: [X]/100
-[Detailed analysis]
-
-Category 4: Social Metrics - Score: [X]/100
-[Detailed analysis]
-
-Category 5: Team & Investors - Score: [X]/100
-[Detailed analysis]
-
-Category 6: Risk Assessment - Score: [X]/100
-[Detailed analysis]
-
-Overall Score: [Average of all scores]/100
-
-Provide actionable insights and recommendations.`;
+    // Compose messages securely: system prompt from env, user supplies only token input
+    const messages = [
+      { role: 'system', content: ANALYSIS_PROMPT },
+      { role: 'user', content: tokenName.trim() }
+    ];
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -90,9 +63,9 @@ Provide actionable insights and recommendations.`;
       },
       body: JSON.stringify({
         model: 'gpt-4o-mini',
-        messages: [{ role: 'user', content: prompt }],
-        max_tokens: 2000,
-        temperature: 0.7
+        messages,
+        max_tokens: 4000,
+        temperature: 0.2
       })
     });
 
@@ -102,7 +75,7 @@ Provide actionable insights and recommendations.`;
       return res.status(500).json({ error: data.error.message });
     }
 
-    const analysis = data.choices[0].message.content;
+    const analysis = data.choices?.[0]?.message?.content || '';
     
     res.json({
       success: true,
