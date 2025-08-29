@@ -5,21 +5,13 @@
 
 [build.environment]
   NODE_VERSION = "18"
+  # Configure secrets scanning via env vars (comma-separated)
+  SECRETS_SCAN_OMIT_KEYS = "PROMPT_ADMIN_KEY"
+  SECRETS_SCAN_OMIT_PATHS = "**/node_modules/**"
+  SECRETS_SCAN_ENABLED = "true"
 
 [functions]
   directory = "netlify/functions"
-
-# Secrets scanning configuration to avoid false positives
-[secrets]
-  # Disable scanning of noisy third-party files
-  omit_paths = [
-    "backend/node_modules/**",
-    "**/node_modules/**"
-  ]
-  # Ignore our short admin key name as it may match in type definitions
-  omit_keys = [
-    "PROMPT_ADMIN_KEY"
-  ]
 
 [[redirects]]
   from = "/api/*"
