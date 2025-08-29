@@ -14,7 +14,8 @@
     "dotenv": "^16.3.1",
     "stripe": "^14.5.0",
     "serverless-http": "^3.2.0",
-    "node-fetch": "^2.6.7"
+    "node-fetch": "^2.6.7",
+    "@netlify/blobs": "^6.3.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
