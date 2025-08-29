@@ -12,7 +12,18 @@ app.use(express.json());
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const STRIPE_PUBLISHABLE_KEY = process.env.STRIPE_PUBLISHABLE_KEY;
-const ANALYSIS_PROMPT = process.env.ANALYSIS_PROMPT; // NEW: secure prompt storage
+const ANALYSIS_PROMPT = process.env.ANALYSIS_PROMPT; // primary single-var storage
+
+// Support multi-part prompt via ANALYSIS_PROMPT_1..N (each < 4KB)
+function loadAnalysisPrompt() {
+  if (ANALYSIS_PROMPT && ANALYSIS_PROMPT.trim().length > 0) return ANALYSIS_PROMPT;
+  const parts = Object.keys(process.env)
+    .filter((key) => /^ANALYSIS_PROMPT_\d+$/.test(key))
+    .sort((a, b) => parseInt(a.split('_').pop(), 10) - parseInt(b.split('_').pop(), 10))
+    .map((key) => process.env[key] || '');
+  const combined = parts.join('');
+  return combined.trim().length > 0 ? combined : '';
+}
 
 // Simple test endpoint
 app.get('/', (req, res) => {
@@ -30,7 +41,7 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString(),
     openai_configured: !!OPENAI_API_KEY,
     stripe_configured: !!STRIPE_SECRET_KEY,
-    prompt_configured: !!ANALYSIS_PROMPT,
+    prompt_configured: !!loadAnalysisPrompt(),
   });
 });
 
@@ -42,7 +53,8 @@ app.post('/api/analyze-token', async (req, res) => {
     if (!OPENAI_API_KEY) {
       return res.status(500).json({ error: 'OpenAI API key not configured' });
     }
-    if (!ANALYSIS_PROMPT) {
+    const securePrompt = loadAnalysisPrompt();
+    if (!securePrompt) {
       return res.status(500).json({ error: 'Analysis prompt not configured' });
     }
     if (!tokenName || typeof tokenName !== 'string') {
@@ -51,7 +63,7 @@ app.post('/api/analyze-token', async (req, res) => {
 
     // Compose messages securely: system prompt from env, user supplies only token input
     const messages = [
-      { role: 'system', content: ANALYSIS_PROMPT },
+      { role: 'system', content: securePrompt },
       { role: 'user', content: tokenName.trim() }
     ];
 
