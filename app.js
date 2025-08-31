@@ -3,6 +3,146 @@
 
 const { useState, useEffect, createContext, useContext } = React;
 
+// Function to parse analysis summary and extract scores
+const parseAnalysisSummary = (summary) => {
+  console.log('Parsing analysis summary:', summary.substring(0, 200) + '...');
+  let categories = [];
+  let overallScore = null;
+  
+  const expectedCategories = [
+    'Market Metrics',
+    'Tokenomics', 
+    'Development Activity',
+    'Social Metrics',
+    'Team & Investors',
+    'Risk Assessment'
+  ];
+
+  // Улучшенные паттерны для поиска категорий
+  const categoryPatterns = [
+    // Паттерн 1: "Category 1: Market Metrics - Score: 85"
+    /Category\s+(\d+):\s*([^-]+?)\s*-\s*Score:\s*(\d+)/gi,
+    // Паттерн 2: "Market Metrics: 85"
+    /(Market Metrics|Tokenomics|Development Activity|Social Metrics|Team & Investors|Risk Assessment):\s*(\d+)/gi,
+    // Паттерн 3: "Category 1 - Market Metrics: 85"
+    /Category\s+\d+\s*-\s*([^:]+?):\s*(\d+)/gi,
+    // Паттерн 4: "Market Metrics Score: 85"
+    /(Market Metrics|Tokenomics|Development Activity|Social Metrics|Team & Investors|Risk Assessment)\s+Score:\s*(\d+)/gi,
+  ];
+
+  let foundCategories = false;
+
+  // Попробуем все паттерны
+  for (let pattern of categoryPatterns) {
+    const matches = [...summary.matchAll(pattern)];
+    
+    if (matches.length > 0) {
+      matches.forEach(match => {
+        let categoryName, score;
+        
+        if (match.length === 4) {
+          // Паттерн 1: Category X: Name - Score: Y
+          const categoryIndex = parseInt(match[1]) - 1;
+          categoryName = expectedCategories[categoryIndex] || match[2].trim();
+          score = parseInt(match[3]);
+        } else if (match.length === 3) {
+          // Паттерн 2, 3, 4: Name: Y или Category X - Name: Y
+          categoryName = match[1].trim();
+          score = parseInt(match[2]);
+        }
+        
+        if (categoryName && !isNaN(score) && score >= 0 && score <= 100) {
+          // Проверяем, что это действительно одна из ожидаемых категорий
+          const normalizedName = categoryName.toLowerCase();
+          const expectedCategory = expectedCategories.find(cat => 
+            cat.toLowerCase() === normalizedName ||
+            cat.toLowerCase().includes(normalizedName) ||
+            normalizedName.includes(cat.toLowerCase())
+          );
+          
+          if (expectedCategory) {
+            categories.push({ name: expectedCategory, score });
+            foundCategories = true;
+          }
+        }
+      });
+      
+      if (foundCategories) break;
+    }
+  }
+
+  // Если не нашли категории, попробуем найти числа рядом с ключевыми словами
+  if (!foundCategories) {
+    expectedCategories.forEach(category => {
+      const categoryLower = category.toLowerCase();
+      const categoryRegex = new RegExp(`${categoryLower.replace(/\s+/g, '\\s+')}[^\\d]*?(\\d{1,2}|100)`, 'gi');
+      const matches = [...summary.matchAll(categoryRegex)];
+      
+      if (matches.length > 0) {
+        const score = parseInt(matches[0][1]);
+        if (!isNaN(score) && score >= 0 && score <= 100) {
+          categories.push({ name: category, score });
+          foundCategories = true;
+        }
+      }
+    });
+  }
+
+  // Парсим общий счет
+  const overallPatterns = [
+    /Overall Score[^:]*:\s*(\d+)/i,
+    /Overall[^:]*Score[^:]*:\s*(\d+)/i,
+    /Final Score[^:]*:\s*(\d+)/i,
+    /Total Score[^:]*:\s*(\d+)/i
+  ];
+  
+  for (let pattern of overallPatterns) {
+    const overallMatch = summary.match(pattern);
+    if (overallMatch) {
+      overallScore = parseInt(overallMatch[1]);
+      break;
+    }
+  }
+
+  // Если категории не найдены, попробуем извлечь числа из текста
+  if (categories.length === 0) {
+    console.log('No categories found, trying to extract numbers...');
+    const numberMatches = summary.match(/\b([0-9]{1,2}|100)\b/g);
+    if (numberMatches && numberMatches.length >= 6) {
+      for (let i = 0; i < Math.min(6, numberMatches.length); i++) {
+        const score = parseInt(numberMatches[i]);
+        // Игнорируем числа меньше 10, так как это скорее всего не оценки
+        if (score >= 10 && score <= 100) {
+          categories.push({ name: expectedCategories[i], score });
+        }
+      }
+    }
+  }
+
+  // Удаляем дубликаты и сортируем категории по порядку
+  const uniqueCategories = [];
+  const seenNames = new Set();
+  
+  categories.forEach(category => {
+    if (!seenNames.has(category.name)) {
+      seenNames.add(category.name);
+      uniqueCategories.push(category);
+    }
+  });
+  
+  uniqueCategories.sort((a, b) => {
+    const aIndex = expectedCategories.indexOf(a.name);
+    const bIndex = expectedCategories.indexOf(b.name);
+    return aIndex - bIndex;
+  });
+  
+  categories = uniqueCategories;
+  
+  console.log('Parsed categories:', categories);
+  console.log('Overall score:', overallScore);
+  return { categories, overallScore };
+};
+
 // Real-time crypto data fetching
 const fetchCryptoData = async () => {
   try {
@@ -1181,145 +1321,6 @@ const ResultScreen = () => {
     if (score >= 80) return 'text-green-600';
     if (score >= 60) return 'text-yellow-600';
     return 'text-red-600';
-  };
-
-    const parseAnalysisSummary = (summary) => {
-    console.log('Parsing analysis summary:', summary.substring(0, 200) + '...');
-    let categories = [];
-    let overallScore = null;
-    
-    const expectedCategories = [
-      'Market Metrics',
-      'Tokenomics', 
-      'Development Activity',
-      'Social Metrics',
-      'Team & Investors',
-      'Risk Assessment'
-    ];
-
-    // Улучшенные паттерны для поиска категорий
-    const categoryPatterns = [
-      // Паттерн 1: "Category 1: Market Metrics - Score: 85"
-      /Category\s+(\d+):\s*([^-]+?)\s*-\s*Score:\s*(\d+)/gi,
-      // Паттерн 2: "Market Metrics: 85"
-      /(Market Metrics|Tokenomics|Development Activity|Social Metrics|Team & Investors|Risk Assessment):\s*(\d+)/gi,
-      // Паттерн 3: "Category 1 - Market Metrics: 85"
-      /Category\s+\d+\s*-\s*([^:]+?):\s*(\d+)/gi,
-      // Паттерн 4: "Market Metrics Score: 85"
-      /(Market Metrics|Tokenomics|Development Activity|Social Metrics|Team & Investors|Risk Assessment)\s+Score:\s*(\d+)/gi,
-    ];
-
-    let foundCategories = false;
-
-    // Попробуем все паттерны
-    for (let pattern of categoryPatterns) {
-      const matches = [...summary.matchAll(pattern)];
-      
-      if (matches.length > 0) {
-        matches.forEach(match => {
-          let categoryName, score;
-          
-          if (match.length === 4) {
-            // Паттерн 1: Category X: Name - Score: Y
-            const categoryIndex = parseInt(match[1]) - 1;
-            categoryName = expectedCategories[categoryIndex] || match[2].trim();
-            score = parseInt(match[3]);
-          } else if (match.length === 3) {
-            // Паттерн 2, 3, 4: Name: Y или Category X - Name: Y
-            categoryName = match[1].trim();
-            score = parseInt(match[2]);
-          }
-          
-          if (categoryName && !isNaN(score) && score >= 0 && score <= 100) {
-            // Проверяем, что это действительно одна из ожидаемых категорий
-            const normalizedName = categoryName.toLowerCase();
-            const expectedCategory = expectedCategories.find(cat => 
-              cat.toLowerCase() === normalizedName ||
-              cat.toLowerCase().includes(normalizedName) ||
-              normalizedName.includes(cat.toLowerCase())
-            );
-            
-            if (expectedCategory) {
-              categories.push({ name: expectedCategory, score });
-              foundCategories = true;
-            }
-          }
-        });
-        
-        if (foundCategories) break;
-      }
-    }
-
-    // Если не нашли категории, попробуем найти числа рядом с ключевыми словами
-    if (!foundCategories) {
-      expectedCategories.forEach(category => {
-        const categoryLower = category.toLowerCase();
-        const categoryRegex = new RegExp(`${categoryLower.replace(/\s+/g, '\\s+')}[^\\d]*?(\\d{1,2}|100)`, 'gi');
-        const matches = [...summary.matchAll(categoryRegex)];
-        
-        if (matches.length > 0) {
-          const score = parseInt(matches[0][1]);
-          if (!isNaN(score) && score >= 0 && score <= 100) {
-            categories.push({ name: category, score });
-            foundCategories = true;
-          }
-        }
-      });
-    }
-
-    // Парсим общий счет
-    const overallPatterns = [
-      /Overall Score[^:]*:\s*(\d+)/i,
-      /Overall[^:]*Score[^:]*:\s*(\d+)/i,
-      /Final Score[^:]*:\s*(\d+)/i,
-      /Total Score[^:]*:\s*(\d+)/i
-    ];
-    
-    for (let pattern of overallPatterns) {
-      const overallMatch = summary.match(pattern);
-      if (overallMatch) {
-        overallScore = parseInt(overallMatch[1]);
-        break;
-      }
-    }
-
-    // Если категории не найдены, попробуем извлечь числа из текста
-    if (categories.length === 0) {
-      console.log('No categories found, trying to extract numbers...');
-      const numberMatches = summary.match(/\b([0-9]{1,2}|100)\b/g);
-      if (numberMatches && numberMatches.length >= 6) {
-        for (let i = 0; i < Math.min(6, numberMatches.length); i++) {
-          const score = parseInt(numberMatches[i]);
-          // Игнорируем числа меньше 10, так как это скорее всего не оценки
-          if (score >= 10 && score <= 100) {
-            categories.push({ name: expectedCategories[i], score });
-          }
-        }
-      }
-    }
-
-    // Удаляем дубликаты и сортируем категории по порядку
-    const uniqueCategories = [];
-    const seenNames = new Set();
-    
-    categories.forEach(category => {
-      if (!seenNames.has(category.name)) {
-        seenNames.add(category.name);
-        uniqueCategories.push(category);
-      }
-    });
-    
-    uniqueCategories.sort((a, b) => {
-      const aIndex = expectedCategories.indexOf(a.name);
-      const bIndex = expectedCategories.indexOf(b.name);
-      return aIndex - bIndex;
-    });
-    
-    categories = uniqueCategories;
-    
-    console.log('Parsed categories:', categories);
-    console.log('Overall score:', overallScore);
-    return { categories, overallScore };
   };
 
   return (
