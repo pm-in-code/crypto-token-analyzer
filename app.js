@@ -317,373 +317,81 @@ const isValidEmail = (email) => {
 const BACKEND_API_URL = 'https://dainty-malasada-96ee00.netlify.app/api';
 
 // PDF Generation
-const generatePDFReport = (analysis, email, isPremium = false) => {
+const generatePDFReport = async (analysisData, userEmail, isPremium = false) => {
   try {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+    console.log('Generating PDF report...', { analysisData, userEmail, isPremium });
     
-    // Helper function to draw rounded rectangle
-    const drawRoundedRect = (x, y, width, height, radius = 3) => {
-      doc.setDrawColor(200, 200, 200);
-      doc.setFillColor(248, 250, 252);
-      doc.roundedRect(x, y, width, height, radius, radius, 'FD');
+    // Parse the analysis to extract structured data
+    const { categories, overallScore } = parseAnalysisSummary(analysisData.summary);
+    
+    // Create structured data for PDF
+    const pdfData = {
+      tokenName: analysisData.token,
+      tokenSymbol: analysisData.token,
+      overallVerdict: overallScore >= 75 ? "Worth it" : overallScore >= 50 ? "Not too bad" : "Not Worth a Penny",
+      overallScore: `${overallScore || 0}/100`,
+      categories: categories.map(cat => ({
+        name: cat.name,
+        score: `${cat.score}/100`,
+        color: cat.score >= 80 ? "green" : cat.score >= 50 ? "yellow" : "pink"
+      }))
     };
     
-    // Helper function to draw gradient-like header
-    const drawHeader = (y) => {
-      doc.setFillColor(59, 130, 246);
-      doc.rect(0, y, 210, 40, 'F');
-      doc.setFillColor(37, 99, 235);
-      doc.rect(0, y + 40, 210, 5, 'F');
+    console.log('PDF data prepared:', pdfData);
+    
+    // Get HTML template from backend
+    const response = await fetch(`${BACKEND_API_URL}/get-pdf-template`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        analysisData: pdfData
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Template generation failed: ${response.status}`);
+    }
+    
+    const { htmlTemplate } = await response.json();
+    
+    // Create a temporary div with the HTML content
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlTemplate;
+    tempDiv.style.position = 'absolute';
+    tempDiv.style.left = '-9999px';
+    tempDiv.style.top = '-9999px';
+    document.body.appendChild(tempDiv);
+    
+    // Use html2pdf.js to generate PDF
+    const opt = {
+      margin: 0,
+      filename: `token-analysis-${analysisData.token}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { 
+        scale: 2,
+        useCORS: true,
+        allowTaint: true
+      },
+      jsPDF: { 
+        unit: 'mm', 
+        format: 'a4', 
+        orientation: 'portrait' 
+      }
     };
     
-    // Helper function to draw score bar
-    const drawScoreBar = (x, y, width, score, color) => {
-      const barHeight = 8;
-      const barWidth = (score / 100) * width;
-      
-      // Background bar
-      doc.setFillColor(229, 231, 235);
-      doc.rect(x, y, width, barHeight, 'F');
-      
-      // Score bar
-      doc.setFillColor(color[0], color[1], color[2]);
-      doc.rect(x, y, barWidth, barHeight, 'F');
-      
-      // Border
-      doc.setDrawColor(209, 213, 219);
-      doc.rect(x, y, width, barHeight, 'S');
-    };
+    // Generate and download PDF
+    await html2pdf().set(opt).from(tempDiv).save();
     
-    // Helper function to get score color
-    const getScoreColor = (score) => {
-      if (score >= 80) return [34, 197, 94]; // Green
-      if (score >= 60) return [234, 179, 8]; // Yellow
-      return [239, 68, 68]; // Red
-    };
+    // Clean up
+    document.body.removeChild(tempDiv);
     
-    // Parse analysis summary for scores
-    const parseAnalysisSummary = (summary) => {
-      console.log('Parsing analysis summary:', summary.substring(0, 200) + '...');
-      let categories = [];
-      let overallScore = null;
-      
-      const expectedCategories = [
-        'Market Metrics',
-        'Tokenomics', 
-        'Development Activity',
-        'Social Metrics',
-        'Team & Investors',
-        'Risk Assessment'
-      ];
-
-      // Улучшенные паттерны для поиска категорий
-      const categoryPatterns = [
-        // Паттерн 1: "Category 1: Market Metrics - Score: 85"
-        /Category\s+(\d+):\s*([^-]+?)\s*-\s*Score:\s*(\d+)/gi,
-        // Паттерн 2: "Market Metrics: 85"
-        /(Market Metrics|Tokenomics|Development Activity|Social Metrics|Team & Investors|Risk Assessment):\s*(\d+)/gi,
-        // Паттерн 3: "Category 1 - Market Metrics: 85"
-        /Category\s+\d+\s*-\s*([^:]+?):\s*(\d+)/gi,
-        // Паттерн 4: "Market Metrics Score: 85"
-        /(Market Metrics|Tokenomics|Development Activity|Social Metrics|Team & Investors|Risk Assessment)\s+Score:\s*(\d+)/gi,
-      ];
-
-      let foundCategories = false;
-
-      // Попробуем все паттерны
-      for (let pattern of categoryPatterns) {
-        const matches = [...summary.matchAll(pattern)];
-        
-        if (matches.length > 0) {
-          matches.forEach(match => {
-            let categoryName, score;
-            
-            if (match.length === 4) {
-              // Паттерн 1: Category X: Name - Score: Y
-              const categoryIndex = parseInt(match[1]) - 1;
-              categoryName = expectedCategories[categoryIndex] || match[2].trim();
-              score = parseInt(match[3]);
-            } else if (match.length === 3) {
-              // Паттерн 2, 3, 4: Name: Y или Category X - Name: Y
-              categoryName = match[1].trim();
-              score = parseInt(match[2]);
-            }
-            
-            if (categoryName && !isNaN(score) && score >= 0 && score <= 100) {
-              // Проверяем, что это действительно одна из ожидаемых категорий
-              const normalizedName = categoryName.toLowerCase();
-              const expectedCategory = expectedCategories.find(cat => 
-                cat.toLowerCase() === normalizedName ||
-                cat.toLowerCase().includes(normalizedName) ||
-                normalizedName.includes(cat.toLowerCase())
-              );
-              
-              if (expectedCategory) {
-                categories.push({ name: expectedCategory, score });
-                foundCategories = true;
-              }
-            }
-          });
-          
-          if (foundCategories) break;
-        }
-      }
-
-      // Если не нашли категории, попробуем найти числа рядом с ключевыми словами
-      if (!foundCategories) {
-        expectedCategories.forEach(category => {
-          const categoryLower = category.toLowerCase();
-          const categoryRegex = new RegExp(`${categoryLower.replace(/\s+/g, '\\s+')}[^\\d]*?(\\d{1,2}|100)`, 'gi');
-          const matches = [...summary.matchAll(categoryRegex)];
-          
-          if (matches.length > 0) {
-            const score = parseInt(matches[0][1]);
-            if (!isNaN(score) && score >= 0 && score <= 100) {
-              categories.push({ name: category, score });
-              foundCategories = true;
-            }
-          }
-        });
-      }
-
-      // Парсим общий счет
-      const overallPatterns = [
-        /Overall Score[^:]*:\s*(\d+)/i,
-        /Overall[^:]*Score[^:]*:\s*(\d+)/i,
-        /Final Score[^:]*:\s*(\d+)/i,
-        /Total Score[^:]*:\s*(\d+)/i
-      ];
-      
-      for (let pattern of overallPatterns) {
-        const overallMatch = summary.match(pattern);
-        if (overallMatch) {
-          overallScore = parseInt(overallMatch[1]);
-          break;
-        }
-      }
-
-      // Если категории не найдены, попробуем извлечь числа из текста
-      if (categories.length === 0) {
-        console.log('No categories found, trying to extract numbers...');
-        const numberMatches = summary.match(/\b([0-9]{1,2}|100)\b/g);
-        if (numberMatches && numberMatches.length >= 6) {
-          for (let i = 0; i < Math.min(6, numberMatches.length); i++) {
-            const score = parseInt(numberMatches[i]);
-            // Игнорируем числа меньше 10, так как это скорее всего не оценки
-            if (score >= 10 && score <= 100) {
-              categories.push({ name: expectedCategories[i], score });
-            }
-          }
-        }
-      }
-
-      // Удаляем дубликаты и сортируем категории по порядку
-      const uniqueCategories = [];
-      const seenNames = new Set();
-      
-      categories.forEach(category => {
-        if (!seenNames.has(category.name)) {
-          seenNames.add(category.name);
-          uniqueCategories.push(category);
-        }
-      });
-      
-      uniqueCategories.sort((a, b) => {
-        const aIndex = expectedCategories.indexOf(a.name);
-        const bIndex = expectedCategories.indexOf(b.name);
-        return aIndex - bIndex;
-      });
-      
-      categories = uniqueCategories;
-      
-      console.log('Parsed categories:', categories);
-      console.log('Overall score:', overallScore);
-      return { categories, overallScore };
-    };
-    
-    const { categories, overallScore } = parseAnalysisSummary(analysis.summary);
-    
-    // Page 1: Cover and Summary
-    drawHeader(0);
-    
-    // Title
-    doc.setFontSize(28);
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('helvetica', 'bold');
-    doc.text(isPremium ? 'Premium Crypto Token Analysis' : 'Crypto Token Analysis', 20, 25);
-    
-    // Subtitle
-    doc.setFontSize(16);
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Comprehensive AI-Powered Analysis Report', 20, 35);
-    
-    // Token info box
-    drawRoundedRect(20, 60, 170, 30);
-    doc.setFontSize(20);
-    doc.setTextColor(31, 41, 55);
-    doc.setFont('helvetica', 'bold');
-    doc.text(`Token: ${analysis.token}`, 30, 75);
-    
-    doc.setFontSize(12);
-    doc.setTextColor(107, 114, 128);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Generated: ${new Date().toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    })} at ${new Date().toLocaleTimeString()}`, 30, 85);
-    
-    // Overall Score Section
-    if (overallScore !== null) {
-      drawRoundedRect(20, 105, 170, 40);
-      
-      doc.setFontSize(16);
-      doc.setTextColor(31, 41, 55);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Overall Score', 30, 120);
-      
-      const scoreColor = getScoreColor(overallScore);
-      doc.setFontSize(24);
-      doc.setTextColor(scoreColor[0], scoreColor[1], scoreColor[2]);
-      doc.text(`${overallScore}/100`, 30, 135);
-      
-      drawScoreBar(30, 140, 150, overallScore, scoreColor);
-    }
-    
-    // Category Scores
-    if (categories.length > 0) {
-      let startY = overallScore !== null ? 160 : 105;
-      
-      doc.setFontSize(16);
-      doc.setTextColor(31, 41, 55);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Category Ratings', 20, startY);
-      startY += 15;
-      
-      const itemsPerColumn = Math.ceil(categories.length / 2);
-      const columnWidth = 80;
-      
-      categories.forEach((category, index) => {
-        const column = Math.floor(index / itemsPerColumn);
-        const row = index % itemsPerColumn;
-        const x = 20 + (column * columnWidth);
-        const y = startY + (row * 25);
-        
-        if (y > 250) {
-          // Need new page
-          doc.addPage();
-          startY = 20;
-          const newY = startY + (row * 25);
-          drawCategoryItem(doc, category, x, newY, getScoreColor);
-        } else {
-          drawCategoryItem(doc, category, x, y, getScoreColor);
-        }
-      });
-    }
-    
-    // Footer
-    doc.setFontSize(10);
-    doc.setTextColor(107, 114, 128);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Email: ${email}`, 20, 280);
-    doc.text('Crypto Token Analyzer - Powered by OpenAI GPT-4o-mini', 20, 285);
-    doc.text(`Page 1`, 170, 285);
-    
-    // Page 2: Detailed Analysis
-    doc.addPage();
-    
-    // Header
-    drawHeader(0);
-    doc.setFontSize(20);
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('helvetica', 'bold');
-    doc.text(`${analysis.token} - Detailed Analysis`, 20, 25);
-    
-    // Analysis content
-    doc.setFontSize(12);
-    doc.setTextColor(31, 41, 55);
-    doc.setFont('helvetica', 'normal');
-    
-    const analysisLines = doc.splitTextToSize(analysis.summary, 170);
-    let currentY = 60;
-    let pageNumber = 2;
-    
-    for (let i = 0; i < analysisLines.length; i++) {
-      if (currentY > 250) {
-        doc.addPage();
-        pageNumber++;
-        currentY = 20;
-        
-        // Page header
-        doc.setFontSize(14);
-        doc.setTextColor(107, 114, 128);
-        doc.text(`${analysis.token} Analysis - Page ${pageNumber}`, 20, currentY);
-        currentY += 15;
-      }
-      
-      doc.setFontSize(11);
-      doc.setTextColor(31, 41, 55);
-      doc.text(analysisLines[i], 20, currentY);
-      currentY += 6;
-    }
-    
-    // API Usage Information
-    if (analysis.usage) {
-      if (currentY > 200) {
-        doc.addPage();
-        pageNumber++;
-        currentY = 20;
-      }
-      
-      currentY += 10;
-      
-      // Usage box
-      drawRoundedRect(20, currentY, 170, 50);
-      
-      doc.setFontSize(14);
-      doc.setTextColor(31, 41, 55);
-      doc.setFont('helvetica', 'bold');
-      doc.text('API Usage Information', 30, currentY + 15);
-      
-      doc.setFontSize(10);
-      doc.setTextColor(75, 85, 99);
-      doc.setFont('helvetica', 'normal');
-      
-      doc.text(`Prompt tokens: ${analysis.usage.prompt_tokens}`, 30, currentY + 25);
-      doc.text(`Completion tokens: ${analysis.usage.completion_tokens}`, 30, currentY + 32);
-      doc.text(`Total tokens: ${analysis.usage.total_tokens}`, 30, currentY + 39);
-      
-      // Calculate cost
-      const inputCost = (analysis.usage.prompt_tokens / 1000000) * 0.15;
-      const outputCost = (analysis.usage.completion_tokens / 1000000) * 0.60;
-      const totalCost = inputCost + outputCost;
-      
-      doc.text(`Estimated cost: $${totalCost.toFixed(6)}`, 30, currentY + 46);
-    }
-    
-    // Footer on all pages
-    for (let i = 2; i <= pageNumber; i++) {
-      doc.setPage(i);
-      doc.setFontSize(10);
-      doc.setTextColor(107, 114, 128);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`Email: ${email}`, 20, 280);
-      doc.text('Crypto Token Analyzer - Powered by OpenAI GPT-4o-mini', 20, 285);
-      doc.text(`Page ${i}`, 170, 285);
-    }
-    
-    // Save the PDF
-    const timestamp = new Date().toISOString().split('T')[0];
-    const filename = isPremium 
-      ? `premium-crypto-analysis-${analysis.token}-${timestamp}.pdf`
-      : `crypto-analysis-${analysis.token}-${timestamp}.pdf`;
-    doc.save(filename);
+    console.log('PDF generated and downloaded successfully');
     
   } catch (error) {
-    console.error('PDF generation error:', error);
-    alert('Error generating PDF. Please try again.');
+    console.error('Error generating PDF:', error);
+    alert('Error generating PDF report: ' + error.message);
   }
 };
 
@@ -1425,62 +1133,6 @@ const ResultScreen = () => {
       alert('Ошибка при инициализации платежа: ' + error.message);
     } finally {
       setPaymentProcessing(false);
-    }
-  };
-
-  const generatePDFReport = async (analysisData, userEmail, isPremium = false) => {
-    try {
-      console.log('Generating PDF report...', { analysisData, userEmail, isPremium });
-      
-      // Parse the analysis to extract structured data
-      const { categories, overallScore } = parseAnalysisSummary(analysisData.summary);
-      
-      // Create structured data for PDF
-      const pdfData = {
-        tokenName: analysisData.token,
-        tokenSymbol: analysisData.token,
-        overallVerdict: overallScore >= 75 ? "Worth it" : overallScore >= 50 ? "Not too bad" : "Not Worth a Penny",
-        overallScore: `${overallScore || 0}/100`,
-        categories: categories.map(cat => ({
-          name: cat.name,
-          score: `${cat.score}/100`,
-          color: cat.score >= 80 ? "green" : cat.score >= 50 ? "yellow" : "pink"
-        }))
-      };
-      
-      console.log('PDF data prepared:', pdfData);
-      
-      // Call backend to generate PDF
-      const response = await fetch(`${BACKEND_API_URL}/generate-pdf`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          analysisData: pdfData
-        })
-      });
-      
-      if (!response.ok) {
-        throw new Error(`PDF generation failed: ${response.status}`);
-      }
-      
-      // Get PDF blob and download
-      const pdfBlob = await response.blob();
-      const url = window.URL.createObjectURL(pdfBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `token-analysis-${analysisData.token}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      
-      console.log('PDF downloaded successfully');
-      
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-      alert('Error generating PDF report: ' + error.message);
     }
   };
 

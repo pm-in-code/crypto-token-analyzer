@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const serverless = require('serverless-http');
-const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
 
@@ -148,8 +147,8 @@ app.post('/api/analyze-token', async (req, res) => {
   }
 });
 
-// PDF generation endpoint
-app.post('/api/generate-pdf', async (req, res) => {
+// HTML template endpoint for PDF generation
+app.post('/api/get-pdf-template', async (req, res) => {
   try {
     const { analysisData } = req.body;
     
@@ -157,54 +156,21 @@ app.post('/api/generate-pdf', async (req, res) => {
       return res.status(400).json({ error: 'analysisData is required' });
     }
 
-    // Parse the analysis data (should be JSON string from AI)
-    let parsedData;
-    try {
-      parsedData = typeof analysisData === 'string' ? JSON.parse(analysisData) : analysisData;
-    } catch (e) {
-      return res.status(400).json({ error: 'Invalid JSON in analysisData' });
-    }
-
     // Read HTML template
     const templatePath = path.join(__dirname, 'pdf-template.html');
     let htmlTemplate = fs.readFileSync(templatePath, 'utf8');
     
     // Replace placeholder with actual data
-    htmlTemplate = htmlTemplate.replace('{{REPORT_DATA}}', JSON.stringify(parsedData));
+    htmlTemplate = htmlTemplate.replace('{{REPORT_DATA}}', JSON.stringify(analysisData));
     
-    // Generate PDF using Puppeteer
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    res.json({
+      success: true,
+      htmlTemplate
     });
-    
-    const page = await browser.newPage();
-    await page.setContent(htmlTemplate, { waitUntil: 'networkidle0' });
-    
-    // Generate PDF
-    const pdfBuffer = await page.pdf({
-      format: 'A4',
-      printBackground: true,
-      margin: {
-        top: '0mm',
-        right: '0mm',
-        bottom: '0mm',
-        left: '0mm'
-      }
-    });
-    
-    await browser.close();
-    
-    // Set response headers for PDF download
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="token-analysis-${parsedData.tokenSymbol || 'report'}.pdf"`);
-    res.setHeader('Content-Length', pdfBuffer.length);
-    
-    res.send(pdfBuffer);
     
   } catch (error) {
-    console.error('Error generating PDF:', error);
-    res.status(500).json({ error: 'Failed to generate PDF' });
+    console.error('Error getting PDF template:', error);
+    res.status(500).json({ error: 'Failed to get PDF template' });
   }
 });
 
