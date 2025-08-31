@@ -12,10 +12,11 @@ app.use(express.json({ limit: '1mb' }));
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const STRIPE_PUBLISHABLE_KEY = process.env.STRIPE_PUBLISHABLE_KEY;
-const PROMPT_ADMIN_KEY = process.env.PROMPT_ADMIN_KEY; // short secret to update prompt via API
-const ANALYSIS_PROMPT = process.env.ANALYSIS_PROMPT; // primary single-var storage
+const GIST_ID = process.env.GIST_ID; // GitHub Gist ID
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN; // GitHub Personal Access Token
+const ANALYSIS_PROMPT = process.env.ANALYSIS_PROMPT; // fallback single-var storage
 
-// Support multi-part prompt via ANALYSIS_PROMPT_1..N (each < 4KB)
+// Support multi-part prompt via ANALYSIS_PROMPT_1..N (each < 4KB) - fallback
 function loadPromptFromEnvParts() {
   const parts = Object.keys(process.env)
     .filter((key) => /^ANALYSIS_PROMPT_\d+$/.test(key))
@@ -25,12 +26,46 @@ function loadPromptFromEnvParts() {
   return combined.trim().length > 0 ? combined : '';
 }
 
-function loadAnalysisPrompt() {
-  // 1) single env
+// Load prompt from GitHub Gist (primary method)
+async function loadPromptFromGist() {
+  if (!GIST_ID || !GITHUB_TOKEN) return '';
+  
+  try {
+    const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+      headers: {
+        'Authorization': `token ${GITHUB_TOKEN}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'Crypto-Token-Analyzer'
+      }
+    });
+    
+    if (!response.ok) {
+      console.error('Failed to fetch Gist:', response.status);
+      return '';
+    }
+    
+    const gist = await response.json();
+    // Get the first file content (assuming it's the prompt)
+    const firstFile = Object.values(gist.files)[0];
+    return firstFile ? firstFile.content : '';
+  } catch (error) {
+    console.error('Error fetching from Gist:', error);
+    return '';
+  }
+}
+
+async function loadAnalysisPrompt() {
+  // 1) GitHub Gist (primary)
+  const gistPrompt = await loadPromptFromGist();
+  if (gistPrompt && gistPrompt.trim().length > 0) return gistPrompt;
+  
+  // 2) single env (fallback)
   if (ANALYSIS_PROMPT && ANALYSIS_PROMPT.trim().length > 0) return ANALYSIS_PROMPT;
-  // 2) multipart env
+  
+  // 3) multipart env (fallback)
   const multi = loadPromptFromEnvParts();
   if (multi) return multi;
+  
   return '';
 }
 
@@ -44,14 +79,15 @@ app.get('/', (req, res) => {
 });
 
 // Health check endpoint
-app.get('/api/health', (req, res) => {
-  const hasPrompt = loadAnalysisPrompt().length > 0;
+app.get('/api/health', async (req, res) => {
+  const hasPrompt = (await loadAnalysisPrompt()).length > 0;
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
     openai_configured: !!OPENAI_API_KEY,
     stripe_configured: !!STRIPE_SECRET_KEY,
     prompt_configured: hasPrompt,
+    gist_configured: !!(GIST_ID && GITHUB_TOKEN),
   });
 });
 
@@ -63,7 +99,7 @@ app.post('/api/analyze-token', async (req, res) => {
     if (!OPENAI_API_KEY) {
       return res.status(500).json({ error: 'OpenAI API key not configured' });
     }
-    const securePrompt = loadAnalysisPrompt();
+    const securePrompt = await loadAnalysisPrompt();
     if (!securePrompt) {
       return res.status(500).json({ error: 'Analysis prompt not configured' });
     }
@@ -71,7 +107,7 @@ app.post('/api/analyze-token', async (req, res) => {
       return res.status(400).json({ error: 'tokenName is required' });
     }
 
-    // Compose messages securely: system prompt from env, user supplies only token input
+    // Compose messages securely: system prompt from Gist/env, user supplies only token input
     const messages = [
       { role: 'system', content: securePrompt },
       { role: 'user', content: tokenName.trim() }
