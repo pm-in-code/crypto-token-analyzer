@@ -461,6 +461,9 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
   try {
     console.log('=== PREMIUM PDF GENERATION START ===');
     console.log('Analysis data:', analysisData);
+    console.log('Analysis data keys:', Object.keys(analysisData));
+    console.log('Analysis data.token:', analysisData.token);
+    console.log('Analysis data.summary:', analysisData.summary);
     
     // Validate input data
     if (!analysisData) {
@@ -474,6 +477,8 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
     // Parse the analysis to extract structured data
     const { categories, overallScore } = parseAnalysisSummary(analysisData.summary);
     console.log('Parsed data:', { categories, overallScore });
+    console.log('Overall score type:', typeof overallScore);
+    console.log('Overall score value:', overallScore);
     
     // Create 8-page professional PDF report
     const fullHtml = `
@@ -482,7 +487,7 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Premium Token Analysis - ${analysisData.token}</title>
+        <title>Premium Token Analysis - ${analysisData.token || 'Token'}</title>
         <style>
           @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
           
@@ -623,11 +628,22 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           }
           
           .score-badge {
-            background: #22c55e;
             color: white;
             padding: 20px;
             border-radius: 15px;
             text-align: center;
+          }
+          
+          .score-badge.score-green {
+            background: #22c55e;
+          }
+          
+          .score-badge.score-yellow {
+            background: #eab308;
+          }
+          
+          .score-badge.score-red {
+            background: #ef4444;
           }
           
           .score-badge .score {
@@ -947,10 +963,10 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
                     <p>${analysisData.token || 'Token'}</p>
                   </div>
                 </div>
-              <div class="score-badge">
-                <div class="score">${overallScore || 0}/100</div>
-                <div class="label">WORTH POINTS</div>
-              </div>
+                              <div class="score-badge score-${overallScore >= 75 ? 'green' : overallScore >= 50 ? 'yellow' : 'red'}">
+                  <div class="score">${overallScore || 0}/100</div>
+                  <div class="label">WORTH POINTS</div>
+                </div>
             </div>
           </div>
           
