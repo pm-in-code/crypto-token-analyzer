@@ -456,13 +456,15 @@ const isValidEmail = (email) => {
 // Global configuration
 const BACKEND_API_URL = 'https://dainty-malasada-96ee00.netlify.app/api';
 
-// PDF Generation - Simplified version
+// PDF Generation - Ultra simplified version
 const generatePDFReport = async (analysisData, userEmail, isPremium = false) => {
   try {
-    console.log('Generating PDF report...', { analysisData, userEmail, isPremium });
+    console.log('=== PDF GENERATION START ===');
+    console.log('Analysis data:', analysisData);
     
     // Parse the analysis to extract structured data
     const { categories, overallScore } = parseAnalysisSummary(analysisData.summary);
+    console.log('Parsed data:', { categories, overallScore });
     
     // Create structured data for PDF
     const pdfData = {
@@ -479,8 +481,13 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
     
     console.log('PDF data prepared:', pdfData);
     
+    // Test backend endpoint first
+    console.log('Testing backend endpoint...');
+    const testResponse = await fetch(`${BACKEND_API_URL}/health`);
+    console.log('Health check status:', testResponse.status);
+    
     // Get HTML template from backend
-    console.log('Fetching HTML template from:', `${BACKEND_API_URL}/get-pdf-template`);
+    console.log('Fetching HTML template...');
     const response = await fetch(`${BACKEND_API_URL}/get-pdf-template`, {
       method: 'POST',
       headers: {
@@ -491,38 +498,76 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
       })
     });
     
-    console.log('Response status:', response.status);
-    console.log('Response headers:', response.headers);
+    console.log('Response received:', {
+      status: response.status,
+      statusText: response.statusText,
+      ok: response.ok,
+      headers: Object.fromEntries(response.headers.entries())
+    });
     
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Backend error response:', errorText);
-      throw new Error(`Template generation failed: ${response.status} - ${errorText}`);
+      throw new Error(`Backend error: ${response.status} - ${errorText}`);
     }
     
-    const { htmlTemplate } = await response.json();
+    const responseData = await response.json();
+    console.log('Response data received:', responseData);
+    
+    if (!responseData.success || !responseData.htmlTemplate) {
+      throw new Error('Invalid response format from backend');
+    }
+    
+    const { htmlTemplate } = responseData;
     console.log('HTML template received, length:', htmlTemplate.length);
     
-    // Use browser print to PDF (most reliable method)
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(htmlTemplate);
-    printWindow.document.close();
+    // Create a simple HTML page and open it
+    const fullHtml = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Token Analysis - ${pdfData.tokenName}</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 20px; }
+          .header { text-align: center; margin-bottom: 30px; }
+          .score { font-size: 24px; color: #22c55e; margin: 20px 0; }
+          .categories { margin: 20px 0; }
+          .category { padding: 10px; margin: 5px 0; background: #f3f4f6; border-radius: 5px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Token Analysis Report</h1>
+          <h2>${pdfData.tokenName} (${pdfData.tokenSymbol})</h2>
+          <div class="score">${pdfData.overallVerdict} - ${pdfData.overallScore}</div>
+        </div>
+        
+        <div class="categories">
+          <h3>Category Ratings:</h3>
+          ${pdfData.categories.map(cat => `
+            <div class="category">
+              <strong>${cat.name}:</strong> ${cat.score}
+            </div>
+          `).join('')}
+        </div>
+        
+        <div style="margin-top: 30px; text-align: center;">
+          <p>Use Ctrl+P (or Cmd+P on Mac) to save as PDF</p>
+        </div>
+      </body>
+      </html>
+    `;
     
-    // Wait for content to load and then print
-    setTimeout(() => {
-      printWindow.focus();
-      printWindow.print();
-      
-      // Close window after a delay
-      setTimeout(() => {
-        printWindow.close();
-      }, 1000);
-    }, 500);
+    // Open in new window
+    const newWindow = window.open('', '_blank');
+    newWindow.document.write(fullHtml);
+    newWindow.document.close();
     
-    console.log('PDF generation initiated via browser print');
+    console.log('=== PDF GENERATION SUCCESS ===');
     
   } catch (error) {
-    console.error('Error generating PDF:', error);
+    console.error('=== PDF GENERATION ERROR ===');
+    console.error('Error details:', error);
     alert('Error generating PDF report: ' + error.message);
   }
 };
