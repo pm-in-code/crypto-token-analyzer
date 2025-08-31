@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Token Analysis Report</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+            color: #1f2937;
+            line-height: 1.6;
+        }
+        
+        .page {
+            width: 210mm;
+            height: 297mm;
+            margin: 0 auto;
+            padding: 20mm;
+            background: #fafafa;
+            position: relative;
+            page-break-after: always;
+            background-image: 
+                linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px),
+                linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        
+        .page:last-child {
+            page-break-after: avoid;
+        }
+        
+        /* Page 1 - Overview */
+        .overview-page {
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 40px;
+        }
+        
+        .title-section h1 {
+            font-size: 48px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        
+        .title-section h2 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .verdict-banner {
+            background: #22c55e;
+            color: white;
+            padding: 20px 30px;
+            border-radius: 20px;
+            font-size: 24px;
+            font-weight: 700;
+            transform: rotate(5deg);
+            box-shadow: 0 10px 25px rgba(34, 197, 94, 0.3);
+        }
+        
+        .overall-score {
+            text-align: center;
+            margin: 40px 0;
+        }
+        
+        .overall-score h3 {
+            font-size: 18px;
+            color: #374151;
+            margin-bottom: 10px;
+        }
+        
+        .overall-score p {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 30px;
+        }
+        
+        .token-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin: 0 auto;
+            max-width: 500px;
+        }
+        
+        .token-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .token-icon {
+            width: 60px;
+            height: 60px;
+            background: #3b82f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .token-details h4 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .token-details p {
+            font-size: 16px;
+            color: #6b7280;
+        }
+        
+        .score-badge {
+            background: #22c55e;
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        .score-badge .score {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .score-badge .label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .category-ratings {
+            margin: 40px 0;
+        }
+        
+        .category-ratings h3 {
+            font-size: 18px;
+            color: #374151;
+            margin-bottom: 20px;
+        }
+        
+        .ratings-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        
+        .rating-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .rating-item .name {
+            font-weight: 500;
+            color: #1f2937;
+        }
+        
+        .rating-item .score {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .score-green { background: #22c55e; color: white; }
+        .score-yellow { background: #eab308; color: white; }
+        .score-pink { background: #ec4899; color: white; }
+        
+        .powered-by {
+            margin: 40px 0;
+        }
+        
+        .powered-by h3 {
+            font-size: 18px;
+            color: #374151;
+            margin-bottom: 20px;
+        }
+        
+        .partners {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+        
+        .partner-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            min-width: 120px;
+        }
+        
+        .partner-logo {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 10px;
+            background: #f3f4f6;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #6b7280;
+        }
+        
+        .partner-name {
+            font-size: 12px;
+            color: #374151;
+            font-weight: 500;
+        }
+        
+        /* Category Pages (2-7) */
+        .category-page {
+            background: #fafafa;
+        }
+        
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 40px;
+        }
+        
+        .category-info h2 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        
+        .category-number {
+            font-size: 14px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .category-score {
+            background: #22c55e;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-size: 20px;
+            font-weight: 700;
+        }
+        
+        .category-content {
+            margin-bottom: 40px;
+        }
+        
+        .category-content p {
+            font-size: 16px;
+            color: #374151;
+            margin-bottom: 20px;
+            line-height: 1.7;
+        }
+        
+        .strengths-weaknesses {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+        
+        .sw-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .sw-section h4 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 15px;
+        }
+        
+        .sw-section ul {
+            list-style: none;
+        }
+        
+        .sw-section li {
+            font-size: 14px;
+            color: #374151;
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .sw-section li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #6b7280;
+            font-weight: bold;
+        }
+        
+        /* Page 8 - Insights */
+        .insights-page {
+            background: #fafafa;
+        }
+        
+        .insights-header h2 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 40px;
+        }
+        
+        .insights-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .insight-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .insight-card h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        
+        .insight-card p {
+            font-size: 14px;
+            color: #374151;
+            line-height: 1.6;
+        }
+        
+        .conclusion {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+        
+        .conclusion p {
+            font-size: 16px;
+            color: #374151;
+            line-height: 1.7;
+        }
+        
+        /* Footer */
+        .footer {
+            position: absolute;
+            bottom: 20mm;
+            left: 20mm;
+            right: 20mm;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #6b7280;
+        }
+        
+        .app-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo-square {
+            width: 20px;
+            height: 20px;
+            background: #1f2937;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        
+        .page-number {
+            font-weight: 500;
+        }
+        
+        .generation-time {
+            font-weight: 500;
+        }
+        
+        /* Utility classes */
+        .text-center { text-align: center; }
+        .mb-20 { margin-bottom: 20px; }
+        .mb-30 { margin-bottom: 30px; }
+        .mb-40 { margin-bottom: 40px; }
+    </style>
+</head>
+<body>
+    <!-- Page 1: Overview -->
+    <div class="page overview-page">
+        <div class="header">
+            <div class="title-section">
+                <h2>COMPREHENSIVE ANALYSIS REPORT</h2>
+                <h1>Is <span id="tokenName">TOKEN</span> worth it?</h1>
+            </div>
+            <div class="verdict-banner" id="overallVerdict">It's worth!</div>
+        </div>
+        
+        <div class="overall-score">
+            <h3>OVERALL SCORE</h3>
+            <p>YOUR QUICK GUIDE TO TRUST: THE CLOSER TO 100, THE STRONGER THE TOKEN'S OUTLOOK.</p>
+            
+            <div class="token-card">
+                <div class="token-info">
+                    <div class="token-icon" id="tokenIcon">$</div>
+                    <div class="token-details">
+                        <h4 id="tokenNameDisplay">TOKEN NAME</h4>
+                        <p id="tokenSymbol">SYMBOL</p>
+                    </div>
+                </div>
+                <div class="score-badge">
+                    <div class="score" id="overallScore">99/100</div>
+                    <div class="label">WORTH POINTS</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="category-ratings">
+            <h3>CATEGORY RATINGS</h3>
+            <div class="ratings-grid" id="categoryRatings">
+                <!-- Categories will be populated here -->
+            </div>
+        </div>
+        
+        <div class="powered-by">
+            <h3>POWERED BY</h3>
+            <div class="partners">
+                <div class="partner-card">
+                    <div class="partner-logo">🦎</div>
+                    <div class="partner-name">coingecko</div>
+                </div>
+                <div class="partner-card">
+                    <div class="partner-logo">M</div>
+                    <div class="partner-name">CoinMarketCap</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <div class="app-logo">
+                <div class="logo-square">W</div>
+                <span>ITSWORTH.APP</span>
+            </div>
+            <div class="page-number">1/8</div>
+            <div class="generation-time" id="generationTime">GENERATED: 7 AUG, 2025 AT 12:56:16</div>
+        </div>
+    </div>
+    
+    <!-- Pages 2-7: Category Details -->
+    <div class="page category-page" id="categoryPages">
+        <!-- Category pages will be generated here -->
+    </div>
+    
+    <!-- Page 8: Insights & Recommendations -->
+    <div class="page insights-page">
+        <div class="insights-header">
+            <h2>Insights & Tips</h2>
+        </div>
+        
+        <div class="insights-grid" id="insightsGrid">
+            <!-- Insights will be populated here -->
+        </div>
+        
+        <div class="conclusion">
+            <p id="conclusionText">Final conclusion will be populated here.</p>
+        </div>
+        
+        <div class="footer">
+            <div class="app-logo">
+                <div class="logo-square">W</div>
+                <span>ITSWORTH.APP</span>
+            </div>
+            <div class="page-number">8/8</div>
+            <div class="generation-time" id="generationTime2">GENERATED: 7 AUG, 2025 AT 12:56:16</div>
+        </div>
+    </div>
+    
+    <script>
+        // This will be populated by the backend
+        const reportData = {{REPORT_DATA}};
+        
+        function populateReport() {
+            // Page 1
+            document.getElementById('tokenName').textContent = reportData.tokenName;
+            document.getElementById('tokenNameDisplay').textContent = reportData.tokenName;
+            document.getElementById('tokenSymbol').textContent = reportData.tokenSymbol;
+            document.getElementById('overallVerdict').textContent = reportData.overallVerdict;
+            document.getElementById('overallScore').textContent = reportData.overallScore;
+            
+            // Category ratings
+            const ratingsContainer = document.getElementById('categoryRatings');
+            ratingsContainer.innerHTML = '';
+            
+            reportData.categories.forEach(category => {
+                const ratingItem = document.createElement('div');
+                ratingItem.className = 'rating-item';
+                ratingItem.innerHTML = `
+                    <span class="name">${category.name}</span>
+                    <span class="score score-${category.color}">${category.score}</span>
+                `;
+                ratingsContainer.appendChild(ratingItem);
+            });
+            
+            // Generation time
+            const now = new Date();
+            const timeString = `GENERATED: ${now.getDate()} ${now.toLocaleString('en', {month: 'short'}).toUpperCase()}, ${now.getFullYear()} AT ${now.toLocaleTimeString('en-US', {hour12: false})}`;
+            document.getElementById('generationTime').textContent = timeString;
+            document.getElementById('generationTime2').textContent = timeString;
+        }
+        
+        // Initialize when page loads
+        if (typeof reportData !== 'undefined') {
+            populateReport();
+        }
+    </script>
+</body>
+</html>

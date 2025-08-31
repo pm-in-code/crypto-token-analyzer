@@ -1,6 +1,9 @@
 const express = require('express');
 const cors = require('cors');
 const serverless = require('serverless-http');
+const puppeteer = require('puppeteer');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
 
@@ -142,6 +145,66 @@ app.post('/api/analyze-token', async (req, res) => {
   } catch (error) {
     console.error('Error analyzing token:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// PDF generation endpoint
+app.post('/api/generate-pdf', async (req, res) => {
+  try {
+    const { analysisData } = req.body;
+    
+    if (!analysisData) {
+      return res.status(400).json({ error: 'analysisData is required' });
+    }
+
+    // Parse the analysis data (should be JSON string from AI)
+    let parsedData;
+    try {
+      parsedData = typeof analysisData === 'string' ? JSON.parse(analysisData) : analysisData;
+    } catch (e) {
+      return res.status(400).json({ error: 'Invalid JSON in analysisData' });
+    }
+
+    // Read HTML template
+    const templatePath = path.join(__dirname, 'pdf-template.html');
+    let htmlTemplate = fs.readFileSync(templatePath, 'utf8');
+    
+    // Replace placeholder with actual data
+    htmlTemplate = htmlTemplate.replace('{{REPORT_DATA}}', JSON.stringify(parsedData));
+    
+    // Generate PDF using Puppeteer
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
+    
+    const page = await browser.newPage();
+    await page.setContent(htmlTemplate, { waitUntil: 'networkidle0' });
+    
+    // Generate PDF
+    const pdfBuffer = await page.pdf({
+      format: 'A4',
+      printBackground: true,
+      margin: {
+        top: '0mm',
+        right: '0mm',
+        bottom: '0mm',
+        left: '0mm'
+      }
+    });
+    
+    await browser.close();
+    
+    // Set response headers for PDF download
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="token-analysis-${parsedData.tokenSymbol || 'report'}.pdf"`);
+    res.setHeader('Content-Length', pdfBuffer.length);
+    
+    res.send(pdfBuffer);
+    
+  } catch (error) {
+    console.error('Error generating PDF:', error);
+    res.status(500).json({ error: 'Failed to generate PDF' });
   }
 });
 
