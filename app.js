@@ -1428,6 +1428,62 @@ const ResultScreen = () => {
     }
   };
 
+  const generatePDFReport = async (analysisData, userEmail, isPremium = false) => {
+    try {
+      console.log('Generating PDF report...', { analysisData, userEmail, isPremium });
+      
+      // Parse the analysis to extract structured data
+      const { categories, overallScore } = parseAnalysisSummary(analysisData.summary);
+      
+      // Create structured data for PDF
+      const pdfData = {
+        tokenName: analysisData.token,
+        tokenSymbol: analysisData.token,
+        overallVerdict: overallScore >= 75 ? "Worth it" : overallScore >= 50 ? "Not too bad" : "Not Worth a Penny",
+        overallScore: `${overallScore || 0}/100`,
+        categories: categories.map(cat => ({
+          name: cat.name,
+          score: `${cat.score}/100`,
+          color: cat.score >= 80 ? "green" : cat.score >= 50 ? "yellow" : "pink"
+        }))
+      };
+      
+      console.log('PDF data prepared:', pdfData);
+      
+      // Call backend to generate PDF
+      const response = await fetch(`${BACKEND_API_URL}/generate-pdf`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          analysisData: pdfData
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`PDF generation failed: ${response.status}`);
+      }
+      
+      // Get PDF blob and download
+      const pdfBlob = await response.blob();
+      const url = window.URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `token-analysis-${analysisData.token}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      console.log('PDF downloaded successfully');
+      
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Error generating PDF report: ' + error.message);
+    }
+  };
+
   const handlePaymentSubmit = async (event) => {
     event.preventDefault();
     
@@ -1769,6 +1825,20 @@ const ResultScreen = () => {
           
           <div className="space-y-4">
             <button
+              onClick={() => generatePDFReport(tokenAnalysis, email, false)}
+              className="btn-download w-full mb-3"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span>Download Free PDF Report</span>
+            </button>
+            
+            <div className="text-center text-sm text-gray-500 mb-3">
+              — or —
+            </div>
+            
+            <button
               onClick={handlePremiumDownload}
               disabled={paymentProcessing}
               className="btn-download-premium w-full"
@@ -1784,7 +1854,7 @@ const ResultScreen = () => {
               ) : (
                 <>
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599-1" />
                   </svg>
                   <span>Premium Report - $9.99</span>
                 </>
