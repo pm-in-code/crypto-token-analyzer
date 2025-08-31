@@ -456,7 +456,7 @@ const isValidEmail = (email) => {
 // Global configuration
 const BACKEND_API_URL = 'https://dainty-malasada-96ee00.netlify.app/api';
 
-// PDF Generation - Ultra simplified version
+// PDF Generation - Frontend only, no backend dependency
 const generatePDFReport = async (analysisData, userEmail, isPremium = false) => {
   try {
     console.log('=== PDF GENERATION START ===');
@@ -466,93 +466,235 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
     const { categories, overallScore } = parseAnalysisSummary(analysisData.summary);
     console.log('Parsed data:', { categories, overallScore });
     
-    // Create structured data for PDF
-    const pdfData = {
-      tokenName: analysisData.token,
-      tokenSymbol: analysisData.token,
-      overallVerdict: overallScore >= 75 ? "Worth it" : overallScore >= 50 ? "Not too bad" : "Not Worth a Penny",
-      overallScore: `${overallScore || 0}/100`,
-      categories: categories.map(cat => ({
-        name: cat.name,
-        score: `${cat.score}/100`,
-        color: cat.score >= 80 ? "green" : cat.score >= 50 ? "yellow" : "pink"
-      }))
-    };
-    
-    console.log('PDF data prepared:', pdfData);
-    
-    // Test backend endpoint first
-    console.log('Testing backend endpoint...');
-    const testResponse = await fetch(`${BACKEND_API_URL}/health`);
-    console.log('Health check status:', testResponse.status);
-    
-    // Get HTML template from backend
-    console.log('Fetching HTML template...');
-    const response = await fetch(`${BACKEND_API_URL}/get-pdf-template`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        analysisData: pdfData
-      })
-    });
-    
-    console.log('Response received:', {
-      status: response.status,
-      statusText: response.statusText,
-      ok: response.ok,
-      headers: Object.fromEntries(response.headers.entries())
-    });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Backend error response:', errorText);
-      throw new Error(`Backend error: ${response.status} - ${errorText}`);
-    }
-    
-    const responseData = await response.json();
-    console.log('Response data received:', responseData);
-    
-    if (!responseData.success || !responseData.htmlTemplate) {
-      throw new Error('Invalid response format from backend');
-    }
-    
-    const { htmlTemplate } = responseData;
-    console.log('HTML template received, length:', htmlTemplate.length);
-    
-    // Create a simple HTML page and open it
+    // Create a beautiful HTML report directly in frontend
     const fullHtml = `
       <!DOCTYPE html>
-      <html>
+      <html lang="en">
       <head>
-        <title>Token Analysis - ${pdfData.tokenName}</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Token Analysis - ${analysisData.token}</title>
         <style>
-          body { font-family: Arial, sans-serif; margin: 20px; }
-          .header { text-align: center; margin-bottom: 30px; }
-          .score { font-size: 24px; color: #22c55e; margin: 20px 0; }
-          .categories { margin: 20px 0; }
-          .category { padding: 10px; margin: 5px 0; background: #f3f4f6; border-radius: 5px; }
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+          
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          
+          body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+            color: #1f2937;
+            line-height: 1.6;
+            padding: 40px;
+            min-height: 100vh;
+          }
+          
+          .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+          }
+          
+          .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid #e5e7eb;
+          }
+          
+          .header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 10px;
+          }
+          
+          .header h2 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 20px;
+          }
+          
+          .verdict-banner {
+            display: inline-block;
+            background: ${overallScore >= 75 ? '#22c55e' : overallScore >= 50 ? '#eab308' : '#ef4444'};
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 20px;
+            font-weight: 700;
+            transform: rotate(-2deg);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+          }
+          
+          .overall-score {
+            text-align: center;
+            margin: 30px 0;
+            padding: 30px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 15px;
+          }
+          
+          .overall-score h3 {
+            font-size: 18px;
+            color: #374151;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+          }
+          
+          .score-display {
+            font-size: 48px;
+            font-weight: 700;
+            color: ${overallScore >= 75 ? '#22c55e' : overallScore >= 50 ? '#eab308' : '#ef4444'};
+            margin-bottom: 10px;
+          }
+          
+          .score-label {
+            font-size: 14px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+          }
+          
+          .categories {
+            margin: 40px 0;
+          }
+          
+          .categories h3 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 20px;
+            text-align: center;
+          }
+          
+          .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+          }
+          
+          .category-item {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s ease;
+          }
+          
+          .category-item:hover {
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.1);
+          }
+          
+          .category-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 15px;
+          }
+          
+          .category-score {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 16px;
+            color: white;
+            background: ${overallScore >= 80 ? '#22c55e' : overallScore >= 50 ? '#eab308' : '#ec4899'};
+          }
+          
+          .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #e5e7eb;
+            color: #6b7280;
+          }
+          
+          .instructions {
+            background: #f3f4f6;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+          }
+          
+          .instructions p {
+            font-size: 16px;
+            color: #374151;
+            margin: 0;
+          }
+          
+          .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+          }
+          
+          .logo-square {
+            width: 24px;
+            height: 24px;
+            background: #1f2937;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            font-weight: 700;
+          }
         </style>
       </head>
       <body>
-        <div class="header">
-          <h1>Token Analysis Report</h1>
-          <h2>${pdfData.tokenName} (${pdfData.tokenSymbol})</h2>
-          <div class="score">${pdfData.overallVerdict} - ${pdfData.overallScore}</div>
-        </div>
-        
-        <div class="categories">
-          <h3>Category Ratings:</h3>
-          ${pdfData.categories.map(cat => `
-            <div class="category">
-              <strong>${cat.name}:</strong> ${cat.score}
+        <div class="container">
+          <div class="header">
+            <h1>COMPREHENSIVE ANALYSIS REPORT</h1>
+            <h2>Is ${analysisData.token} worth it?</h2>
+            <div class="verdict-banner">
+              ${overallScore >= 75 ? "Worth it" : overallScore >= 50 ? "Not too bad" : "Not Worth a Penny"}
             </div>
-          `).join('')}
-        </div>
-        
-        <div style="margin-top: 30px; text-align: center;">
-          <p>Use Ctrl+P (or Cmd+P on Mac) to save as PDF</p>
+          </div>
+          
+          <div class="overall-score">
+            <h3>OVERALL SCORE</h3>
+            <div class="score-display">${overallScore || 0}/100</div>
+            <div class="score-label">WORTH POINTS</div>
+          </div>
+          
+          <div class="categories">
+            <h3>CATEGORY RATINGS</h3>
+            <div class="category-grid">
+              ${categories.map(cat => `
+                <div class="category-item">
+                  <div class="category-name">${cat.name}</div>
+                  <div class="category-score">${cat.score}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          
+          <div class="footer">
+            <div class="instructions">
+              <p><strong>To save as PDF:</strong> Press Ctrl+P (Windows/Linux) or Cmd+P (Mac)</p>
+              <p>Then select "Save as PDF" in the print dialog</p>
+            </div>
+            
+            <div class="logo">
+              <div class="logo-square">W</div>
+              <span>ITSWORTH.APP</span>
+            </div>
+          </div>
         </div>
       </body>
       </html>
@@ -564,6 +706,7 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
     newWindow.document.close();
     
     console.log('=== PDF GENERATION SUCCESS ===');
+    console.log('Report opened in new window');
     
   } catch (error) {
     console.error('=== PDF GENERATION ERROR ===');
