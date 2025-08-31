@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const serverless = require('serverless-http');
-const { getStore } = require('@netlify/blobs');
 
 const app = express();
 
@@ -16,10 +15,6 @@ const STRIPE_PUBLISHABLE_KEY = process.env.STRIPE_PUBLISHABLE_KEY;
 const PROMPT_ADMIN_KEY = process.env.PROMPT_ADMIN_KEY; // short secret to update prompt via API
 const ANALYSIS_PROMPT = process.env.ANALYSIS_PROMPT; // primary single-var storage
 
-// Blob store for large prompt
-const promptStore = getStore({ name: 'secure-prompts' });
-const PROMPT_BLOB_KEY = 'analysis_prompt_v1.txt';
-
 // Support multi-part prompt via ANALYSIS_PROMPT_1..N (each < 4KB)
 function loadPromptFromEnvParts() {
   const parts = Object.keys(process.env)
@@ -30,19 +25,12 @@ function loadPromptFromEnvParts() {
   return combined.trim().length > 0 ? combined : '';
 }
 
-async function loadAnalysisPrompt() {
+function loadAnalysisPrompt() {
   // 1) single env
   if (ANALYSIS_PROMPT && ANALYSIS_PROMPT.trim().length > 0) return ANALYSIS_PROMPT;
   // 2) multipart env
   const multi = loadPromptFromEnvParts();
   if (multi) return multi;
-  // 3) blob store
-  try {
-    const blob = await promptStore.get(PROMPT_BLOB_KEY, { type: 'text' });
-    if (blob && typeof blob === 'string' && blob.trim().length > 0) return blob;
-  } catch (e) {
-    // swallow
-  }
   return '';
 }
 
@@ -56,8 +44,8 @@ app.get('/', (req, res) => {
 });
 
 // Health check endpoint
-app.get('/api/health', async (req, res) => {
-  const hasPrompt = (await loadAnalysisPrompt()).length > 0;
+app.get('/api/health', (req, res) => {
+  const hasPrompt = loadAnalysisPrompt().length > 0;
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
@@ -65,25 +53,6 @@ app.get('/api/health', async (req, res) => {
     stripe_configured: !!STRIPE_SECRET_KEY,
     prompt_configured: hasPrompt,
   });
-});
-
-// Admin endpoint to set/update the prompt in Blob store
-app.post('/api/admin/set-prompt', async (req, res) => {
-  try {
-    const apiKey = req.header('x-admin-key');
-    if (!PROMPT_ADMIN_KEY || apiKey !== PROMPT_ADMIN_KEY) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-    const { prompt } = req.body;
-    if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
-      return res.status(400).json({ error: 'prompt is required' });
-    }
-    await promptStore.set(PROMPT_BLOB_KEY, prompt, { metadata: { updatedAt: new Date().toISOString() } });
-    res.json({ success: true });
-  } catch (err) {
-    console.error('Failed to set prompt:', err);
-    res.status(500).json({ error: 'Failed to set prompt' });
-  }
 });
 
 // Token analysis endpoint
@@ -94,7 +63,7 @@ app.post('/api/analyze-token', async (req, res) => {
     if (!OPENAI_API_KEY) {
       return res.status(500).json({ error: 'OpenAI API key not configured' });
     }
-    const securePrompt = await loadAnalysisPrompt();
+    const securePrompt = loadAnalysisPrompt();
     if (!securePrompt) {
       return res.status(500).json({ error: 'Analysis prompt not configured' });
     }
@@ -102,7 +71,7 @@ app.post('/api/analyze-token', async (req, res) => {
       return res.status(400).json({ error: 'tokenName is required' });
     }
 
-    // Compose messages securely: system prompt from env/blob, user supplies only token input
+    // Compose messages securely: system prompt from env, user supplies only token input
     const messages = [
       { role: 'system', content: securePrompt },
       { role: 'user', content: tokenName.trim() }
@@ -140,42 +109,7 @@ app.post('/api/analyze-token', async (req, res) => {
   }
 });
 
-// Test Stripe API endpoint
-app.get('/api/test-stripe', async (req, res) => {
-  try {
-    if (!STRIPE_SECRET_KEY) {
-      return res.status(500).json({ error: 'Stripe not configured' });
-    }
-
-    // Test Stripe API with a simple request
-    const stripeResponse = await fetch('https://api.stripe.com/v1/account', {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${STRIPE_SECRET_KEY}`,
-      },
-    });
-
-    const accountData = await stripeResponse.json();
-    
-    if (accountData.error) {
-      return res.status(400).json({ 
-        error: 'Stripe API error', 
-        details: accountData.error 
-      });
-    }
-
-    res.json({
-      status: 'ok',
-      stripe_configured: true,
-      account_id: accountData.id
-    });
-  } catch (error) {
-    console.error('Error testing Stripe:', error);
-    res.status(500).json({ error: 'Failed to test Stripe API' });
-  }
-});
-
-// Stripe payment intent endpoint (unchanged)
+// Stripe payment intent endpoint
 app.post('/api/create-payment-intent', async (req, res) => {
   try {
     console.log('Stripe endpoint called with body:', req.body);
