@@ -457,83 +457,106 @@ const isValidEmail = (email) => {
 const BACKEND_API_URL = 'https://dainty-malasada-96ee00.netlify.app/api';
 
 // PDF Generation
-const generatePDFReport = async (analysisData, userEmail, isPremium = false) => {
-  try {
-    console.log('Generating PDF report...', { analysisData, userEmail, isPremium });
-    
-    // Parse the analysis to extract structured data
-    const { categories, overallScore } = parseAnalysisSummary(analysisData.summary);
-    
-    // Create structured data for PDF
-    const pdfData = {
-      tokenName: analysisData.token,
-      tokenSymbol: analysisData.token,
-      overallVerdict: overallScore >= 75 ? "Worth it" : overallScore >= 50 ? "Not too bad" : "Not Worth a Penny",
-      overallScore: `${overallScore || 0}/100`,
-      categories: categories.map(cat => ({
-        name: cat.name,
-        score: `${cat.score}/100`,
-        color: cat.score >= 80 ? "green" : cat.score >= 50 ? "yellow" : "pink"
-      }))
-    };
-    
-    console.log('PDF data prepared:', pdfData);
-    
-    // Get HTML template from backend
-    const response = await fetch(`${BACKEND_API_URL}/get-pdf-template`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        analysisData: pdfData
-      })
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Template generation failed: ${response.status}`);
-    }
-    
-    const { htmlTemplate } = await response.json();
-    
-    // Create a temporary div with the HTML content
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = htmlTemplate;
-    tempDiv.style.position = 'absolute';
-    tempDiv.style.left = '-9999px';
-    tempDiv.style.top = '-9999px';
-    document.body.appendChild(tempDiv);
-    
-    // Use html2pdf.js to generate PDF
-    const opt = {
-      margin: 0,
-      filename: `token-analysis-${analysisData.token}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { 
-        scale: 2,
-        useCORS: true,
-        allowTaint: true
-      },
-      jsPDF: { 
-        unit: 'mm', 
-        format: 'a4', 
-        orientation: 'portrait' 
+  const generatePDFReport = async (analysisData, userEmail, isPremium = false) => {
+    try {
+      console.log('Generating PDF report...', { analysisData, userEmail, isPremium });
+      
+      // Check if html2pdf is available
+      if (typeof html2pdf === 'undefined') {
+        throw new Error('HTML2PDF.js library not loaded. Please refresh the page and try again.');
       }
-    };
-    
-    // Generate and download PDF
-    await html2pdf().set(opt).from(tempDiv).save();
-    
-    // Clean up
-    document.body.removeChild(tempDiv);
-    
-    console.log('PDF generated and downloaded successfully');
-    
-  } catch (error) {
-    console.error('Error generating PDF:', error);
-    alert('Error generating PDF report: ' + error.message);
-  }
-};
+      
+      // Parse the analysis to extract structured data
+      const { categories, overallScore } = parseAnalysisSummary(analysisData.summary);
+      
+      // Create structured data for PDF
+      const pdfData = {
+        tokenName: analysisData.token,
+        tokenSymbol: analysisData.token,
+        overallVerdict: overallScore >= 75 ? "Worth it" : overallScore >= 50 ? "Not too bad" : "Not Worth a Penny",
+        overallScore: `${overallScore || 0}/100`,
+        categories: categories.map(cat => ({
+          name: cat.name,
+          score: `${cat.score}/100`,
+          color: cat.score >= 80 ? "green" : cat.score >= 50 ? "yellow" : "pink"
+        }))
+      };
+      
+      console.log('PDF data prepared:', pdfData);
+      
+      // Get HTML template from backend
+      const response = await fetch(`${BACKEND_API_URL}/get-pdf-template`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          analysisData: pdfData
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Template generation failed: ${response.status}`);
+      }
+      
+      const { htmlTemplate } = await response.json();
+      console.log('HTML template received, length:', htmlTemplate.length);
+      
+      // Create a temporary div with the HTML content
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = htmlTemplate;
+      tempDiv.style.position = 'absolute';
+      tempDiv.style.left = '-9999px';
+      tempDiv.style.top = '-9999px';
+      document.body.appendChild(tempDiv);
+      
+      console.log('Temporary div created, starting PDF generation...');
+      
+      // Try html2pdf.js first, fallback to browser print if it fails
+      try {
+        const opt = {
+          margin: 0,
+          filename: `token-analysis-${analysisData.token}.pdf`,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { 
+            scale: 2,
+            useCORS: true,
+            allowTaint: true
+          },
+          jsPDF: { 
+            unit: 'mm', 
+            format: 'a4', 
+            orientation: 'portrait' 
+          }
+        };
+        
+        // Generate and download PDF
+        await html2pdf().set(opt).from(tempDiv).save();
+      } catch (html2pdfError) {
+        console.warn('HTML2PDF failed, trying browser print...', html2pdfError);
+        
+        // Fallback: use browser print to PDF
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(htmlTemplate);
+        printWindow.document.close();
+        
+        // Wait for content to load
+        setTimeout(() => {
+          printWindow.print();
+          printWindow.close();
+        }, 500);
+      }
+      
+      // Clean up
+      document.body.removeChild(tempDiv);
+      
+      console.log('PDF generated and downloaded successfully');
+      
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Error generating PDF report: ' + error.message);
+    }
+  };
 
 // Helper function to draw category item
 const drawCategoryItem = (doc, category, x, y, getScoreColor) => {
