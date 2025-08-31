@@ -482,7 +482,7 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Premium Token Analysis - ${analysisData.token}</title>
+        <title>Premium Token Analysis - ${tokenAnalysis.token}</title>
         <style>
           @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
           
@@ -539,14 +539,28 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           }
           
           .verdict-banner {
-            background: #22c55e;
             color: white;
             padding: 20px 30px;
             border-radius: 20px;
             font-size: 24px;
             font-weight: 700;
             transform: rotate(5deg);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+          }
+          
+          .verdict-green {
+            background: #22c55e;
             box-shadow: 0 10px 25px rgba(34, 197, 94, 0.3);
+          }
+          
+          .verdict-yellow {
+            background: #eab308;
+            box-shadow: 0 10px 25px rgba(234, 179, 8, 0.3);
+          }
+          
+          .verdict-red {
+            background: #ef4444;
+            box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
           }
           
           .overall-score {
@@ -689,29 +703,35 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           .partner-card {
             background: white;
             border-radius: 15px;
-            padding: 20px;
+            padding: 15px;
             text-align: center;
             box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            min-width: 120px;
+            min-width: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
           }
           
           .partner-logo {
-            width: 40px;
-            height: 40px;
-            margin: 0 auto 10px;
+            width: 32px;
+            height: 32px;
+            margin: 0 auto 8px;
             background: #f3f4f6;
-            border-radius: 10px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
             color: #6b7280;
+            font-size: 16px;
           }
           
           .partner-name {
-            font-size: 12px;
+            font-size: 11px;
             color: #1f2937;
             font-weight: 500;
+            line-height: 1.2;
           }
           
           .footer {
@@ -910,9 +930,9 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           <div class="header">
             <div class="title-section">
               <h2>COMPREHENSIVE ANALYSIS REPORT</h2>
-              <h1>Is ${analysisData.token || 'this token'} worth it?</h1>
+              <h1>Is ${tokenAnalysis.token || 'this token'} worth it?</h1>
             </div>
-            <div class="verdict-banner">${overallScore >= 75 ? "Worth it" : overallScore >= 50 ? "Not too bad" : "Not Worth a Penny"}</div>
+            <div class="verdict-banner verdict-${overallScore >= 75 ? 'green' : overallScore >= 50 ? 'yellow' : 'red'}">${overallScore >= 75 ? "Worth it" : overallScore >= 50 ? "Not too bad" : "Not Worth a Penny"}</div>
           </div>
           
           <div class="overall-score">
@@ -921,10 +941,10 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
             
                           <div class="token-card">
                 <div class="token-info">
-                  <div class="token-icon">${analysisData.token ? analysisData.token.charAt(0) : 'T'}</div>
+                  <div class="token-icon">${tokenAnalysis.token ? tokenAnalysis.token.charAt(0) : 'T'}</div>
                   <div class="token-details">
-                    <h4>${analysisData.token || 'Token'}</h4>
-                    <p>${analysisData.token || 'Token'}</p>
+                    <h4>${tokenAnalysis.token || 'Token'}</h4>
+                    <p>${tokenAnalysis.token || 'Token'}</p>
                   </div>
                 </div>
               <div class="score-badge">
@@ -983,7 +1003,7 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           </div>
           
           <div class="category-content">
-            <p>${analysisData.token || 'This token'} has shown significant market presence since its launch, with a market capitalization that places it among the top cryptocurrencies. The token has experienced price volatility but maintained strong trading volume, indicating sustained investor interest and market activity.</p>
+            <p>${tokenAnalysis.token || 'This token'} has shown significant market presence since its launch, with a market capitalization that places it among the top cryptocurrencies. The token has experienced price volatility but maintained strong trading volume, indicating sustained investor interest and market activity.</p>
             <p>Market dominance has been challenged by newer projects and competitors in the layer-1 space, but the established presence and liquidity provide a solid foundation for continued growth.</p>
           </div>
           
@@ -1027,7 +1047,7 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           </div>
           
           <div class="category-content">
-            <p>${analysisData.token || 'This token'}'s tokenomics is well-structured, with a carefully designed supply model that promotes long-term sustainability. The staking mechanism allows users to earn rewards, promoting network security and engagement while providing passive income opportunities.</p>
+            <p>${tokenAnalysis.token || 'This token'}'s tokenomics is well-structured, with a carefully designed supply model that promotes long-term sustainability. The staking mechanism allows users to earn rewards, promoting network security and engagement while providing passive income opportunities.</p>
             <p>The inflation rate is gradually decreasing, which supports the token's value over time and creates a deflationary pressure that benefits long-term holders.</p>
           </div>
           
@@ -1071,7 +1091,7 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           </div>
           
           <div class="category-content">
-            <p>${analysisData.token || 'This token'} is known for its rigorous development process, emphasizing peer-reviewed research and academic rigor. The platform has consistently rolled out upgrades and improvements, enhancing smart contract capabilities and overall functionality.</p>
+            <p>${tokenAnalysis.token || 'This token'} is known for its rigorous development process, emphasizing peer-reviewed research and academic rigor. The platform has consistently rolled out upgrades and improvements, enhancing smart contract capabilities and overall functionality.</p>
             <p>GitHub activity is robust, with a high number of commits and contributions from various developers, indicating sustained interest and development momentum that bodes well for future innovation.</p>
           </div>
           
@@ -1115,7 +1135,7 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           </div>
           
           <div class="category-content">
-            <p>${analysisData.token || 'This token'} has a passionate community, with significant engagement on social platforms like Twitter and Reddit. The number of active users and followers has grown steadily, demonstrating strong community support and interest.</p>
+            <p>${tokenAnalysis.token || 'This token'} has a passionate community, with significant engagement on social platforms like Twitter and Reddit. The number of active users and followers has grown steadily, demonstrating strong community support and interest.</p>
             <p>However, social sentiment fluctuates based on market conditions and development updates, leading to periods of negativity that can impact investor confidence and market perception.</p>
           </div>
           
@@ -1159,7 +1179,7 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           </div>
           
           <div class="category-content">
-            <p>${analysisData.token || 'This token'} was founded by experienced professionals with strong backgrounds in blockchain technology and cryptography. The team has demonstrated expertise and commitment to the project's long-term success.</p>
+            <p>${tokenAnalysis.token || 'This token'} was founded by experienced professionals with strong backgrounds in blockchain technology and cryptography. The team has demonstrated expertise and commitment to the project's long-term success.</p>
             <p>The backing from notable investors and partnerships with educational institutions provides credibility and resources that support continued development and market expansion.</p>
           </div>
           
@@ -1203,7 +1223,7 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           </div>
           
           <div class="category-content">
-            <p>The risks associated with ${analysisData.token || 'this token'} stem from regulatory scrutiny, market competition, and technological challenges. While the platform has positioned itself as a scalable and secure solution, the evolving regulatory landscape could pose risks to operations and adoption.</p>
+            <p>The risks associated with ${tokenAnalysis.token || 'this token'} stem from regulatory scrutiny, market competition, and technological challenges. While the platform has positioned itself as a scalable and secure solution, the evolving regulatory landscape could pose risks to operations and adoption.</p>
             <p>Additionally, competition from other smart contract platforms remains a significant threat, requiring continuous innovation and development to maintain market position.</p>
           </div>
           
@@ -1265,7 +1285,7 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           </div>
           
           <div class="overall-conclusion">
-            <p>In conclusion, while ${analysisData.token || 'this token'} demonstrates a solid foundation and potential for growth, addressing its weaknesses and leveraging its strengths will be crucial for future success in the competitive cryptocurrency landscape.</p>
+            <p>In conclusion, while ${tokenAnalysis.token || 'this token'} demonstrates a solid foundation and potential for growth, addressing its weaknesses and leveraging its strengths will be crucial for future success in the competitive cryptocurrency landscape.</p>
           </div>
           
           <div class="footer">
@@ -1285,10 +1305,13 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
       </html>
     `;
     
-    // Open in new window for PDF generation
+    // Open in new window for PDF generation with proper URL
     const newWindow = window.open('', '_blank');
     newWindow.document.write(fullHtml);
     newWindow.document.close();
+    
+    // Set proper URL for the report window
+    newWindow.history.replaceState({}, 'Token Analysis Report', '/token-analysis-report');
     
     console.log('=== PREMIUM PDF GENERATION SUCCESS ===');
     console.log('8-page professional report opened in new window');
