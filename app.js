@@ -2087,6 +2087,25 @@ const ResultScreen = () => {
     return null;
   }
 
+  // Parsed data for UI
+  const { categories: parsedCategories, overallScore: parsedOverall } = parseAnalysisSummary(tokenAnalysis.summary);
+  const categories = parsedCategories || [];
+  const overallScore = (parsedOverall == null && categories.length)
+    ? Math.round(categories.reduce((a, c) => a + (c.score || 0), 0) / categories.length)
+    : (parsedOverall || 0);
+
+  const scoreBand = (score) => {
+    if (score >= 80) return 'green';
+    if (score >= 60) return 'yellow';
+    return 'red';
+  };
+
+  const band = scoreBand(overallScore);
+  const bandPill = band === 'green' ? 'bg-lime-400 text-white' : band === 'yellow' ? 'bg-amber-400 text-white' : 'bg-pink-400 text-white';
+  const bandBorder = band === 'green' ? 'border-lime-400' : band === 'yellow' ? 'border-amber-400' : 'border-pink-400';
+  const bandBg = band === 'green' ? 'bg-lime-300' : band === 'yellow' ? 'bg-amber-300' : 'bg-pink-300';
+  const verdictText = band === 'green' ? "It's worth!" : band === 'yellow' ? 'Not too bad' : 'Not Worth a Penny';
+
   const handleNewTokenSubmit = async (e) => {
     e.preventDefault();
     if (!newTokenInput.trim()) return;
@@ -2276,148 +2295,75 @@ const ResultScreen = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <div className="lg:col-span-2 card">
-          <h3 className="text-xl font-bold text-gray-900 mb-4">
-            {tokenAnalysis.token} Analysis Summary
-          </h3>
-          
-          {(() => {
-            const { categories, overallScore } = parseAnalysisSummary(tokenAnalysis.summary);
-            console.log('Parsed categories:', categories);
-            console.log('Overall score:', overallScore);
-            console.log('Categories length:', categories.length);
-            console.log('First category:', categories[0]);
-            return (
-              <div className="space-y-6">
-                {/* Overall Score */}
-                {overallScore !== null && (
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-200">
-                    <h4 className="text-lg font-bold text-gray-900 mb-2">Overall Score</h4>
-                    <div className="flex items-center gap-4">
-                      <div className={`text-4xl font-bold ${getScoreColor(overallScore)}`}>
-                        {overallScore}/100
-                      </div>
-                      <div className="flex-1">
-                        <div className="w-full bg-gray-200 rounded-full h-3">
-                          <div 
-                            className={`h-3 rounded-full transition-all duration-500 ${
-                              overallScore >= 80 ? 'bg-green-500' : 
-                              overallScore >= 60 ? 'bg-yellow-500' : 'bg-red-500'
-                            }`}
-                            style={{ width: `${overallScore}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    </div>
+        {/* Left hero card */}
+        <div className="lg:col-span-2">
+          <div className={`rounded-2xl overflow-hidden border ${bandBorder}`} style={{ backgroundImage: "url('assets/report-bg.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' }}>
+            <div className="bg-white/70 p-6">
+              {/* Token header */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xl">
+                    {(tokenAnalysis.token || 'T').charAt(0)}
                   </div>
-                )}
+                  <div>
+                    <div className="text-xl font-semibold text-gray-900">{tokenAnalysis.token}</div>
+                    <div className="text-xs uppercase text-gray-500">{tokenAnalysis.token?.slice(0,3) || 'TOK'}</div>
+                  </div>
+                </div>
+                <div className={`px-4 py-2 rounded-full text-2xl font-bold ${bandPill}`}>{overallScore}/100</div>
+              </div>
 
-                {/* Category Scores */}
-                {categories.length > 0 ? (
-                  <div className="space-y-4">
-                    <h4 className="text-lg font-bold text-gray-900 mb-4">Category Ratings</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {categories.map((category, index) => (
-                        <div key={index} className="bg-gray-50 p-4 rounded-lg border hover:shadow-md transition-shadow">
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="font-semibold text-gray-900 text-sm">{category.name}</span>
-                            <span className={`text-lg font-bold ${getScoreColor(category.score)}`}>
-                              {category.score}/100
-                            </span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div 
-                              className={`h-2 rounded-full transition-all duration-500 ${
-                                category.score >= 80 ? 'bg-green-500' : 
-                                category.score >= 60 ? 'bg-yellow-500' : 'bg-red-500'
-                              }`}
-                              style={{ width: `${category.score}%` }}
-                            ></div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+              {/* Unlock button */}
+              <div className="mt-6">
+                {hasPaid ? (
+                  <button onClick={() => generatePDFReport(tokenAnalysis, email, true)} className="btn-download-premium w-full">Download full report</button>
                 ) : (
-                  <div className="space-y-4">
-                    <h4 className="text-lg font-bold text-gray-900 mb-4">Category Ratings</h4>
-                    <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                      <p className="text-yellow-800 text-sm">
-                        Категории не найдены в анализе. Полный анализ доступен в PDF отчете.
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* API Usage */}
-                {tokenAnalysis.usage && (
-                  <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <h4 className="font-semibold text-blue-900 mb-2">API Usage</h4>
-                    <div className="text-sm text-blue-700">
-                      <div className="flex justify-between">
-                        <span>Prompt tokens:</span>
-                        <span className="font-medium">{tokenAnalysis.usage.prompt_tokens}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Completion tokens:</span>
-                        <span className="font-medium">{tokenAnalysis.usage.completion_tokens}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Total tokens:</span>
-                        <span className="font-medium">{tokenAnalysis.usage.total_tokens}</span>
-                      </div>
-                    </div>
-                  </div>
+                  <button onClick={handlePremiumDownload} disabled={paymentProcessing} className="btn-download-premium w-full">{paymentProcessing ? 'Processing…' : 'Unlock full report'}</button>
                 )}
               </div>
-            );
-          })()}
+            </div>
+            {/* Verdict stripe */}
+            <div className={`px-6 py-4 ${bandBg} flex items-center justify-between`}>
+              <div className="text-lg font-bold text-gray-900">{verdictText}</div>
+              <div className="flex items-center gap-2">
+                <button className="w-9 h-9 rounded-lg bg-white/70 flex items-center justify-center text-gray-700">?</button>
+                <button className="w-9 h-9 rounded-lg bg-white/70 flex items-center justify-center text-gray-700">✈️</button>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="card">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">
-            Premium Report
-          </h3>
-          
-          <div className="space-y-4">
+        {/* Right column */}
+        <div className="space-y-6">
+          {/* Categories overview */}
+          <div className="card">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {['Market Metrics','Social Metrics','Tokenomics','Team & Investors','Development Activity','Risk Assessment'].map((name) => {
+                const c = categories.find((x) => (x.name||'').toLowerCase() === name.toLowerCase()) || { score: 0 };
+                const b = scoreBand(c.score);
+                const pill = b === 'green' ? 'bg-lime-300' : b === 'yellow' ? 'bg-amber-300' : 'bg-pink-300';
+                return (
+                  <div key={name} className="flex items-center justify-between p-3 rounded-lg bg-white/70 border">
+                    <span className="text-gray-800 text-sm font-medium">{name}</span>
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${pill}`}>{c.score}/100</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
 
-            
-
-            
-            {hasPaid ? (
-              <button
-                onClick={() => generatePDFReport(tokenAnalysis, email, true)}
-                className="btn-download-premium w-full"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <span>Premium Report — Download</span>
-              </button>
-            ) : (
-              <button
-                onClick={handlePremiumDownload}
-                disabled={paymentProcessing}
-                className="btn-download-premium w-full"
-              >
-                {paymentProcessing ? (
-                  <>
-                    <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span>Processing...</span>
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599-1" />
-                    </svg>
-                    <span>Premium Report - $9.99</span>
-                  </>
-                )}
-              </button>
-            )}
+          {/* Blurred full report teaser */}
+          <div className="relative">
+            <div className="card backdrop-blur-sm bg-white/30">
+              <div className="h-40 w-full filter blur-sm bg-gray-100 rounded-lg"></div>
+            </div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              {hasPaid ? (
+                <button onClick={() => generatePDFReport(tokenAnalysis, email, true)} className="btn-download-premium">Download full report</button>
+              ) : (
+                <button onClick={handlePremiumDownload} disabled={paymentProcessing} className="btn-download-premium">Unlock full report</button>
+              )}
+            </div>
           </div>
         </div>
       </div>
