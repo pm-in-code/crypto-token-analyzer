@@ -2248,7 +2248,7 @@ const ResultScreen = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="w-full">
       {/* Social links - Fixed Position Top Right (visible on results too) */}
       <div className="fixed top-4 right-4 flex gap-3 z-40">
         <a href="https://x.com/itsworth_app" target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-xl bg-amber-50 border border-amber-100 text-gray-800 shadow-sm hover:bg-amber-100 transition-colors">Twitter</a>
@@ -2291,7 +2291,7 @@ const ResultScreen = () => {
       {/* Removed top success title and subtitle per design request */}
 
       {/* Central block layout */}
-      <div className="mb-8" style={{ width: 1200, height: 724, maxWidth: '1200px', display: 'flex', gap: 8, opacity: 1 }}>
+      <div className="mb-8" style={{ width: 1200, height: 724, maxWidth: '1200px', display: 'flex', gap: 8, opacity: 1, margin: '0 auto' }}>
         {/* Left hero card */}
         <div>
           <div className={`overflow-hidden border ${bandBorder}`} style={{ width: 560, height: 724, maxWidth: '560px', borderRadius: 24, display: 'flex', flexDirection: 'column', gap: '8px', opacity: 1 }}>
