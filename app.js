@@ -2290,10 +2290,11 @@ const ResultScreen = () => {
 
       {/* Removed top success title and subtitle per design request */}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      {/* Central block layout */}
+      <div className="mb-8" style={{ width: 1200, height: 724, maxWidth: '1200px', display: 'flex', gap: 8, opacity: 1 }}>
         {/* Left hero card */}
-        <div className="lg:col-span-2">
-          <div className={`rounded-2xl overflow-hidden border ${bandBorder}`} style={{ backgroundImage: "url('assets/result-left-bg.jpg')", backgroundSize: 'cover', backgroundPosition: 'center', width: 1200, height: 724, maxWidth: '1200px', display: 'flex', flexDirection: 'column', gap: '8px', opacity: 1 }}>
+        <div>
+          <div className={`overflow-hidden border ${bandBorder}`} style={{ backgroundImage: "url('assets/result-left-bg.jpg')", backgroundSize: 'cover', backgroundPosition: 'center', width: 560, height: 724, maxWidth: '560px', borderRadius: 24, display: 'flex', flexDirection: 'column', gap: '8px', opacity: 1 }}>
             <div className="bg-white/70 p-6">
               {/* Token header */}
               <div className="flex items-center justify-between">
@@ -2330,10 +2331,11 @@ const ResultScreen = () => {
         </div>
 
         {/* Right column */}
-        <div className="space-y-6 lg:col-span-1">
+        {/* Right column */}
+        <div className="space-y-2" style={{ width: 632, height: 718, display: 'flex', flexDirection: 'column', gap: 8, opacity: 1 }}>
           {/* Categories overview */}
-          <div className="card" style={{ width: 632, height: 388, opacity: 1 }}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="card" style={{ width: 632, height: 330, opacity: 1 }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {['Market Metrics','Social Metrics','Tokenomics','Team & Investors','Development Activity','Risk Assessment'].map((name) => {
                 const c = categories.find((x) => (x.name||'').toLowerCase() === name.toLowerCase()) || { score: 0 };
                 const b = scoreBand(c.score);
@@ -2364,7 +2366,7 @@ const ResultScreen = () => {
           </div>
 
           {/* Blurred full report teaser */}
-          <div className="relative" style={{ width: 632, height: 388, opacity: 1 }}>
+          <div className="relative" style={{ width: 632, height: 380, opacity: 1 }}>
             <div className="card backdrop-blur-sm bg-white/30 overflow-hidden" style={{ backgroundImage: "url('assets/result-right-bg.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' }}>
               <div className="h-full w-full bg-white/40 backdrop-blur-[2px] rounded-lg"></div>
             </div>
