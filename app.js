@@ -569,12 +569,7 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
             padding: 20mm;
             background: white;
             position: relative;
-            page-break-after: always;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-          }
-          
-          .page:last-child {
-            page-break-after: avoid;
           }
           
           .overview-page {
@@ -582,7 +577,7 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           }
           .download-btn {
             position: absolute;
-            top: 18mm;
+            top: 8mm;
             right: 20mm;
             background: #111827;
             color: #ffffff;
@@ -593,6 +588,7 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
             box-shadow: 0 6px 18px rgba(0,0,0,0.15);
             border: none;
             cursor: pointer;
+            z-index: 50;
           }
           
           .header {
@@ -1088,7 +1084,7 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           <div class="category-header">
             <div class="category-label">CATEGORY 1</div>
             <h1 class="category-title">Market Metrics</h1>
-            <div class="category-score-badge score-99">99/100</div>
+            <div class="category-score-badge ${ (s=> s>=80?'score-99': s>=60?'score-80':'score-60')( (categories.find(c=> (c.name||'').toLowerCase()==='market metrics'.toLowerCase())||{}).score || 0 ) }">${ ((categories.find(c=> (c.name||'').toLowerCase()==='market metrics'.toLowerCase())||{}).score || 0) }/100</div>
           </div>
           
           <div class="category-content">
@@ -1132,7 +1128,7 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           <div class="category-header">
             <div class="category-label">CATEGORY 2</div>
             <h1 class="category-title">Tokenomics</h1>
-            <div class="category-score-badge score-99">99/100</div>
+            <div class="category-score-badge ${ (s=> s>=80?'score-99': s>=60?'score-80':'score-60')( (categories.find(c=> (c.name||'').toLowerCase()==='tokenomics')||{}).score || 0 ) }">${ ((categories.find(c=> (c.name||'').toLowerCase()==='tokenomics')||{}).score || 0) }/100</div>
           </div>
           
           <div class="category-content">
@@ -1176,7 +1172,7 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           <div class="category-header">
             <div class="category-label">CATEGORY 3</div>
             <h1 class="category-title">Development Activity</h1>
-            <div class="category-score-badge score-99">99/100</div>
+            <div class="category-score-badge ${ (s=> s>=80?'score-99': s>=60?'score-80':'score-60')( (categories.find(c=> (c.name||'').toLowerCase()==='development activity')||{}).score || 0 ) }">${ ((categories.find(c=> (c.name||'').toLowerCase()==='development activity')||{}).score || 0) }/100</div>
           </div>
           
           <div class="category-content">
@@ -1220,7 +1216,7 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           <div class="category-header">
             <div class="category-label">CATEGORY 4</div>
             <h1 class="category-title">Social Metrics</h1>
-            <div class="category-score-badge score-99">99/100</div>
+            <div class="category-score-badge ${ (s=> s>=80?'score-99': s>=60?'score-80':'score-60')( (categories.find(c=> (c.name||'').toLowerCase()==='social metrics')||{}).score || 0 ) }">${ ((categories.find(c=> (c.name||'').toLowerCase()==='social metrics')||{}).score || 0) }/100</div>
           </div>
           
           <div class="category-content">
@@ -1264,7 +1260,7 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           <div class="category-header">
             <div class="category-label">CATEGORY 5</div>
             <h1 class="category-title">Team & Investors</h1>
-            <div class="category-score-badge score-99">99/100</div>
+            <div class="category-score-badge ${ (s=> s>=80?'score-99': s>=60?'score-80':'score-60')( (categories.find(c=> (c.name||'').toLowerCase()==='team & investors')||{}).score || 0 ) }">${ ((categories.find(c=> (c.name||'').toLowerCase()==='team & investors')||{}).score || 0) }/100</div>
           </div>
           
           <div class="category-content">
@@ -1308,7 +1304,7 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           <div class="category-header">
             <div class="category-label">CATEGORY 6</div>
             <h1 class="category-title">Risk Assessment</h1>
-            <div class="category-score-badge score-99">99/100</div>
+            <div class="category-score-badge ${ (s=> s>=80?'score-99': s>=60?'score-80':'score-60')( (categories.find(c=> (c.name||'').toLowerCase()==='risk assessment')||{}).score || 0 ) }">${ ((categories.find(c=> (c.name||'').toLowerCase()==='risk assessment')||{}).score || 0) }/100</div>
           </div>
           
           <div class="category-content">
@@ -1402,11 +1398,11 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
                 margin: 0,
                 filename: 'token-analysis-${tokenDisplay}.pdf',
                 image: { type: 'jpeg', quality: 0.95 },
-                html2canvas: { scale: 2, useCORS: true },
+                html2canvas: { scale: 2, useCORS: true, letterRendering: true },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                pagebreak: { mode: ['css','legacy'], before: '.page' }
+                pagebreak: { mode: ['css'], after: '.page' }
               };
-              window.html2pdf().set(opt).from(document.body).save();
+              window.html2pdf().set(opt).from(document.querySelector('body')).save();
             } else {
               window.print();
             }
