@@ -1973,75 +1973,74 @@ const TokenSearch = () => {
   );
 };
 
-// Loading Screen Component
+// Loading Screen Component with step-by-step loaders
 const LoadingScreen = () => {
+  const { setCurrentScreen } = useAppContext();
+  const steps = [
+    'Market Metrics',
+    'Tokenomics',
+    'Development Activity',
+    'Social Metrics',
+    'Team & Investors',
+    'Risk Assessment',
+  ];
+
+  const [completed, setCompleted] = useState(0);
+
+  useEffect(() => {
+    // Start with zero completed, progressively tick steps
+    setCompleted(0);
+    const interval = setInterval(() => {
+      setCompleted((prev) => {
+        const next = prev + 1;
+        if (next >= steps.length) {
+          clearInterval(interval);
+          // Small delay to show last check, then move to result
+          setTimeout(() => setCurrentScreen('result'), 350);
+        }
+        return Math.min(next, steps.length);
+      });
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const renderIcon = (index) => {
+    if (index < completed) {
+      return (
+        <div className="w-8 h-8 bg-crypto-green rounded-full flex items-center justify-center">
+          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+      );
+    }
+    // loader
+    return (
+      <div className="w-8 h-8 rounded-full border-2 border-gray-300 border-t-2 border-t-blue-400 animate-spin"></div>
+    );
+  };
+
   return (
     <div className="card">
       <div className="text-center">
         <div className="loading-spinner"></div>
-        
+
         <h2 className="text-2xl font-bold text-gray-900 mb-4">
           Analyzing token...
         </h2>
-        
+
         <p className="text-gray-600 mb-8">
           Our AI is processing market data, social sentiment, and technical indicators
         </p>
-        
-        <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-            <span className="text-gray-700">Market Metrics</span>
-            <div className="w-8 h-8 bg-crypto-green rounded-full flex items-center justify-center">
-              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-      </div>
 
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-            <span className="text-gray-700">Tokenomics</span>
-            <div className="w-8 h-8 bg-crypto-green rounded-full flex items-center justify-center">
-              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+        <div className="space-y-4">
+          {steps.map((label, idx) => (
+            <div key={label} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <span className="text-gray-700">{label}</span>
+              {renderIcon(idx)}
             </div>
-          </div>
-          
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-            <span className="text-gray-700">Development Activity</span>
-            <div className="w-8 h-8 bg-crypto-green rounded-full flex items-center justify-center">
-              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-          </div>
-          
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-            <span className="text-gray-700">Social Metrics</span>
-            <div className="w-8 h-8 bg-crypto-green rounded-full flex items-center justify-center">
-              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-          </div>
-          
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-            <span className="text-gray-700">Team & Investors</span>
-            <div className="w-8 h-8 bg-crypto-green rounded-full flex items-center justify-center">
-              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-          </div>
-          
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-            <span className="text-gray-700">Risk Assessment</span>
-            <div className="w-8 h-8 bg-crypto-green rounded-full flex items-center justify-center">
-              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </div>
