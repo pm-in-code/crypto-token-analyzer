@@ -2297,7 +2297,7 @@ const ResultScreen = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         {/* Left hero card */}
         <div className="lg:col-span-2">
-          <div className={`rounded-2xl overflow-hidden border ${bandBorder}`} style={{ backgroundImage: "url('assets/report-bg.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' }}>
+          <div className={`rounded-2xl overflow-hidden border ${bandBorder}`} style={{ backgroundImage: "url('assets/result-left-bg.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' }}>
             <div className="bg-white/70 p-6">
               {/* Token header */}
               <div className="flex items-center justify-between">
@@ -2334,16 +2334,16 @@ const ResultScreen = () => {
         </div>
 
         {/* Right column */}
-        <div className="space-y-6">
+        <div className="space-y-6 lg:col-span-1">
           {/* Categories overview */}
           <div className="card">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {['Market Metrics','Social Metrics','Tokenomics','Team & Investors','Development Activity','Risk Assessment'].map((name) => {
                 const c = categories.find((x) => (x.name||'').toLowerCase() === name.toLowerCase()) || { score: 0 };
                 const b = scoreBand(c.score);
                 const pill = b === 'green' ? 'bg-lime-300' : b === 'yellow' ? 'bg-amber-300' : 'bg-pink-300';
                 return (
-                  <div key={name} className="flex items-center justify-between p-3 rounded-lg bg-white/70 border">
+                  <div key={name} className="flex items-center justify-between p-4 rounded-lg bg-white/80 border">
                     <span className="text-gray-800 text-sm font-medium">{name}</span>
                     <span className={`px-3 py-1 rounded-full text-xs font-bold ${pill}`}>{c.score}/100</span>
                   </div>
@@ -2355,7 +2355,7 @@ const ResultScreen = () => {
           {/* Blurred full report teaser */}
           <div className="relative">
             <div className="card backdrop-blur-sm bg-white/30">
-              <div className="h-40 w-full filter blur-sm bg-gray-100 rounded-lg"></div>
+              <div className="h-56 w-full filter blur-sm bg-gray-100 rounded-lg"></div>
             </div>
             <div className="absolute inset-0 flex items-center justify-center">
               {hasPaid ? (
