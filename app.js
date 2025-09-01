@@ -2294,7 +2294,7 @@ const ResultScreen = () => {
       <div className="mb-8" style={{ width: 1200, height: 724, maxWidth: '1200px', display: 'flex', gap: 8, opacity: 1 }}>
         {/* Left hero card */}
         <div>
-          <div className={`overflow-hidden border ${bandBorder}`} style={{ backgroundImage: "url('assets/result-left-bg.jpg')", backgroundSize: 'cover', backgroundPosition: 'center', width: 560, height: 724, maxWidth: '560px', borderRadius: 24, display: 'flex', flexDirection: 'column', gap: '8px', opacity: 1 }}>
+          <div className={`overflow-hidden border ${bandBorder}`} style={{ width: 560, height: 724, maxWidth: '560px', borderRadius: 24, display: 'flex', flexDirection: 'column', gap: '8px', opacity: 1 }}>
             <div className="bg-white/70 p-6">
               {/* Token header */}
               <div className="flex items-center justify-between">
@@ -2327,6 +2327,8 @@ const ResultScreen = () => {
                 <button className="w-9 h-9 rounded-lg bg-white/70 flex items-center justify-center text-gray-700">✈️</button>
               </div>
             </div>
+            {/* Clouds background filler */}
+            <div style={{ flex: 1, backgroundImage: "url('assets/result-left-bg.jpg')", backgroundSize: 'cover', backgroundPosition: 'center', borderBottomLeftRadius: 24, borderBottomRightRadius: 24 }}></div>
           </div>
         </div>
 
