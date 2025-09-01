@@ -2062,6 +2062,28 @@ const ResultScreen = () => {
   const [newTokenInput, setNewTokenInput] = useState('');
   const [isAnalyzingNew, setIsAnalyzingNew] = useState(false);
 
+  // Initialize Stripe Elements when payment modal opens (must be before any conditional returns)
+  React.useEffect(() => {
+    if (showPaymentModal && elements && !cardElement) {
+      const card = elements.create('card', {
+        style: {
+          base: {
+            fontSize: '16px',
+            color: '#424770',
+            '::placeholder': {
+              color: '#aab7c4',
+            },
+          },
+          invalid: {
+            color: '#9e2146',
+          },
+        },
+      });
+      card.mount('#card-element');
+      setCardElement(card);
+    }
+  }, [showPaymentModal, elements, cardElement]);
+
   if (!tokenAnalysis) {
     return null;
   }
@@ -2117,27 +2139,7 @@ const ResultScreen = () => {
     }
   };
 
-  // Initialize Stripe Elements when payment modal opens
-  React.useEffect(() => {
-    if (showPaymentModal && elements && !cardElement) {
-      const card = elements.create('card', {
-        style: {
-          base: {
-            fontSize: '16px',
-            color: '#424770',
-            '::placeholder': {
-              color: '#aab7c4',
-            },
-          },
-          invalid: {
-            color: '#9e2146',
-          },
-        },
-      });
-      card.mount('#card-element');
-      setCardElement(card);
-    }
-  }, [showPaymentModal, elements, cardElement]);
+  
 
   const handlePremiumDownload = async () => {
     try {
