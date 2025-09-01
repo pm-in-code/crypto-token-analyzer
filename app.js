@@ -2282,19 +2282,7 @@ const ResultScreen = () => {
         </form>
       </div>
 
-      <div className="text-center mb-8">
-        <div className="w-16 h-16 bg-crypto-green rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">
-          Your report is ready!
-        </h2>
-        <p className="text-gray-600">
-          Comprehensive analysis of {tokenAnalysis.token}
-        </p>
-      </div>
+      {/* Removed top success title and subtitle per design request */}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         {/* Left hero card */}
