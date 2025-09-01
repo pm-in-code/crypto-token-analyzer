@@ -2347,7 +2347,22 @@ const ResultScreen = () => {
                 return (
                   <div key={name} className="flex items-center justify-between p-4 rounded-lg bg-white/80 border">
                     <span className="text-gray-800 text-sm font-medium">{name}</span>
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${pill}`}>{c.score}/100</span>
+                    <span
+                      className={`rounded-full text-xs font-bold ${pill}`}
+                      style={{
+                        width: 100,
+                        height: 40,
+                        borderRadius: 156,
+                        padding: '12px 16px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 8,
+                        opacity: 1,
+                      }}
+                    >
+                      {c.score}/100
+                    </span>
                   </div>
                 );
               })}
