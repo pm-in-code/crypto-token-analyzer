@@ -1991,15 +1991,7 @@ const LoadingScreen = () => {
     // Start with zero completed, progressively tick steps
     setCompleted(0);
     const interval = setInterval(() => {
-      setCompleted((prev) => {
-        const next = prev + 1;
-        if (next >= steps.length) {
-          clearInterval(interval);
-          // Small delay to show last check, then move to result
-          setTimeout(() => setCurrentScreen('result'), 350);
-        }
-        return Math.min(next, steps.length);
-      });
+      setCompleted((prev) => Math.min(prev + 1, steps.length));
     }, 500);
 
     return () => clearInterval(interval);
@@ -2020,6 +2012,13 @@ const LoadingScreen = () => {
       <div className="w-8 h-8 rounded-full border-2 border-gray-300 border-t-2 border-t-blue-400 animate-spin"></div>
     );
   };
+
+  useEffect(() => {
+    if (completed >= steps.length) {
+      const t = setTimeout(() => setCurrentScreen('result'), 350);
+      return () => clearTimeout(t);
+    }
+  }, [completed, steps.length, setCurrentScreen]);
 
   return (
     <div className="card">
