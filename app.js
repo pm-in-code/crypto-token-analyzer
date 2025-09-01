@@ -2050,6 +2050,7 @@ const ResultScreen = () => {
   const [emailError, setEmailError] = useState('');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentProcessing, setPaymentProcessing] = useState(false);
+  const [hasPaid, setHasPaid] = useState(false);
   const [stripe, setStripe] = useState(null);
   const [elements, setElements] = useState(null);
   const [cardElement, setCardElement] = useState(null);
@@ -2203,6 +2204,7 @@ const ResultScreen = () => {
         setShowPaymentModal(false);
         generatePDFReport(tokenAnalysis, email, true); // true = premium
         alert('Платеж успешен! Премиум отчет скачивается...');
+        setHasPaid(true);
       }
       
     } catch (error) {
@@ -2377,28 +2379,40 @@ const ResultScreen = () => {
             
 
             
-            <button
-              onClick={handlePremiumDownload}
-              disabled={paymentProcessing}
-              className="btn-download-premium w-full"
-            >
-              {paymentProcessing ? (
-                <>
-                  <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  <span>Processing...</span>
-                </>
-              ) : (
-                <>
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599-1" />
-                  </svg>
-                  <span>Premium Report - $9.99</span>
-                </>
-              )}
-            </button>
+            {hasPaid ? (
+              <button
+                onClick={() => generatePDFReport(tokenAnalysis, email, true)}
+                className="btn-download-premium w-full"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>Premium Report — Download</span>
+              </button>
+            ) : (
+              <button
+                onClick={handlePremiumDownload}
+                disabled={paymentProcessing}
+                className="btn-download-premium w-full"
+              >
+                {paymentProcessing ? (
+                  <>
+                    <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Processing...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599-1" />
+                    </svg>
+                    <span>Premium Report - $9.99</span>
+                  </>
+                )}
+              </button>
+            )}
           </div>
         </div>
       </div>
