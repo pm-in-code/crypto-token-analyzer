@@ -1505,10 +1505,9 @@ const Logo = ({ onClick }) => {
     <button
       onClick={onClick}
       className="flex items-center space-x-2 text-2xl font-bold text-primary-600 hover:text-primary-700 transition-colors duration-200"
+      aria-label="Go Home"
     >
-      <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center">
-        <span className="text-white text-sm font-bold">₿</span>
-      </div>
+      <img src="assets/logo-w.png" alt="ItsWorth Logo" className="w-8 h-8 rounded-lg" onError={(e)=>{e.target.style.display='none';}} />
       <span>CryptoAnalyzer</span>
     </button>
   );
@@ -1613,7 +1612,7 @@ const TrendingTokens = () => {
         }
       };
       setTokenAnalysis(mockAnalysis);
-      setCurrentScreen('result');
+      setTimeout(() => setCurrentScreen('result'), 350);
     }, 2000);
   };
 
@@ -1782,7 +1781,7 @@ const TokenSearch = () => {
           summary: data.analysis,
           usage: data.usage
         });
-        setCurrentScreen('result');
+        setTimeout(() => setCurrentScreen('result'), 350); // короткая пауза: видны финальные галочки
       } else {
         console.error('Backend error:', data);
         setShowError(true);
@@ -1841,7 +1840,7 @@ const TokenSearch = () => {
           summary: data.analysis,
           usage: data.usage
         });
-        setCurrentScreen('result');
+        setTimeout(() => setCurrentScreen('result'), 350);
       } else {
         console.error('Backend error:', data);
         setShowError(true);
@@ -2014,9 +2013,9 @@ const LoadingScreen = () => {
   };
 
   useEffect(() => {
+    // оставляем экран с заполненными галочками; переход на result делает код, который завершает анализ
     if (completed >= steps.length) {
-      const t = setTimeout(() => setCurrentScreen('result'), 350);
-      return () => clearTimeout(t);
+      return;
     }
   }, [completed, steps.length, setCurrentScreen]);
 
