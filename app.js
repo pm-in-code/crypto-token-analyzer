@@ -1412,13 +1412,19 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
       </html>
     `;
     
-    // Open in new window for PDF generation with proper URL
-    const newWindow = window.open('', '_blank');
-    newWindow.document.write(fullHtml);
-    newWindow.document.close();
-    
-    // Set proper URL for the report window
-    newWindow.history.replaceState({}, 'Token Analysis Report', '/token-analysis-report');
+    // Persist the generated HTML and open a friendly URL page that renders it
+    try {
+      sessionStorage.setItem('itsworth_report_html', fullHtml);
+      sessionStorage.setItem('itsworth_report_title', `Token Analysis Report – ${tokenDisplay}`);
+    } catch (e) {
+      // Fallback to localStorage if sessionStorage is unavailable
+      try {
+        localStorage.setItem('itsworth_report_html', fullHtml);
+        localStorage.setItem('itsworth_report_title', `Token Analysis Report – ${tokenDisplay}`);
+      } catch (e2) { /* ignore */ }
+    }
+    // Open a dedicated page (relative path works on GitHub Pages and Netlify)
+    window.open('report.html', '_blank');
     
     console.log('=== PREMIUM PDF GENERATION SUCCESS ===');
     console.log('8-page professional report opened in new window');
