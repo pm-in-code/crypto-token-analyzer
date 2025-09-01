@@ -2088,11 +2088,13 @@ const ResultScreen = () => {
   }
 
   // Parsed data for UI
-  const { categories: parsedCategories, overallScore: parsedOverall } = parseAnalysisSummary(tokenAnalysis.summary);
+  const { categories: parsedCategories, overallScore: parsedOverall, tokenName, tokenSymbol } = parseAnalysisSummary(tokenAnalysis.summary);
   const categories = parsedCategories || [];
   const overallScore = (parsedOverall == null && categories.length)
     ? Math.round(categories.reduce((a, c) => a + (c.score || 0), 0) / categories.length)
     : (parsedOverall || 0);
+  const tokenDisplay = (tokenName || tokenAnalysis.token || '').toString();
+  const tokenTicker = (tokenSymbol || tokenDisplay.replace(/[^A-Za-z]/g, '').slice(0, 3) || 'TOK').toUpperCase();
 
   const scoreBand = (score) => {
     if (score >= 80) return 'green';
@@ -2303,11 +2305,11 @@ const ResultScreen = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xl">
-                    {(tokenAnalysis.token || 'T').charAt(0)}
+                    {(tokenDisplay || 'T').charAt(0)}
                   </div>
                   <div>
-                    <div className="text-xl font-semibold text-gray-900">{tokenAnalysis.token}</div>
-                    <div className="text-xs uppercase text-gray-500">{tokenAnalysis.token?.slice(0,3) || 'TOK'}</div>
+                    <div className="text-xl font-semibold text-gray-900">{tokenDisplay || 'Token'}</div>
+                    <div className="text-xs uppercase text-gray-500">{tokenTicker}</div>
                   </div>
                 </div>
                 <div className={`px-4 py-2 rounded-full text-2xl font-bold ${bandPill}`}>{overallScore}/100</div>
@@ -2354,8 +2356,8 @@ const ResultScreen = () => {
 
           {/* Blurred full report teaser */}
           <div className="relative">
-            <div className="card backdrop-blur-sm bg-white/30">
-              <div className="h-56 w-full filter blur-sm bg-gray-100 rounded-lg"></div>
+            <div className="card backdrop-blur-sm bg-white/30 overflow-hidden" style={{ backgroundImage: "url('assets/result-right-bg.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' }}>
+              <div className="h-56 w-full bg-white/40 backdrop-blur-[2px] rounded-lg"></div>
             </div>
             <div className="absolute inset-0 flex items-center justify-center">
               {hasPaid ? (
