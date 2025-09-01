@@ -8,6 +8,55 @@ const parseAnalysisSummary = (summary) => {
   console.log('Parsing analysis summary:', summary.substring(0, 200) + '...');
   let categories = [];
   let overallScore = null;
+  let tokenName;
+  let tokenSymbol;
+
+  // First, attempt JSON parsing because the model frequently returns JSON
+  try {
+    const parsed = JSON.parse(summary);
+    if (parsed && (parsed.categories || parsed.overallScore || parsed.tokenName || parsed.token || parsed.tokenSymbol)) {
+      // Categories may be like: [{ name: "Market Metrics", score: "70/100" }]
+      if (Array.isArray(parsed.categories)) {
+        categories = parsed.categories
+          .map((c) => {
+            const name = c.name || c.category || c.title;
+            let scoreRaw = c.score;
+            if (typeof scoreRaw === 'string') {
+              const m = scoreRaw.match(/\d{1,3}/);
+              scoreRaw = m ? parseInt(m[0], 10) : NaN;
+            }
+            if (typeof scoreRaw === 'number') {
+              return { name, score: scoreRaw };
+            }
+            return null;
+          })
+          .filter(Boolean)
+          .filter((c) => c.name && Number.isFinite(c.score) && c.score >= 0 && c.score <= 100);
+      }
+
+      // Overall score may be "68/100" or a number
+      if (parsed.overallScore !== undefined && parsed.overallScore !== null) {
+        if (typeof parsed.overallScore === 'number') {
+          overallScore = parsed.overallScore;
+        } else if (typeof parsed.overallScore === 'string') {
+          const m = parsed.overallScore.match(/\d{1,3}/);
+          overallScore = m ? parseInt(m[0], 10) : null;
+        }
+      }
+
+      tokenName = parsed.tokenName || parsed.token || undefined;
+      tokenSymbol = parsed.tokenSymbol || undefined;
+
+      // Early return if JSON parse succeeded meaningfully
+      if ((categories && categories.length) || overallScore !== null || tokenName || tokenSymbol) {
+        console.log('Parsed (JSON) categories:', categories);
+        console.log('Parsed (JSON) overall score:', overallScore);
+        return { categories, overallScore, tokenName, tokenSymbol };
+      }
+    }
+  } catch (e) {
+    // Not JSON, continue with regex parsing below
+  }
   
   const expectedCategories = [
     'Market Metrics',
@@ -140,7 +189,7 @@ const parseAnalysisSummary = (summary) => {
   
   console.log('Parsed categories:', categories);
   console.log('Overall score:', overallScore);
-  return { categories, overallScore };
+  return { categories, overallScore, tokenName, tokenSymbol };
 };
 
 // Real-time crypto data fetching
@@ -475,10 +524,19 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
     }
     
     // Parse the analysis to extract structured data
-    const { categories, overallScore } = parseAnalysisSummary(analysisData.summary);
-    console.log('Parsed data:', { categories, overallScore });
+    let { categories, overallScore, tokenName, tokenSymbol } = parseAnalysisSummary(analysisData.summary);
+    console.log('Parsed data:', { categories, overallScore, tokenName, tokenSymbol });
     console.log('Overall score type:', typeof overallScore);
     console.log('Overall score value:', overallScore);
+    
+    // Fallbacks
+    if ((overallScore === null || Number.isNaN(overallScore)) && Array.isArray(categories) && categories.length > 0) {
+      const sum = categories.reduce((acc, c) => acc + (typeof c.score === 'number' ? c.score : 0), 0);
+      const avg = Math.round(sum / categories.length);
+      overallScore = Number.isFinite(avg) ? avg : 0;
+    }
+    const tokenDisplay = (analysisData.token || tokenName || tokenSymbol || 'Token').toString();
+    const tokenInitial = tokenDisplay.charAt(0).toUpperCase();
     
     // Create 8-page professional PDF report
     const fullHtml = `
@@ -487,7 +545,7 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Premium Token Analysis - ${analysisData.token || 'Token'}</title>
+        <title>Premium Token Analysis - ${tokenDisplay}</title>
         <style>
           @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
           
@@ -521,6 +579,20 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           
           .overview-page {
             background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+          }
+          .download-btn {
+            position: absolute;
+            top: 18mm;
+            right: 20mm;
+            background: #111827;
+            color: #ffffff;
+            padding: 8px 14px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+            border: none;
+            cursor: pointer;
           }
           
           .header {
@@ -943,10 +1015,11 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
       <body>
         <!-- PAGE 1: Overview -->
         <div class="page overview-page">
+          <button id="downloadBtn" class="download-btn">Download as PDF</button>
           <div class="header">
             <div class="title-section">
               <h2>COMPREHENSIVE ANALYSIS REPORT</h2>
-              <h1>Is ${analysisData.token || 'this token'} worth it?</h1>
+              <h1>Is ${tokenDisplay || 'this token'} worth it?</h1>
             </div>
             <div class="verdict-banner verdict-${overallScore >= 75 ? 'green' : overallScore >= 50 ? 'yellow' : 'red'}">${overallScore >= 75 ? "Worth it" : overallScore >= 50 ? "Not too bad" : "Not Worth a Penny"}</div>
           </div>
@@ -955,18 +1028,18 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
             <h3>OVERALL SCORE</h3>
             <p>YOUR QUICK GUIDE TO TRUST: THE CLOSER TO 100, THE STRONGER THE TOKEN'S OUTLOOK.</p>
             
-                          <div class="token-card">
-                <div class="token-info">
-                  <div class="token-icon">${analysisData.token ? analysisData.token.charAt(0) : 'T'}</div>
-                  <div class="token-details">
-                    <h4>${analysisData.token || 'Token'}</h4>
-                    <p>${analysisData.token || 'Token'}</p>
-                  </div>
+            <div class="token-card">
+              <div class="token-info">
+                <div class="token-icon">${tokenInitial}</div>
+                <div class="token-details">
+                  <h4>${tokenDisplay || 'Token'}</h4>
+                  <p>${tokenDisplay || 'Token'}</p>
                 </div>
-                              <div class="score-badge score-${overallScore >= 75 ? 'green' : overallScore >= 50 ? 'yellow' : 'red'}">
-                  <div class="score">${overallScore || 0}/100</div>
-                  <div class="label">WORTH POINTS</div>
-                </div>
+              </div>
+              <div class="score-badge score-${overallScore >= 75 ? 'green' : overallScore >= 50 ? 'yellow' : 'red'}">
+                <div class="score">${overallScore || 0}/100</div>
+                <div class="label">WORTH POINTS</div>
+              </div>
             </div>
           </div>
           
@@ -1318,6 +1391,28 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           </div>
         </div>
       </body>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+      <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          var btn = document.getElementById('downloadBtn');
+          if (!btn) return;
+          btn.addEventListener('click', function () {
+            if (window.html2pdf) {
+              var opt = {
+                margin: 0,
+                filename: 'token-analysis-${tokenDisplay}.pdf',
+                image: { type: 'jpeg', quality: 0.95 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: ['css','legacy'], before: '.page' }
+              };
+              window.html2pdf().set(opt).from(document.body).save();
+            } else {
+              window.print();
+            }
+          });
+        });
+      </script>
       </html>
     `;
     
@@ -1760,7 +1855,7 @@ const TokenSearch = () => {
   };
 
   if (showError) {
-    return (
+  return (
       <div className="card">
         <div className="error-card">
           <div className="error-title">Oops</div>
@@ -1785,26 +1880,26 @@ const TokenSearch = () => {
         
         <form onSubmit={handleSubmit}>
           <div className="input-container">
-            <input
-              type="text"
-              value={tokenInput}
-              onChange={(e) => setTokenInput(e.target.value)}
-              onKeyPress={handleKeyPress}
+          <input
+            type="text"
+            value={tokenInput}
+            onChange={(e) => setTokenInput(e.target.value)}
+            onKeyPress={handleKeyPress}
               placeholder="Enter Token name or address"
               className="input-field"
-              disabled={isSubmitting}
-            />
+            disabled={isSubmitting}
+          />
             {tokenInput && (
-              <button
+          <button
                 type="button"
                 onClick={handleClearInput}
                 className="clear-button"
               >
                 ×
-              </button>
+          </button>
             )}
-          </div>
-        </form>
+        </div>
+      </form>
       </div>
 
       {/* Trending Tokens Card */}
@@ -1899,8 +1994,8 @@ const LoadingScreen = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-          </div>
-          
+      </div>
+
           <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
             <span className="text-gray-700">Tokenomics</span>
             <div className="w-8 h-8 bg-crypto-green rounded-full flex items-center justify-center">
@@ -2001,7 +2096,7 @@ const ResultScreen = () => {
           usage: data.usage
         });
         setCurrentScreen('result');
-      } else {
+    } else {
         console.error('Backend error:', data);
         alert('Error analyzing token. Please try again.');
         setCurrentScreen('result');
