@@ -2249,6 +2249,12 @@ const ResultScreen = () => {
 
   return (
     <div className="max-w-4xl mx-auto">
+      {/* Social links - Fixed Position Top Right (visible on results too) */}
+      <div className="fixed top-4 right-4 flex gap-3 z-40">
+        <a href="https://x.com/itsworth_app" target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-xl bg-amber-50 border border-amber-100 text-gray-800 shadow-sm hover:bg-amber-100 transition-colors">Twitter</a>
+        <a href="https://www.reddit.com/r/Its_worth_app/" target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-xl bg-amber-50 border border-amber-100 text-gray-800 shadow-sm hover:bg-amber-100 transition-colors">Reddit</a>
+        <a href="https://t.me/+AUgtdKZ7FqQ3NzAy" target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-xl bg-amber-50 border border-amber-100 text-gray-800 shadow-sm hover:bg-amber-100 transition-colors">Telegram</a>
+      </div>
       {/* New Token Search Bar */}
       <div className="mb-6">
         <form onSubmit={handleNewTokenSubmit}>
