@@ -32,6 +32,9 @@ jobs:
           cp index.html deploy/
           cp app.js deploy/
           cp favicon.ico deploy/ 2>/dev/null || true
+          cp report.html deploy/ 2>/dev/null || true
+          mkdir -p deploy/assets
+          cp -r assets/* deploy/assets/ 2>/dev/null || true
         
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
