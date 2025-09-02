@@ -107,10 +107,24 @@ app.post('/api/analyze-token', async (req, res) => {
       return res.status(400).json({ error: 'tokenName is required' });
     }
 
-    // Compose messages securely: system prompt from Gist/env, user supplies only token input
+    // Compose messages: secure system prompt + explicit JSON instruction for stable parsing
+    const jsonInstruction = `You MUST respond with strict JSON only, no prose. Schema:
+{
+  "tokenName": string,
+  "tokenSymbol": string,
+  "overallScore": number, // 0-100
+  "categories": [
+    { "name": "Market Metrics", "score": number },
+    { "name": "Tokenomics", "score": number },
+    { "name": "Development Activity", "score": number },
+    { "name": "Social Metrics", "score": number },
+    { "name": "Team & Investors", "score": number },
+    { "name": "Risk Assessment", "score": number }
+  ]
+}`;
     const messages = [
       { role: 'system', content: securePrompt },
-      { role: 'user', content: tokenName.trim() }
+      { role: 'user', content: `Token: ${tokenName.trim()}\n${jsonInstruction}` }
     ];
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -122,7 +136,7 @@ app.post('/api/analyze-token', async (req, res) => {
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages,
-        max_tokens: 4000,
+        max_tokens: 2000,
         temperature: 0.2
       })
     });
