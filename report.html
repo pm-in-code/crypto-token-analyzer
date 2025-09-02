@@ -33,6 +33,32 @@
         if (html) {
           document.documentElement.style.background = '#fff';
           document.body.innerHTML = html;
+          // Load html2pdf and wire the Download button since innerHTML won't execute scripts
+          function wirePdf() {
+            try {
+              var btn = document.getElementById('downloadBtn');
+              if (!btn) return;
+              btn.addEventListener('click', function () {
+                var opt = {
+                  margin: 0,
+                  filename: (document.title || 'token-analysis') + '.pdf',
+                  image: { type: 'jpeg', quality: 0.95 },
+                  html2canvas: { scale: 2, useCORS: true },
+                  jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                  pagebreak: { mode: ['css','legacy'], before: '.page' }
+                };
+                if (window.html2pdf) {
+                  window.html2pdf().set(opt).from(document.body).save();
+                } else {
+                  window.print();
+                }
+              });
+            } catch (e) {}
+          }
+          var s = document.createElement('script');
+          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js';
+          s.onload = wirePdf;
+          document.head.appendChild(s);
         } else {
           document.getElementById('fallback').style.display = 'block';
           document.getElementById('openBtn').onclick = function () {
