@@ -2375,7 +2375,7 @@ const ResultScreen = () => {
 
           {/* Blurred full report teaser */}
           <div className="relative" style={{ width: 632, height: 392, opacity: 1, borderRadius: 24, borderWidth: 1, padding: 4, display: 'flex', gap: 4 }}>
-            <div className="backdrop-blur-sm overflow-hidden" style={{ backgroundImage: "url('assets/result-right-bg.jpg')", backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: 24, width: '100%', height: '100%' }}>
+            <div className="backdrop-blur-sm overflow-hidden" style={{ backgroundImage: "url('assets/Rectangle26.png')", backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: 24, width: '100%', height: '100%' }}>
               <div className="h-full w-full bg-white/40 backdrop-blur-[2px]" style={{ borderRadius: 24 }}></div>
             </div>
             <div className="absolute inset-0 flex items-center justify-center">
