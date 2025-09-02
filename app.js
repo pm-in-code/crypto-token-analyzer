@@ -2294,29 +2294,35 @@ const ResultScreen = () => {
       <div className="mb-8" style={{ width: 1200, height: 724, maxWidth: '1200px', display: 'flex', gap: 8, opacity: 1, margin: '0 auto' }}>
         {/* Left hero card */}
         <div>
-          <div className={`overflow-hidden border ${bandBorder}`} style={{ width: 560, height: 724, maxWidth: '560px', borderRadius: 24, display: 'flex', flexDirection: 'column', gap: '8px', opacity: 1 }}>
-            <div className="bg-white/70 p-6">
-              {/* Token header */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xl">
-                    {(tokenDisplay || 'T').charAt(0)}
+          <div className={`overflow-hidden border ${bandBorder}`} style={{ width: 560, height: 724, maxWidth: '560px', borderRadius: 24, display: 'flex', flexDirection: 'column', gap: '8px', opacity: 1, position: 'relative' }}>
+            {/* Floating inner card by Figma spec */}
+            <div style={{ position: 'absolute', top: 170, left: 64, width: 432, height: 384, borderRadius: 24, borderWidth: 1, padding: 4, display: 'flex', flexDirection: 'column', gap: 4, background: 'transparent' }} className={`border ${bandBorder}`}>
+              <div className="bg-white rounded-2xl shadow-sm p-6 flex-1 flex flex-col">
+                {/* Token header */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xl">
+                      {(tokenDisplay || 'T').charAt(0)}
+                    </div>
+                    <div>
+                      <div className="text-2xl font-semibold text-gray-900">{tokenDisplay || 'Token'}</div>
+                      <div className="text-xs uppercase text-gray-500">{tokenTicker}</div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="text-xl font-semibold text-gray-900">{tokenDisplay || 'Token'}</div>
-                    <div className="text-xs uppercase text-gray-500">{tokenTicker}</div>
-                  </div>
+                  <div className={`px-4 py-2 rounded-full text-2xl font-bold ${bandPill}`}>{overallScore}/100</div>
                 </div>
-                <div className={`px-4 py-2 rounded-full text-2xl font-bold ${bandPill}`}>{overallScore}/100</div>
-              </div>
 
-              {/* Unlock button */}
-              <div className="mt-6">
-                {hasPaid ? (
-                  <button onClick={() => generatePDFReport(tokenAnalysis, email, true)} className="btn-download-premium w-full">Download full report</button>
-                ) : (
-                  <button onClick={handlePremiumDownload} disabled={paymentProcessing} className="btn-download-premium w-full">{paymentProcessing ? 'Processing…' : 'Unlock full report'}</button>
-                )}
+                {/* Buttons row */}
+                <div className="mt-6 grid grid-cols-2 gap-4">
+                  <button className="w-full rounded-xl border border-gray-300 bg-white text-gray-800 py-3 flex items-center justify-center gap-2">
+                    <span>Save as .pdf</span>
+                  </button>
+                  {hasPaid ? (
+                    <button onClick={() => generatePDFReport(tokenAnalysis, email, true)} className="btn-download-premium w-full">Download full report</button>
+                  ) : (
+                    <button onClick={handlePremiumDownload} disabled={paymentProcessing} className="btn-download-premium w-full">{paymentProcessing ? 'Processing…' : 'Unlock full report'}</button>
+                  )}
+                </div>
               </div>
             </div>
             {/* Verdict stripe */}
