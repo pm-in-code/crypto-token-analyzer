@@ -2081,7 +2081,18 @@ const ResultScreen = () => {
       card.mount('#card-element');
       setCardElement(card);
     }
+    // When reopening modal, re-mount existing card element
+    if (showPaymentModal && cardElement) {
+      try { cardElement.mount('#card-element'); } catch (e) { /* ignore */ }
+    }
   }, [showPaymentModal, elements, cardElement]);
+
+  // Unmount card element when modal is closed to avoid stale mount
+  React.useEffect(() => {
+    if (!showPaymentModal && cardElement) {
+      try { cardElement.unmount(); } catch (e) { /* ignore */ }
+    }
+  }, [showPaymentModal, cardElement]);
 
   if (!tokenAnalysis) {
     return null;
@@ -2164,6 +2175,11 @@ const ResultScreen = () => {
   const handlePremiumDownload = async () => {
     try {
       setPaymentProcessing(true);
+      // reset previous Stripe state so modal re-initializes correctly
+      setStripe(null);
+      setElements(null);
+      setCardElement(null);
+      setClientSecret(null);
       
       // Создаем Payment Intent
       const response = await fetch(`${BACKEND_API_URL}/create-payment-intent`, {
@@ -2313,10 +2329,7 @@ const ResultScreen = () => {
                 </div>
 
                 {/* Buttons row */}
-                <div className="mt-6 grid grid-cols-2 gap-4">
-                  <button className="w-full rounded-xl border border-gray-300 bg-white text-gray-800 py-3 flex items-center justify-center gap-2">
-                    <span>Save as .pdf</span>
-                  </button>
+                <div className="mt-6 grid grid-cols-1 gap-4">
                   {hasPaid ? (
                     <button onClick={() => generatePDFReport(tokenAnalysis, email, true)} className="btn-download-premium w-full">Download full report</button>
                   ) : (
