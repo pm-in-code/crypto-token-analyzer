@@ -10,6 +10,7 @@ const parseAnalysisSummary = (summary) => {
   let overallScore = null;
   let tokenName;
   let tokenSymbol;
+  const summaries = {};
 
   // First, attempt JSON parsing because the model frequently returns JSON
   try {
@@ -26,6 +27,7 @@ const parseAnalysisSummary = (summary) => {
               scoreRaw = m ? parseInt(m[0], 10) : NaN;
             }
             if (typeof scoreRaw === 'number') {
+              if (c.summary) summaries[(name||'').toLowerCase()] = c.summary;
               return { name, score: scoreRaw };
             }
             return null;
@@ -189,7 +191,7 @@ const parseAnalysisSummary = (summary) => {
   
   console.log('Parsed categories:', categories);
   console.log('Overall score:', overallScore);
-  return { categories, overallScore, tokenName, tokenSymbol };
+  return { categories, overallScore, tokenName, tokenSymbol, summaries };
 };
 
 // Real-time crypto data fetching
@@ -1088,8 +1090,7 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           </div>
           
           <div class="category-content">
-            <p>${analysisData.token || 'This token'} has shown significant market presence since its launch, with a market capitalization that places it among the top cryptocurrencies. The token has experienced price volatility but maintained strong trading volume, indicating sustained investor interest and market activity.</p>
-            <p>Market dominance has been challenged by newer projects and competitors in the layer-1 space, but the established presence and liquidity provide a solid foundation for continued growth.</p>
+            <p>${(summaries['market metrics'] || `${analysisData.token || 'This token'} market metrics summary unavailable.`)}</p>
           </div>
           
           <div class="strengths-weaknesses">
@@ -1132,8 +1133,7 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           </div>
           
           <div class="category-content">
-            <p>${analysisData.token || 'This token'}'s tokenomics is well-structured, with a carefully designed supply model that promotes long-term sustainability. The staking mechanism allows users to earn rewards, promoting network security and engagement while providing passive income opportunities.</p>
-            <p>The inflation rate is gradually decreasing, which supports the token's value over time and creates a deflationary pressure that benefits long-term holders.</p>
+            <p>${(summaries['tokenomics'] || `${analysisData.token || 'This token'} tokenomics summary unavailable.`)}</p>
           </div>
           
           <div class="strengths-weaknesses">
@@ -1176,8 +1176,7 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           </div>
           
           <div class="category-content">
-            <p>${analysisData.token || 'This token'} is known for its rigorous development process, emphasizing peer-reviewed research and academic rigor. The platform has consistently rolled out upgrades and improvements, enhancing smart contract capabilities and overall functionality.</p>
-            <p>GitHub activity is robust, with a high number of commits and contributions from various developers, indicating sustained interest and development momentum that bodes well for future innovation.</p>
+            <p>${(summaries['development activity'] || `${analysisData.token || 'This token'} development summary unavailable.`)}</p>
           </div>
           
           <div class="strengths-weaknesses">
@@ -1220,8 +1219,7 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           </div>
           
           <div class="category-content">
-            <p>${analysisData.token || 'This token'} has a passionate community, with significant engagement on social platforms like Twitter and Reddit. The number of active users and followers has grown steadily, demonstrating strong community support and interest.</p>
-            <p>However, social sentiment fluctuates based on market conditions and development updates, leading to periods of negativity that can impact investor confidence and market perception.</p>
+            <p>${(summaries['social metrics'] || `${analysisData.token || 'This token'} social summary unavailable.`)}</p>
           </div>
           
           <div class="strengths-weaknesses">
@@ -1264,8 +1262,7 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           </div>
           
           <div class="category-content">
-            <p>${analysisData.token || 'This token'} was founded by experienced professionals with strong backgrounds in blockchain technology and cryptography. The team has demonstrated expertise and commitment to the project's long-term success.</p>
-            <p>The backing from notable investors and partnerships with educational institutions provides credibility and resources that support continued development and market expansion.</p>
+            <p>${(summaries['team & investors'] || `${analysisData.token || 'This token'} team & investors summary unavailable.`)}</p>
           </div>
           
           <div class="strengths-weaknesses">
@@ -1308,8 +1305,7 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           </div>
           
           <div class="category-content">
-            <p>The risks associated with ${analysisData.token || 'this token'} stem from regulatory scrutiny, market competition, and technological challenges. While the platform has positioned itself as a scalable and secure solution, the evolving regulatory landscape could pose risks to operations and adoption.</p>
-            <p>Additionally, competition from other smart contract platforms remains a significant threat, requiring continuous innovation and development to maintain market position.</p>
+            <p>${(summaries['risk assessment'] || `Risk summary for ${analysisData.token || 'this token'} unavailable.`)}</p>
           </div>
           
           <div class="strengths-weaknesses">

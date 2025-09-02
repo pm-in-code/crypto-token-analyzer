@@ -114,14 +114,15 @@ app.post('/api/analyze-token', async (req, res) => {
   "tokenSymbol": string,
   "overallScore": number, // 0-100
   "categories": [
-    { "name": "Market Metrics", "score": number },
-    { "name": "Tokenomics", "score": number },
-    { "name": "Development Activity", "score": number },
-    { "name": "Social Metrics", "score": number },
-    { "name": "Team & Investors", "score": number },
-    { "name": "Risk Assessment", "score": number }
+    { "name": "Market Metrics", "score": number, "summary": string },
+    { "name": "Tokenomics", "score": number, "summary": string },
+    { "name": "Development Activity", "score": number, "summary": string },
+    { "name": "Social Metrics", "score": number, "summary": string },
+    { "name": "Team & Investors", "score": number, "summary": string },
+    { "name": "Risk Assessment", "score": number, "summary": string }
   ]
-}`;
+}
+Guidelines: summaries MUST be 2-4 sentences and SPECIFIC to the token ${tokenName.trim()}, reflecting current data and reasoning, not generic templates. Return valid JSON only.`;
     const messages = [
       { role: 'system', content: securePrompt },
       { role: 'user', content: `Token: ${tokenName.trim()}\n${jsonInstruction}` }
