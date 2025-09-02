@@ -526,7 +526,7 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
     }
     
     // Parse the analysis to extract structured data
-    let { categories, overallScore, tokenName, tokenSymbol } = parseAnalysisSummary(analysisData.summary);
+    let { categories, overallScore, tokenName, tokenSymbol, summaries = {} } = parseAnalysisSummary(analysisData.summary);
     console.log('Parsed data:', { categories, overallScore, tokenName, tokenSymbol });
     console.log('Overall score type:', typeof overallScore);
     console.log('Overall score value:', overallScore);
@@ -2095,7 +2095,7 @@ const ResultScreen = () => {
   }
 
   // Parsed data for UI
-  const { categories: parsedCategories, overallScore: parsedOverall, tokenName, tokenSymbol } = parseAnalysisSummary(tokenAnalysis.summary);
+  const { categories: parsedCategories, overallScore: parsedOverall, tokenName, tokenSymbol, summaries = {} } = parseAnalysisSummary(tokenAnalysis.summary);
   const categories = parsedCategories || [];
   const overallScore = (parsedOverall == null && categories.length)
     ? Math.round(categories.reduce((a, c) => a + (c.score || 0), 0) / categories.length)
