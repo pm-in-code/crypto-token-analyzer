@@ -2013,6 +2013,20 @@ const TokenSearch = () => {
   console.log('TokenSearch component rendering...');
   return (
     <div className="w-full">
+      {/* Logo - Fixed Position Top Left */}
+      <div className="fixed top-4 left-4 z-40">
+        <button 
+          onClick={handleLogoClick}
+          className="w-12 h-12 rounded-xl bg-lime-400 flex items-center justify-center text-white font-bold text-2xl shadow-lg hover:bg-lime-500 transition-colors cursor-pointer"
+          style={{
+            background: 'linear-gradient(135deg, #84cc16 0%, #65a30d 100%)',
+            boxShadow: '0 4px 12px rgba(132, 204, 22, 0.3)'
+          }}
+        >
+          W
+        </button>
+      </div>
+
       {/* Main Search Card */}
       <div className="card">
         <div className="worth-badge">WORTH OS 1.0</div>
@@ -2164,8 +2178,23 @@ const LoadingScreen = () => {
   }, [completed, steps.length, setCurrentScreen]);
 
   return (
-    <div className="card">
-      <div className="text-center">
+    <div className="w-full">
+      {/* Logo - Fixed Position Top Left */}
+      <div className="fixed top-4 left-4 z-40">
+        <button 
+          onClick={() => setCurrentScreen('home')}
+          className="w-12 h-12 rounded-xl bg-lime-400 flex items-center justify-center text-white font-bold text-2xl shadow-lg hover:bg-lime-500 transition-colors cursor-pointer"
+          style={{
+            background: 'linear-gradient(135deg, #84cc16 0%, #65a30d 100%)',
+            boxShadow: '0 4px 12px rgba(132, 204, 22, 0.3)'
+          }}
+        >
+          W
+        </button>
+      </div>
+
+      <div className="card">
+        <div className="text-center">
         <div className="loading-spinner"></div>
 
         <h2 className="text-2xl font-bold text-gray-900 mb-4">
@@ -2271,6 +2300,11 @@ const ResultScreen = () => {
 
   const handleShareClick = () => {
     setShowShareModal(true);
+  };
+
+  const handleLogoClick = () => {
+    setCurrentScreen('home');
+    setTokenAnalysis(null);
   };
 
   const generateShareImage = async () => {
@@ -2573,6 +2607,20 @@ const ResultScreen = () => {
 
   return (
     <div className="w-full">
+      {/* Logo - Fixed Position Top Left */}
+      <div className="fixed top-4 left-4 z-40">
+        <button 
+          onClick={handleLogoClick}
+          className="w-12 h-12 rounded-xl bg-lime-400 flex items-center justify-center text-white font-bold text-2xl shadow-lg hover:bg-lime-500 transition-colors cursor-pointer"
+          style={{
+            background: 'linear-gradient(135deg, #84cc16 0%, #65a30d 100%)',
+            boxShadow: '0 4px 12px rgba(132, 204, 22, 0.3)'
+          }}
+        >
+          W
+        </button>
+      </div>
+
       {/* Social links - Fixed Position Top Right (visible on results too) */}
       <div className="fixed top-4 right-4 flex gap-3 z-40">
         <a href="https://x.com/itsworth_app" target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-xl bg-amber-50 border border-amber-100 text-gray-800 shadow-sm hover:bg-amber-100 transition-colors">Twitter</a>
