@@ -2416,9 +2416,9 @@ const ResultScreen = () => {
 
         {/* Right column */}
         {/* Right column */}
-        <div className="space-y-2" style={{ width: 632, height: 718, display: 'flex', flexDirection: 'column', gap: 8, opacity: 1 }}>
+        <div className="space-y-2" style={{ width: 640, height: 718, display: 'flex', flexDirection: 'column', gap: 8, opacity: 1 }}>
           {/* Categories overview */}
-          <div className="card" style={{ width: 632, height: 330, opacity: 1 }}>
+          <div className="card" style={{ width: 640, height: 330, opacity: 1 }}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4" style={{ gridTemplateColumns: '1fr 1fr' }}>
               {['Market Metrics','Social Metrics','Tokenomics','Team & Investors','Development Activity','Risk Assessment'].map((name) => {
                 const c = categories.find((x) => (x.name||'').toLowerCase() === name.toLowerCase()) || { score: 0 };
@@ -2450,7 +2450,7 @@ const ResultScreen = () => {
       </div>
 
           {/* Blurred full report teaser */}
-          <div className="relative" style={{ width: 632, height: 392, opacity: 1, borderRadius: 24, borderWidth: 1, padding: 4, display: 'flex', gap: 4 }}>
+          <div className="relative" style={{ width: 640, height: 392, opacity: 1, borderRadius: 24, borderWidth: 1, padding: 4, display: 'flex', gap: 4 }}>
             <div className="backdrop-blur-sm overflow-hidden" style={{ backgroundImage: "url('assets/Rectangle26.png')", backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: 24, width: '100%', height: '100%' }}>
               <div className="h-full w-full bg-white/40 backdrop-blur-[2px]" style={{ borderRadius: 24 }}></div>
             </div>
