@@ -2370,10 +2370,10 @@ const ResultScreen = () => {
       {/* Removed top success title and subtitle per design request */}
 
       {/* Central block layout */}
-      <div className="mb-8" style={{ width: 1200, height: 724, maxWidth: '1200px', display: 'flex', gap: 8, opacity: 1, margin: '0 auto' }}>
+      <div className="mb-8" style={{ width: 1200, height: 600, maxWidth: '1200px', display: 'flex', gap: 8, opacity: 1, margin: '0 auto' }}>
         {/* Left hero card */}
         <div>
-          <div className={`overflow-hidden border ${bandBorder}`} style={{ width: 560, height: 724, maxWidth: '560px', borderRadius: 24, display: 'flex', flexDirection: 'column', gap: '8px', opacity: 1, position: 'relative' }}>
+          <div className={`overflow-hidden border ${bandBorder}`} style={{ width: 560, height: 600, maxWidth: '560px', borderRadius: 24, display: 'flex', flexDirection: 'column', gap: '8px', opacity: 1, position: 'relative' }}>
             {/* Floating inner card by Figma spec */}
             <div style={{ position: 'absolute', top: 170, left: 64, width: 432, height: 384, borderRadius: 24, borderWidth: 1, padding: 4, display: 'flex', flexDirection: 'column', gap: 4, background: 'transparent' }} className={`border ${bandBorder}`}>
               <div className="bg-white rounded-2xl shadow-sm p-6 flex-1 flex flex-col">
@@ -2416,10 +2416,10 @@ const ResultScreen = () => {
 
         {/* Right column */}
         {/* Right column */}
-        <div className="space-y-2" style={{ width: 640, height: 718, display: 'flex', flexDirection: 'column', gap: 8, opacity: 1 }}>
+        <div className="space-y-2" style={{ width: 640, height: 600, display: 'flex', flexDirection: 'column', gap: 8, opacity: 1 }}>
           {/* Categories overview */}
-          <div className="card" style={{ width: 640, height: 330, opacity: 1 }}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4" style={{ gridTemplateColumns: '1fr 1fr' }}>
+          <div className="card" style={{ width: 640, height: 280, opacity: 1 }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4" style={{ gridTemplateColumns: '1fr 1fr', width: '100%' }}>
               {['Market Metrics','Social Metrics','Tokenomics','Team & Investors','Development Activity','Risk Assessment'].map((name) => {
                 const c = categories.find((x) => (x.name||'').toLowerCase() === name.toLowerCase()) || { score: 0 };
                 const b = scoreBand(c.score);
@@ -2450,7 +2450,7 @@ const ResultScreen = () => {
       </div>
 
           {/* Blurred full report teaser */}
-          <div className="relative" style={{ width: 640, height: 392, opacity: 1, borderRadius: 24, borderWidth: 1, padding: 4, display: 'flex', gap: 4 }}>
+          <div className="relative" style={{ width: 640, height: 300, opacity: 1, borderRadius: 24, borderWidth: 1, padding: 4, display: 'flex', gap: 4 }}>
             <div className="backdrop-blur-sm overflow-hidden" style={{ backgroundImage: "url('assets/Rectangle26.png')", backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: 24, width: '100%', height: '100%' }}>
               <div className="h-full w-full bg-white/40 backdrop-blur-[2px]" style={{ borderRadius: 24 }}></div>
             </div>
