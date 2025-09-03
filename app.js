@@ -2454,7 +2454,7 @@ const ResultScreen = () => {
             <div className="backdrop-blur-sm overflow-hidden" style={{ backgroundImage: "url('assets/Rectangle26.png')", backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: 24, width: '100%', height: '100%' }}>
               <div className="h-full w-full bg-white/40 backdrop-blur-[2px]" style={{ borderRadius: 24 }}></div>
             </div>
-            <div className="absolute inset-0 flex items-center justify-center">
+            <div className="absolute inset-0 flex items-center justify-center" style={{ width: 600, height: 280 }}>
               {hasPaid ? (
                 <button onClick={() => generatePDFReport(tokenAnalysis, email, true)} className="btn-download-premium">Download full report</button>
               ) : (
