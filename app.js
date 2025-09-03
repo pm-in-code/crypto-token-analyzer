@@ -2017,7 +2017,7 @@ const TokenSearch = () => {
       <div className="fixed top-4 left-4 z-40">
         <button 
           onClick={handleLogoClick}
-          className="w-12 h-12 rounded-xl bg-lime-400 flex items-center justify-center text-white font-bold text-2xl shadow-lg hover:bg-lime-500 transition-colors cursor-pointer"
+          className="w-12 h-12 rounded-xl bg-lime-400 flex items-center justify-center text-gray-900 font-bold text-2xl shadow-lg hover:bg-lime-500 transition-colors cursor-pointer"
           style={{
             background: 'linear-gradient(135deg, #84cc16 0%, #65a30d 100%)',
             boxShadow: '0 4px 12px rgba(132, 204, 22, 0.3)'
@@ -2183,7 +2183,7 @@ const LoadingScreen = () => {
       <div className="fixed top-4 left-4 z-40">
         <button 
           onClick={() => setCurrentScreen('home')}
-          className="w-12 h-12 rounded-xl bg-lime-400 flex items-center justify-center text-white font-bold text-2xl shadow-lg hover:bg-lime-500 transition-colors cursor-pointer"
+          className="w-12 h-12 rounded-xl bg-lime-400 flex items-center justify-center text-gray-900 font-bold text-2xl shadow-lg hover:bg-lime-500 transition-colors cursor-pointer"
           style={{
             background: 'linear-gradient(135deg, #84cc16 0%, #65a30d 100%)',
             boxShadow: '0 4px 12px rgba(132, 204, 22, 0.3)'
@@ -2612,7 +2612,7 @@ const ResultScreen = () => {
       <div className="fixed top-4 left-4 z-40">
         <button 
           onClick={handleLogoClick}
-          className="w-12 h-12 rounded-xl bg-lime-400 flex items-center justify-center text-white font-bold text-2xl shadow-lg hover:bg-lime-500 transition-colors cursor-pointer"
+          className="w-12 h-12 rounded-xl bg-lime-400 flex items-center justify-center text-gray-900 font-bold text-2xl shadow-lg hover:bg-lime-500 transition-colors cursor-pointer"
           style={{
             background: 'linear-gradient(135deg, #84cc16 0%, #65a30d 100%)',
             boxShadow: '0 4px 12px rgba(132, 204, 22, 0.3)'
