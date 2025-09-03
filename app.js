@@ -581,23 +581,45 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             display: block;
             clear: both;
+            page-break-after: always;
+            page-break-inside: avoid;
+            break-inside: avoid;
+            orphans: 1;
+            widows: 1;
           }
           
-          .page-break {
-            page-break-before: always;
+          .page:last-child {
             page-break-after: auto;
           }
           
-          .page:first-child {
-            page-break-before: auto;
+          /* Prevent any unwanted page breaks */
+          body {
+            page-break-inside: avoid;
+            break-inside: avoid;
+          }
+          
+          /* Ensure content doesn't create extra breaks */
+          .page > * {
+            page-break-inside: avoid;
+            break-inside: avoid;
           }
           
           @media print {
             .page {
               margin: 0;
               box-shadow: none;
+            }
+            
+            /* Prevent empty pages */
+            .page:empty {
+              display: none;
+            }
+            
+            /* Ensure proper page breaks */
+            .page {
               page-break-after: always;
             }
+            
             .page:last-child {
               page-break-after: auto;
             }
