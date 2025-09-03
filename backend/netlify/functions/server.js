@@ -114,15 +114,51 @@ app.post('/api/analyze-token', async (req, res) => {
   "tokenSymbol": string,
   "overallScore": number, // 0-100
   "categories": [
-    { "name": "Market Metrics", "score": number, "summary": string },
-    { "name": "Tokenomics", "score": number, "summary": string },
-    { "name": "Development Activity", "score": number, "summary": string },
-    { "name": "Social Metrics", "score": number, "summary": string },
-    { "name": "Team & Investors", "score": number, "summary": string },
-    { "name": "Risk Assessment", "score": number, "summary": string }
+    { 
+      "name": "Market Metrics", 
+      "score": number, 
+      "summary": string, // 2-4 sentences specific to this token
+      "strengths": [string, string, string], // 2-3 specific strengths
+      "weaknesses": [string, string, string] // 2-3 specific weaknesses
+    },
+    { 
+      "name": "Tokenomics", 
+      "score": number, 
+      "summary": string,
+      "strengths": [string, string, string],
+      "weaknesses": [string, string, string]
+    },
+    { 
+      "name": "Development Activity", 
+      "score": number, 
+      "summary": string,
+      "strengths": [string, string, string],
+      "weaknesses": [string, string, string]
+    },
+    { 
+      "name": "Social Metrics", 
+      "score": number, 
+      "summary": string,
+      "strengths": [string, string, string],
+      "weaknesses": [string, string, string]
+    },
+    { 
+      "name": "Team & Investors", 
+      "score": number, 
+      "summary": string,
+      "strengths": [string, string, string],
+      "weaknesses": [string, string, string]
+    },
+    { 
+      "name": "Risk Assessment", 
+      "score": number, 
+      "summary": string,
+      "strengths": [string, string, string],
+      "weaknesses": [string, string, string]
+    }
   ]
 }
-Guidelines: summaries MUST be 2-4 sentences and SPECIFIC to the token ${tokenName.trim()}, reflecting current data and reasoning, not generic templates. Return valid JSON only.`;
+Guidelines: ALL content MUST be specific to the token ${tokenName.trim()}, reflecting current data and reasoning, not generic templates. Return valid JSON only.`;
     const messages = [
       { role: 'system', content: securePrompt },
       { role: 'user', content: `Token: ${tokenName.trim()}\n${jsonInstruction}` }

@@ -16,7 +16,7 @@ const parseAnalysisSummary = (summary) => {
   try {
     const parsed = JSON.parse(summary);
     if (parsed && (parsed.categories || parsed.overallScore || parsed.tokenName || parsed.token || parsed.tokenSymbol)) {
-      // Categories may be like: [{ name: "Market Metrics", score: "70/100" }]
+      // Categories may be like: [{ name: "Market Metrics", score: "70/100", summary: "...", strengths: [...], weaknesses: [...] }]
       if (Array.isArray(parsed.categories)) {
         categories = parsed.categories
           .map((c) => {
@@ -27,8 +27,13 @@ const parseAnalysisSummary = (summary) => {
               scoreRaw = m ? parseInt(m[0], 10) : NaN;
             }
             if (typeof scoreRaw === 'number') {
-              if (c.summary) summaries[(name||'').toLowerCase()] = c.summary;
-              return { name, score: scoreRaw };
+              return { 
+                name, 
+                score: scoreRaw,
+                summary: c.summary || '',
+                strengths: Array.isArray(c.strengths) ? c.strengths : [],
+                weaknesses: Array.isArray(c.weaknesses) ? c.weaknesses : []
+              };
             }
             return null;
           })
@@ -1090,22 +1095,20 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           </div>
           
           <div class="category-content">
-            <p>${(summaries['market metrics'] || `${analysisData.token || 'This token'} market metrics summary unavailable.`)}</p>
+            <p>${(categories.find(c => (c.name || '').toLowerCase() === 'market metrics'.toLowerCase()) || {}).summary || `${analysisData.token || 'This token'} market metrics summary unavailable.`}</p>
           </div>
           
           <div class="strengths-weaknesses">
             <div class="sw-section">
               <h4>Strengths</h4>
               <ul>
-                <li>Strong market capitalization and liquidity</li>
-                <li>Established presence in the cryptocurrency market</li>
+                ${((categories.find(c => (c.name || '').toLowerCase() === 'market metrics'.toLowerCase()) || {}).strengths || ['Strong market capitalization and liquidity', 'Established presence in the cryptocurrency market']).map(s => `<li>${s}</li>`).join('')}
               </ul>
             </div>
             <div class="sw-section">
               <h4>Weaknesses</h4>
               <ul>
-                <li>Price volatility can deter long-term investors</li>
-                <li>Competitive pressure from other blockchain platforms</li>
+                ${((categories.find(c => (c.name || '').toLowerCase() === 'market metrics'.toLowerCase()) || {}).weaknesses || ['Price volatility can deter long-term investors', 'Competitive pressure from other blockchain platforms']).map(w => `<li>${w}</li>`).join('')}
               </ul>
             </div>
           </div>
@@ -1133,22 +1136,20 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           </div>
           
           <div class="category-content">
-            <p>${(summaries['tokenomics'] || `${analysisData.token || 'This token'} tokenomics summary unavailable.`)}</p>
+            <p>${(categories.find(c => (c.name || '').toLowerCase() === 'tokenomics') || {}).summary || `${analysisData.token || 'This token'} tokenomics summary unavailable.`}</p>
           </div>
           
           <div class="strengths-weaknesses">
             <div class="sw-section">
               <h4>Strengths</h4>
               <ul>
-                <li>Sustainable supply model with staking rewards</li>
-                <li>Active community participation in governance</li>
+                ${((categories.find(c => (c.name || '').toLowerCase() === 'tokenomics') || {}).strengths || ['Sustainable supply model with staking rewards', 'Active community participation in governance']).map(s => `<li>${s}</li>`).join('')}
               </ul>
             </div>
             <div class="sw-section">
               <h4>Weaknesses</h4>
               <ul>
-                <li>Large circulating supply could pressure the price</li>
-                <li>Dependence on staking could deter non-participating investors</li>
+                ${((categories.find(c => (c.name || '').toLowerCase() === 'tokenomics') || {}).weaknesses || ['Large circulating supply could pressure the price', 'Dependence on staking could deter non-participating investors']).map(w => `<li>${w}</li>`).join('')}
               </ul>
             </div>
           </div>
@@ -1176,7 +1177,7 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           </div>
           
           <div class="category-content">
-            <p>${(summaries['development activity'] || `${analysisData.token || 'This token'} development summary unavailable.`)}</p>
+            <p>${(categories.find(c => (c.name || '').toLowerCase() === 'development activity') || {}).summary || `${analysisData.token || 'This token'} development summary unavailable.`}</p>
           </div>
           
           <div class="strengths-weaknesses">
@@ -1219,22 +1220,20 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           </div>
           
           <div class="category-content">
-            <p>${(summaries['social metrics'] || `${analysisData.token || 'This token'} social summary unavailable.`)}</p>
+            <p>${(categories.find(c => (c.name || '').toLowerCase() === 'social metrics') || {}).summary || `${analysisData.token || 'This token'} social summary unavailable.`}</p>
           </div>
           
           <div class="strengths-weaknesses">
             <div class="sw-section">
               <h4>Strengths</h4>
               <ul>
-                <li>Active and engaged community</li>
-                <li>Strong social media presence</li>
+                ${((categories.find(c => (c.name || '').toLowerCase() === 'social metrics') || {}).strengths || ['Active and engaged community', 'Strong social media presence']).map(s => `<li>${s}</li>`).join('')}
               </ul>
             </div>
             <div class="sw-section">
               <h4>Weaknesses</h4>
               <ul>
-                <li>Vulnerability to negative sentiment during market downturns</li>
-                <li>Competition for social engagement with other cryptocurrencies</li>
+                ${((categories.find(c => (c.name || '').toLowerCase() === 'social metrics') || {}).weaknesses || ['Vulnerability to negative sentiment during market downturns', 'Competition for social engagement with other cryptocurrencies']).map(w => `<li>${w}</li>`).join('')}
               </ul>
             </div>
           </div>
@@ -1262,22 +1261,20 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           </div>
           
           <div class="category-content">
-            <p>${(summaries['team & investors'] || `${analysisData.token || 'This token'} team & investors summary unavailable.`)}</p>
+            <p>${(categories.find(c => (c.name || '').toLowerCase() === 'team & investors') || {}).summary || `${analysisData.token || 'This token'} team & investors summary unavailable.`}</p>
           </div>
           
           <div class="strengths-weaknesses">
             <div class="sw-section">
               <h4>Strengths</h4>
               <ul>
-                <li>Experienced and reputable leadership team</li>
-                <li>Strong academic partnerships enhancing credibility</li>
+                ${((categories.find(c => (c.name || '').toLowerCase() === 'team & investors') || {}).strengths || ['Experienced and reputable leadership team', 'Strong academic partnerships enhancing credibility']).map(s => `<li>${s}</li>`).join('')}
               </ul>
             </div>
             <div class="sw-section">
               <h4>Weaknesses</h4>
               <ul>
-                <li>Centralized decision-making structure could raise concerns about governance</li>
-                <li>Heavy reliance on the founder's vision and public persona</li>
+                ${((categories.find(c => (c.name || '').toLowerCase() === 'team & investors') || {}).weaknesses || ['Centralized decision-making structure could raise concerns about governance', 'Heavy reliance on the founder\'s vision and public persona']).map(w => `<li>${w}</li>`).join('')}
               </ul>
             </div>
           </div>
@@ -1305,22 +1302,20 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           </div>
           
           <div class="category-content">
-            <p>${(summaries['risk assessment'] || `Risk summary for ${analysisData.token || 'this token'} unavailable.`)}</p>
+            <p>${(categories.find(c => (c.name || '').toLowerCase() === 'risk assessment') || {}).summary || `Risk summary for ${analysisData.token || 'this token'} unavailable.`}</p>
           </div>
           
           <div class="strengths-weaknesses">
             <div class="sw-section">
               <h4>Strengths</h4>
               <ul>
-                <li>Established protocol with a focus on security and scalability</li>
-                <li>Active risk management strategies in place</li>
+                ${((categories.find(c => (c.name || '').toLowerCase() === 'risk assessment') || {}).strengths || ['Established protocol with a focus on security and scalability', 'Active risk management strategies in place']).map(s => `<li>${s}</li>`).join('')}
               </ul>
             </div>
             <div class="sw-section">
               <h4>Weaknesses</h4>
               <ul>
-                <li>Regulatory risks could impact market perception</li>
-                <li>Rapid technological advancements from competitors can outpace development</li>
+                ${((categories.find(c => (c.name || '').toLowerCase() === 'risk assessment') || {}).weaknesses || ['Regulatory risks could impact market perception', 'Rapid technological advancements from competitors can outpace development']).map(w => `<li>${w}</li>`).join('')}
               </ul>
             </div>
           </div>
@@ -1396,7 +1391,7 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
                 image: { type: 'jpeg', quality: 0.95 },
                 html2canvas: { scale: 2, useCORS: true, letterRendering: true },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                pagebreak: { mode: ['css'], after: '.page' }
+                pagebreak: { mode: ['css'], before: '.page' }
               };
               window.html2pdf().set(opt).from(document.querySelector('body')).save();
             } else {
@@ -2027,13 +2022,13 @@ const LoadingScreen = () => {
         <p className="text-gray-600 mb-8">
           Our AI is processing market data, social sentiment, and technical indicators
         </p>
-
+        
         <div className="space-y-4">
           {steps.map((label, idx) => (
             <div key={label} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
               <span className="text-gray-700">{label}</span>
               {renderIcon(idx)}
-            </div>
+          </div>
           ))}
         </div>
       </div>
@@ -2289,14 +2284,14 @@ const ResultScreen = () => {
                 <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
+          </svg>
               ) : (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               )}
             </button>
-          </div>
+        </div>
         </form>
       </div>
 
@@ -2312,17 +2307,17 @@ const ResultScreen = () => {
               <div className="bg-white rounded-2xl shadow-sm p-6 flex-1 flex flex-col">
                 {/* Token header */}
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xl">
                       {(tokenDisplay || 'T').charAt(0)}
-                    </div>
+                      </div>
                     <div>
                       <div className="text-2xl font-semibold text-gray-900">{tokenDisplay || 'Token'}</div>
                       <div className="text-xs uppercase text-gray-500">{tokenTicker}</div>
-                    </div>
-                  </div>
+                        </div>
+                      </div>
                   <div className={`px-4 py-2 rounded-full text-2xl font-bold ${bandPill}`}>{overallScore}/100</div>
-                </div>
+                    </div>
 
                 {/* Buttons row */}
                 <div className="mt-6 grid grid-cols-1 gap-4">
@@ -2331,20 +2326,20 @@ const ResultScreen = () => {
                   ) : (
                     <button onClick={handlePremiumDownload} disabled={paymentProcessing} className="btn-download-premium w-full">{paymentProcessing ? 'Processing…' : 'Unlock full report'}</button>
                   )}
-                </div>
-              </div>
-            </div>
+                      </div>
+                      </div>
+                      </div>
             {/* Verdict stripe */}
             <div className={`px-6 py-4 ${bandBg} flex items-center justify-between`}>
               <div className="text-lg font-bold text-gray-900">{verdictText}</div>
               <div className="flex items-center gap-2">
                 <button className="w-9 h-9 rounded-lg bg-white/70 flex items-center justify-center text-gray-700">?</button>
                 <button className="w-9 h-9 rounded-lg bg-white/70 flex items-center justify-center text-gray-700">✈️</button>
-              </div>
-            </div>
+                    </div>
+                  </div>
             {/* Clouds background filler */}
             <div style={{ flex: 1, backgroundImage: "url('assets/result-left-bg.jpg')", backgroundSize: 'cover', backgroundPosition: 'center', borderBottomLeftRadius: 24, borderBottomRightRadius: 24 }}></div>
-          </div>
+              </div>
         </div>
 
         {/* Right column */}
@@ -2376,11 +2371,11 @@ const ResultScreen = () => {
                     >
                       {c.score}/100
                     </span>
-                  </div>
+          </div>
                 );
               })}
-            </div>
-          </div>
+        </div>
+      </div>
 
           {/* Blurred full report teaser */}
           <div className="relative" style={{ width: 632, height: 392, opacity: 1, borderRadius: 24, borderWidth: 1, padding: 4, display: 'flex', gap: 4 }}>
@@ -2394,9 +2389,9 @@ const ResultScreen = () => {
                 <button onClick={handlePremiumDownload} disabled={paymentProcessing} className="btn-download-premium">Unlock full report</button>
               )}
             </div>
+            </div>
           </div>
         </div>
-      </div>
 
       {/* Payment Modal */}
       {showPaymentModal && (
