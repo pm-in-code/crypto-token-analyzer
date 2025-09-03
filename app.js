@@ -2335,8 +2335,8 @@ const ResultScreen = () => {
         <a href="https://t.me/+AUgtdKZ7FqQ3NzAy" target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-xl bg-amber-50 border border-amber-100 text-gray-800 shadow-sm hover:bg-amber-100 transition-colors">Telegram</a>
       </div>
       {/* New Token Search Bar */}
-      <div className="mb-6">
-        <form onSubmit={handleNewTokenSubmit}>
+      <div className="mb-6 flex justify-center">
+        <form onSubmit={handleNewTokenSubmit} style={{ width: 640 }}>
           <div className="relative">
             <input
               type="text"
