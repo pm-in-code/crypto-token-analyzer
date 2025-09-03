@@ -2419,18 +2419,14 @@ const ResultScreen = () => {
         <div className="space-y-2" style={{ width: 632, height: 718, display: 'flex', flexDirection: 'column', gap: 8, opacity: 1 }}>
           {/* Categories overview */}
           <div className="card" style={{ width: 632, height: 330, opacity: 1 }}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4" style={{ 
-              width: '100%', 
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-              gridAutoRows: 'minmax(60px, auto)'
-            }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4" style={{ gridTemplateColumns: '1fr 1fr' }}>
               {['Market Metrics','Social Metrics','Tokenomics','Team & Investors','Development Activity','Risk Assessment'].map((name) => {
                 const c = categories.find((x) => (x.name||'').toLowerCase() === name.toLowerCase()) || { score: 0 };
                 const b = scoreBand(c.score);
                 const pill = b === 'green' ? 'bg-lime-300' : b === 'yellow' ? 'bg-amber-300' : 'bg-pink-300';
                 return (
-                  <div key={name} className="flex items-center justify-between p-4 rounded-lg bg-white/80 border" style={{ minHeight: 60, width: '100%' }}>
-                    <span className="text-gray-800 text-sm font-medium flex-1 text-left min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{name}</span>
+                  <div key={name} className="flex items-center justify-between p-4 rounded-lg bg-white/80 border h-16" style={{ width: '100%', minWidth: 0 }}>
+                    <span className="text-gray-800 text-sm font-medium truncate flex-1 mr-4">{name}</span>
                     <span
                       className={`rounded-full text-xs font-bold flex-shrink-0 ${pill}`}
                       style={{
