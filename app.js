@@ -2205,6 +2205,7 @@ const ResultScreen = () => {
   const [newTokenInput, setNewTokenInput] = useState('');
   const [isAnalyzingNew, setIsAnalyzingNew] = useState(false);
   const [showExplanationModal, setShowExplanationModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   // Initialize Stripe Elements when payment modal opens (must be before any conditional returns)
   React.useEffect(() => {
@@ -2266,6 +2267,164 @@ const ResultScreen = () => {
 
   const handleExplanationClick = () => {
     setShowExplanationModal(true);
+  };
+
+  const handleShareClick = () => {
+    setShowShareModal(true);
+  };
+
+  const generateShareImage = async () => {
+    try {
+      // Create a canvas element for generating the share image
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = 1200;
+      canvas.height = 630;
+
+      // Background gradient
+      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      gradient.addColorStop(0, '#E0F2FE'); // Light blue
+      gradient.addColorStop(1, '#BAE6FD'); // Slightly darker blue
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Add some decorative elements
+      ctx.fillStyle = 'rgba(59, 130, 246, 0.1)';
+      ctx.beginPath();
+      ctx.arc(100, 100, 80, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(canvas.width - 100, canvas.height - 100, 120, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Title
+      ctx.fillStyle = '#1E40AF';
+      ctx.font = 'bold 48px Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`${tokenDisplay || 'Token'} Analysis Results`, canvas.width / 2, 120);
+
+      // Overall score
+      ctx.fillStyle = '#059669';
+      ctx.font = 'bold 72px Arial, sans-serif';
+      ctx.fillText(`${overallScore}/100`, canvas.width / 2, 220);
+
+      // Category scores
+      ctx.fillStyle = '#374151';
+      ctx.font = 'bold 32px Arial, sans-serif';
+      ctx.textAlign = 'left';
+      
+      let yPos = 300;
+      categories.forEach((category, index) => {
+        const xPos = index < 3 ? 100 : canvas.width / 2 + 50;
+        if (index === 3) yPos = 300; // Reset Y position for right column
+        
+        const score = category.score || 0;
+        const color = score >= 80 ? '#059669' : score >= 60 ? '#D97706' : '#DC2626';
+        
+        ctx.fillStyle = color;
+        ctx.fillText(`${category.name}: ${score}/100`, xPos, yPos);
+        yPos += 50;
+      });
+
+      // Website info
+      ctx.fillStyle = '#6B7280';
+      ctx.font = '24px Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Analyze your tokens at', canvas.width / 2, canvas.height - 80);
+      ctx.fillStyle = '#3B82F6';
+      ctx.font = 'bold 28px Arial, sans-serif';
+      ctx.fillText('itsworth.app', canvas.width / 2, canvas.height - 50);
+
+      // Convert canvas to blob
+      return new Promise((resolve) => {
+        canvas.toBlob(resolve, 'image/png');
+      });
+    } catch (error) {
+      console.error('Error generating share image:', error);
+      return null;
+    }
+  };
+
+  const shareToTwitter = async () => {
+    try {
+      const imageBlob = await generateShareImage();
+      if (!imageBlob) {
+        alert('Failed to generate share image');
+        return;
+      }
+
+      // Create form data for Twitter upload
+      const formData = new FormData();
+      formData.append('media', imageBlob, 'token-analysis.png');
+
+      // For now, we'll just open Twitter with text (image upload requires Twitter API)
+      const text = `${tokenDisplay || 'Token'} Analysis: ${overallScore}/100 overall score! 🚀\n\nAnalyze your tokens at itsworth.app`;
+      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+      window.open(twitterUrl, '_blank');
+    } catch (error) {
+      console.error('Error sharing to Twitter:', error);
+      alert('Failed to share to Twitter');
+    }
+  };
+
+  const shareToTelegram = async () => {
+    try {
+      const imageBlob = await generateShareImage();
+      if (!imageBlob) {
+        alert('Failed to generate share image');
+        return;
+      }
+
+      // For now, we'll just open Telegram with text (image upload requires Telegram Bot API)
+      const text = `${tokenDisplay || 'Token'} Analysis: ${overallScore}/100 overall score! 🚀\n\nAnalyze your tokens at itsworth.app`;
+      const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent('https://itsworth.app')}&text=${encodeURIComponent(text)}`;
+      window.open(telegramUrl, '_blank');
+    } catch (error) {
+      console.error('Error sharing to Telegram:', error);
+      alert('Failed to share to Telegram');
+    }
+  };
+
+  const shareToReddit = async () => {
+    try {
+      const imageBlob = await generateShareImage();
+      if (!imageBlob) {
+        alert('Failed to generate share image');
+        return;
+      }
+
+      // For now, we'll just open Reddit with text (image upload requires Reddit API)
+      const text = `${tokenDisplay || 'Token'} Analysis: ${overallScore}/100 overall score! 🚀\n\nAnalyze your tokens at itsworth.app`;
+      const redditUrl = `https://reddit.com/submit?url=${encodeURIComponent('https://itsworth.app')}&title=${encodeURIComponent(text)}`;
+      window.open(redditUrl, '_blank');
+    } catch (error) {
+      console.error('Error sharing to Reddit:', error);
+      alert('Failed to share to Reddit');
+    }
+  };
+
+  const downloadShareImage = async () => {
+    try {
+      const imageBlob = await generateShareImage();
+      if (!imageBlob) {
+        alert('Failed to generate share image');
+        return;
+      }
+
+      // Create download link
+      const url = URL.createObjectURL(imageBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${tokenDisplay || 'token'}-analysis-share.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading share image:', error);
+      alert('Failed to download share image');
+    }
   };
 
   const handleNewTokenSubmit = async (e) => {
@@ -2492,7 +2651,13 @@ const ResultScreen = () => {
               <div className="text-lg font-bold text-gray-900">{verdictText}</div>
               <div className="flex items-center gap-2">
                 <button onClick={handleExplanationClick} className="w-9 h-9 rounded-lg bg-white/70 flex items-center justify-center text-gray-700 hover:bg-white/90 transition-colors">?</button>
-                <button className="w-9 h-9 rounded-lg bg-white/70 flex items-center justify-center text-gray-700">✈️</button>
+                <button onClick={handleShareClick} className="w-9 h-9 rounded-lg bg-white/70 flex items-center justify-center text-gray-700 hover:bg-white/90 transition-colors">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#3B82F6"/>
+                    <path d="M2 17L12 22L22 17" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M2 12L12 17L22 12" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
                     </div>
                   </div>
             {/* Clouds background filler */}
@@ -2607,6 +2772,95 @@ const ResultScreen = () => {
               >
                 Got it
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 max-w-2xl w-full mx-4">
+            {/* Header */}
+            <div className="flex justify-between items-start mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Share Analysis Results</h2>
+              <button 
+                onClick={() => setShowShareModal(false)}
+                className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-300 transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Preview */}
+            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">Preview:</h3>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-blue-600 mb-2">{tokenDisplay || 'Token'}</div>
+                <div className="text-2xl font-bold text-green-600 mb-2">{overallScore}/100</div>
+                <div className="text-sm text-gray-600">Overall Score</div>
+              </div>
+            </div>
+
+            {/* Social Media Options */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              {/* Twitter */}
+              <button 
+                onClick={shareToTwitter}
+                className="flex flex-col items-center p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors"
+              >
+                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mb-2">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                    <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.665 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                  </svg>
+                </div>
+                <span className="text-sm font-medium text-gray-700">Twitter</span>
+              </button>
+
+              {/* Telegram */}
+              <button 
+                onClick={shareToTelegram}
+                className="flex flex-col items-center p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors"
+              >
+                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mb-2">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                    <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .237.077c.28.56.96 1.956 1.427 2.87a.535.535 0 0 1 .096.295.495.495 0 0 1-.189.351c-.048.047-.112.09-.2.116a.509.509 0 0 1-.42-.049 9.902 9.902 0 0 1-1.98-1.093.49.49 0 0 1-.196-.247.478.478 0 0 1 .015-.386.507.507 0 0 1 .244-.215c.258-.108.56-.16.882-.128a.457.457 0 0 1 .066.013z"/>
+                  </svg>
+                </div>
+                <span className="text-sm font-medium text-gray-700">Telegram</span>
+              </button>
+
+              {/* Reddit */}
+              <button 
+                onClick={shareToReddit}
+                className="flex flex-col items-center p-4 rounded-lg border border-gray-200 hover:border-orange-300 hover:bg-orange-50 transition-colors"
+              >
+                <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center mb-2">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                    <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .31-.093c.587.29 1.243.442 1.942.442zm-9.25 3.821c.263 0 .484.22.484.484s-.22.484-.484.484-.484-.22-.484-.484.22-.484.484-.484zm5.5 0c.263 0 .484.22.484.484s-.22.484-.484.484-.484-.22-.484-.484.22-.484.484-.484z"/>
+                  </svg>
+                </div>
+                <span className="text-sm font-medium text-gray-700">Reddit</span>
+              </button>
+
+              {/* Download */}
+              <button 
+                onClick={downloadShareImage}
+                className="flex flex-col items-center p-4 rounded-lg border border-gray-200 hover:border-green-300 hover:bg-green-50 transition-colors"
+              >
+                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mb-2">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                    <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                  </svg>
+                </div>
+                <span className="text-sm font-medium text-gray-700">Download</span>
+              </button>
+            </div>
+
+            {/* Info */}
+            <div className="text-center text-sm text-gray-600">
+              <p>Share your token analysis results with the community!</p>
+              <p className="mt-1">The image includes your overall score and category breakdown.</p>
             </div>
           </div>
         </div>
