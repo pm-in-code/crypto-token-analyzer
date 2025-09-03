@@ -45,7 +45,7 @@
                   image: { type: 'jpeg', quality: 0.95 },
                   html2canvas: { scale: 2, useCORS: true },
                   jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                  pagebreak: { mode: ['css','legacy'], before: '.page' }
+                  pagebreak: { mode: ['css'], after: '.page' }
                 };
                 if (window.html2pdf) {
                   window.html2pdf().set(opt).from(document.body).save();

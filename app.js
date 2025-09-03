@@ -567,16 +567,32 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
             background: #fafafa;
             color: #1f2937;
             line-height: 1.6;
+            margin: 0;
+            padding: 0;
           }
           
           .page {
             width: 210mm;
             height: 297mm;
-            margin: 0 auto 20px;
+            margin: 0;
             padding: 20mm;
             background: white;
             position: relative;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            page-break-after: always;
+            page-break-inside: avoid;
+            break-inside: avoid;
+          }
+          
+          .page:last-child {
+            page-break-after: auto;
+          }
+          
+          @media print {
+            .page {
+              margin: 0;
+              box-shadow: none;
+            }
           }
           
           .overview-page {
@@ -1391,7 +1407,7 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
                 image: { type: 'jpeg', quality: 0.95 },
                 html2canvas: { scale: 2, useCORS: true, letterRendering: true },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                pagebreak: { mode: ['css'], before: '.page' }
+                pagebreak: { mode: ['css'], after: '.page' }
               };
               window.html2pdf().set(opt).from(document.querySelector('body')).save();
             } else {
