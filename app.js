@@ -1169,13 +1169,17 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
             <div class="sw-section">
               <h4>Strengths</h4>
               <ul>
-                ${((categories.find(c => (c.name || '').toLowerCase() === 'market metrics'.toLowerCase()) || {}).strengths || ['Strong market capitalization and liquidity', 'Established presence in the cryptocurrency market']).map(s => `<li>${s}</li>`).join('')}
+                ${((categories.find(c => (c.name || '').toLowerCase() === 'market metrics'.toLowerCase()) || {}).strengths || []).length > 0 ? 
+                  (categories.find(c => (c.name || '').toLowerCase() === 'market metrics'.toLowerCase()) || {}).strengths.map(s => `<li>${s}</li>`).join('') : 
+                  '<li>No specific strengths identified for this token</li>'}
               </ul>
             </div>
             <div class="sw-section">
               <h4>Weaknesses</h4>
               <ul>
-                ${((categories.find(c => (c.name || '').toLowerCase() === 'market metrics'.toLowerCase()) || {}).weaknesses || ['Price volatility can deter long-term investors', 'Competitive pressure from other blockchain platforms']).map(w => `<li>${w}</li>`).join('')}
+                ${((categories.find(c => (c.name || '').toLowerCase() === 'market metrics'.toLowerCase()) || {}).weaknesses || []).length > 0 ? 
+                  (categories.find(c => (c.name || '').toLowerCase() === 'market metrics'.toLowerCase()) || {}).weaknesses.map(w => `<li>${w}</li>`).join('') : 
+                  '<li>No specific weaknesses identified for this token</li>'}
               </ul>
             </div>
           </div>
@@ -1210,13 +1214,17 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
             <div class="sw-section">
               <h4>Strengths</h4>
               <ul>
-                ${((categories.find(c => (c.name || '').toLowerCase() === 'tokenomics') || {}).strengths || ['Sustainable supply model with staking rewards', 'Active community participation in governance']).map(s => `<li>${s}</li>`).join('')}
+                ${((categories.find(c => (c.name || '').toLowerCase() === 'tokenomics') || {}).strengths || []).length > 0 ? 
+                  (categories.find(c => (c.name || '').toLowerCase() === 'tokenomics') || {}).strengths.map(s => `<li>${s}</li>`).join('') : 
+                  '<li>No specific strengths identified for this token</li>'}
               </ul>
             </div>
             <div class="sw-section">
               <h4>Weaknesses</h4>
               <ul>
-                ${((categories.find(c => (c.name || '').toLowerCase() === 'tokenomics') || {}).weaknesses || ['Large circulating supply could pressure the price', 'Dependence on staking could deter non-participating investors']).map(w => `<li>${w}</li>`).join('')}
+                ${((categories.find(c => (c.name || '').toLowerCase() === 'tokenomics') || {}).weaknesses || []).length > 0 ? 
+                  (categories.find(c => (c.name || '').toLowerCase() === 'tokenomics') || {}).weaknesses.map(w => `<li>${w}</li>`).join('') : 
+                  '<li>No specific weaknesses identified for this token</li>'}
               </ul>
             </div>
           </div>
@@ -1251,15 +1259,17 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
             <div class="sw-section">
               <h4>Strengths</h4>
               <ul>
-                <li>Strong emphasis on research-driven development</li>
-                <li>Continuous upgrades and improvements</li>
+                ${((categories.find(c => (c.name || '').toLowerCase() === 'development activity') || {}).strengths || []).length > 0 ? 
+                  (categories.find(c => (c.name || '').toLowerCase() === 'development activity') || {}).strengths.map(s => `<li>${s}</li>`).join('') : 
+                  '<li>No specific strengths identified for this token</li>'}
               </ul>
             </div>
             <div class="sw-section">
               <h4>Weaknesses</h4>
               <ul>
-                <li>Slow rollout of features can frustrate users expecting rapid innovation</li>
-                <li>Perception of being behind in terms of real-world application compared to competitors</li>
+                ${((categories.find(c => (c.name || '').toLowerCase() === 'development activity') || {}).weaknesses || []).length > 0 ? 
+                  (categories.find(c => (c.name || '').toLowerCase() === 'development activity') || {}).weaknesses.map(s => `<li>${s}</li>`).join('') : 
+                  '<li>No specific weaknesses identified for this token</li>'}
               </ul>
             </div>
           </div>
@@ -1294,13 +1304,17 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
             <div class="sw-section">
               <h4>Strengths</h4>
               <ul>
-                ${((categories.find(c => (c.name || '').toLowerCase() === 'social metrics') || {}).strengths || ['Active and engaged community', 'Strong social media presence']).map(s => `<li>${s}</li>`).join('')}
+                ${((categories.find(c => (c.name || '').toLowerCase() === 'social metrics') || {}).strengths || []).length > 0 ? 
+                  (categories.find(c => (c.name || '').toLowerCase() === 'social metrics') || {}).strengths.map(s => `<li>${s}</li>`).join('') : 
+                  '<li>No specific strengths identified for this token</li>'}
               </ul>
             </div>
             <div class="sw-section">
               <h4>Weaknesses</h4>
               <ul>
-                ${((categories.find(c => (c.name || '').toLowerCase() === 'social metrics') || {}).weaknesses || ['Vulnerability to negative sentiment during market downturns', 'Competition for social engagement with other cryptocurrencies']).map(w => `<li>${w}</li>`).join('')}
+                ${((categories.find(c => (c.name || '').toLowerCase() === 'social metrics') || {}).weaknesses || []).length > 0 ? 
+                  (categories.find(c => (c.name || '').toLowerCase() === 'social metrics') || {}).weaknesses.map(w => `<li>${w}</li>`).join('') : 
+                  '<li>No specific weaknesses identified for this token</li>'}
               </ul>
             </div>
           </div>
@@ -1335,13 +1349,17 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
             <div class="sw-section">
               <h4>Strengths</h4>
               <ul>
-                ${((categories.find(c => (c.name || '').toLowerCase() === 'team & investors') || {}).strengths || ['Experienced and reputable leadership team', 'Strong academic partnerships enhancing credibility']).map(s => `<li>${s}</li>`).join('')}
+                ${((categories.find(c => (c.name || '').toLowerCase() === 'team & investors') || {}).strengths || []).length > 0 ? 
+                  (categories.find(c => (c.name || '').toLowerCase() === 'team & investors') || {}).strengths.map(s => `<li>${s}</li>`).join('') : 
+                  '<li>No specific strengths identified for this token</li>'}
               </ul>
             </div>
             <div class="sw-section">
               <h4>Weaknesses</h4>
               <ul>
-                ${((categories.find(c => (c.name || '').toLowerCase() === 'team & investors') || {}).weaknesses || ['Centralized decision-making structure could raise concerns about governance', 'Heavy reliance on the founder\'s vision and public persona']).map(w => `<li>${w}</li>`).join('')}
+                ${((categories.find(c => (c.name || '').toLowerCase() === 'team & investors') || {}).weaknesses || []).length > 0 ? 
+                  (categories.find(c => (c.name || '').toLowerCase() === 'team & investors') || {}).weaknesses.map(w => `<li>${w}</li>`).join('') : 
+                  '<li>No specific weaknesses identified for this token</li>'}
               </ul>
             </div>
           </div>
@@ -1376,13 +1394,17 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
             <div class="sw-section">
               <h4>Strengths</h4>
               <ul>
-                ${((categories.find(c => (c.name || '').toLowerCase() === 'risk assessment') || {}).strengths || ['Established protocol with a focus on security and scalability', 'Active risk management strategies in place']).map(s => `<li>${s}</li>`).join('')}
+                ${((categories.find(c => (c.name || '').toLowerCase() === 'risk assessment') || {}).strengths || []).length > 0 ? 
+                  (categories.find(c => (c.name || '').toLowerCase() === 'risk assessment') || {}).strengths.map(s => `<li>${s}</li>`).join('') : 
+                  '<li>No specific strengths identified for this token</li>'}
               </ul>
             </div>
             <div class="sw-section">
               <h4>Weaknesses</h4>
               <ul>
-                ${((categories.find(c => (c.name || '').toLowerCase() === 'risk assessment') || {}).weaknesses || ['Regulatory risks could impact market perception', 'Rapid technological advancements from competitors can outpace development']).map(w => `<li>${w}</li>`).join('')}
+                ${((categories.find(c => (c.name || '').toLowerCase() === 'risk assessment') || {}).weaknesses || []).length > 0 ? 
+                  (categories.find(c => (c.name || '').toLowerCase() === 'risk assessment') || {}).weaknesses.map(w => `<li>${w}</li>`).join('') : 
+                  '<li>No specific weaknesses identified for this token</li>'}
               </ul>
             </div>
           </div>
@@ -1409,22 +1431,86 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           </div>
           
           <div class="recommendations">
-            <div class="recommendation-card">
-              <h4>Enhance Community Engagement</h4>
-              <p>Focus on building a more robust community outreach program to maintain positive sentiment and reduce volatility during market downturns.</p>
-            </div>
-            <div class="recommendation-card">
-              <h4>Accelerate Development Roadmap</h4>
-              <p>While the academic approach is valuable, consider strategies to speed up the deployment of new features and improvements.</p>
-            </div>
-            <div class="recommendation-card">
-              <h4>Diversify Use Cases</h4>
-              <p>Encourage the development of real-world applications and partnerships to enhance the utility beyond staking and governance.</p>
-            </div>
-            <div class="recommendation-card">
-              <h4>Strengthen Regulatory Compliance</h4>
-              <p>Proactively engage with regulators to ensure compliance and build trust within the investor community.</p>
-            </div>
+            ${(() => {
+              const recommendations = [];
+              
+              // Generate recommendations based on actual analysis data
+              if (categories && categories.length > 0) {
+                // Find lowest scoring category for improvement recommendations
+                const lowestCategory = categories.reduce((lowest, current) => 
+                  (current.score || 0) < (lowest.score || 0) ? current : lowest
+                );
+                
+                if (lowestCategory && lowestCategory.score < 80) {
+                  recommendations.push({
+                    title: `Improve ${lowestCategory.name}`,
+                    description: `Focus on addressing the weaknesses identified in ${lowestCategory.name.toLowerCase()} to improve the overall score from ${lowestCategory.score}/100.`
+                  });
+                }
+                
+                // Market Metrics specific recommendations
+                const marketMetrics = categories.find(c => c.name.toLowerCase() === 'market metrics');
+                if (marketMetrics && marketMetrics.score < 70) {
+                  recommendations.push({
+                    title: 'Strengthen Market Position',
+                    description: 'Work on improving market capitalization, liquidity, and trading volume to enhance market stability.'
+                  });
+                }
+                
+                // Development Activity recommendations
+                const development = categories.find(c => c.name.toLowerCase() === 'development activity');
+                if (development && development.score < 75) {
+                  recommendations.push({
+                    title: 'Accelerate Development',
+                    description: 'Increase development activity, deploy new features faster, and improve the project roadmap execution.'
+                  });
+                }
+                
+                // Social Metrics recommendations
+                const social = categories.find(c => c.name.toLowerCase() === 'social metrics');
+                if (social && social.score < 70) {
+                  recommendations.push({
+                    title: 'Enhance Community Engagement',
+                    description: 'Improve social media presence, community outreach, and user engagement strategies.'
+                  });
+                }
+                
+                // Risk Assessment recommendations
+                const risk = categories.find(c => c.name.toLowerCase() === 'risk assessment');
+                if (risk && risk.score < 75) {
+                  recommendations.push({
+                    title: 'Strengthen Risk Management',
+                    description: 'Implement better risk mitigation strategies and improve regulatory compliance measures.'
+                  });
+                }
+              }
+              
+              // Default recommendations if no specific data available
+              if (recommendations.length === 0) {
+                recommendations.push(
+                  {
+                    title: 'Monitor Performance',
+                    description: 'Continue monitoring the token\'s performance across all categories and adjust strategies accordingly.'
+                  },
+                  {
+                    title: 'Community Building',
+                    description: 'Focus on building and maintaining a strong, engaged community around the project.'
+                  },
+                  {
+                    title: 'Development Continuity',
+                    description: 'Maintain consistent development activity and regular updates to the project.'
+                  }
+                );
+              }
+              
+              // Return HTML for recommendations
+              return recommendations.map(rec => `
+                <div class="recommendation-card">
+                  <h4>${rec.title}</h4>
+                  <p>${rec.description}</p>
+                </div>
+              `).join('');
+            })()}
           </div>
           
           <div class="overall-conclusion">
