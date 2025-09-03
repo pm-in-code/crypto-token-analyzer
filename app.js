@@ -574,24 +574,39 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           .page {
             width: 210mm;
             height: 297mm;
-            margin: 0;
+            margin: 0 auto;
             padding: 20mm;
             background: white;
             position: relative;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            page-break-after: always;
-            page-break-inside: avoid;
-            break-inside: avoid;
+            display: block;
+            clear: both;
           }
           
-          .page:last-child {
+          .page-break {
+            page-break-before: always;
             page-break-after: auto;
+          }
+          
+          .page:first-child {
+            page-break-before: auto;
           }
           
           @media print {
             .page {
               margin: 0;
               box-shadow: none;
+              page-break-after: always;
+            }
+            .page:last-child {
+              page-break-after: auto;
+            }
+          }
+          
+          /* Web display centering */
+          @media screen {
+            .page {
+              margin: 0 auto 20px;
             }
           }
           
@@ -763,6 +778,8 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 20px;
+            width: 100%;
+            align-items: stretch;
           }
           
           .rating-item {
@@ -773,11 +790,20 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
             background: white;
             border-radius: 15px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            min-height: 60px;
+            width: 100%;
+            box-sizing: border-box;
           }
           
           .rating-item .name {
             font-weight: 500;
             color: #1f2937;
+            flex: 1;
+            text-align: left;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
           }
           
           .rating-item .score {
@@ -785,6 +811,9 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
             border-radius: 20px;
             font-weight: 600;
             font-size: 14px;
+            flex-shrink: 0;
+            min-width: 60px;
+            text-align: center;
           }
           
           .score-green { background: #22c55e; color: white; }
@@ -1407,7 +1436,7 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
                 image: { type: 'jpeg', quality: 0.95 },
                 html2canvas: { scale: 2, useCORS: true, letterRendering: true },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                pagebreak: { mode: ['css'], after: '.page' }
+                pagebreak: { mode: ['css'], before: '.page:not(:first-child)' }
               };
               window.html2pdf().set(opt).from(document.querySelector('body')).save();
             } else {
