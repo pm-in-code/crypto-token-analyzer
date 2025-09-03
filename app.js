@@ -2195,23 +2195,24 @@ const LoadingScreen = () => {
 
       <div className="card">
         <div className="text-center">
-        <div className="loading-spinner"></div>
+          <div className="loading-spinner"></div>
 
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">
-          Analyzing token...
-        </h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            Analyzing token...
+          </h2>
 
-        <p className="text-gray-600 mb-8">
-          Our AI is processing market data, social sentiment, and technical indicators
-        </p>
-        
-        <div className="space-y-4">
-          {steps.map((label, idx) => (
-            <div key={label} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <span className="text-gray-700">{label}</span>
-              {renderIcon(idx)}
+          <p className="text-gray-600 mb-8">
+            Our AI is processing market data, social sentiment, and technical indicators
+          </p>
+          
+          <div className="space-y-4">
+            {steps.map((label, idx) => (
+              <div key={label} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <span className="text-gray-700">{label}</span>
+                {renderIcon(idx)}
+              </div>
+            ))}
           </div>
-          ))}
         </div>
       </div>
     </div>
