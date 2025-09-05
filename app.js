@@ -2124,7 +2124,7 @@ const TokenSearch = () => {
         className="fixed top-4 left-4 w-12 h-12 bg-green-400 rounded-lg flex items-center justify-center hover:bg-green-500 transition-colors duration-200 z-50"
         style={{ backgroundColor: '#D9FF00' }}
       >
-        <span className="text-white text-xl font-bold">W</span>
+        <span className="text-gray-900 text-xl font-bold">W</span>
       </button>
     </div>
   );
@@ -2198,19 +2198,19 @@ const LoadingScreen = () => {
           <div className="loading-spinner"></div>
 
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Analyzing token...
-          </h2>
+          Analyzing token...
+        </h2>
 
           <p className="text-gray-600 mb-8">
-            Our AI is processing market data, social sentiment, and technical indicators
-          </p>
-          
-          <div className="space-y-4">
+          Our AI is processing market data, social sentiment, and technical indicators
+        </p>
+        
+        <div className="space-y-4">
             {steps.map((label, idx) => (
               <div key={label} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                 <span className="text-gray-700">{label}</span>
                 {renderIcon(idx)}
-              </div>
+          </div>
             ))}
           </div>
         </div>
@@ -2692,9 +2692,9 @@ const ResultScreen = () => {
                   ) : (
                     <button onClick={handlePremiumDownload} disabled={paymentProcessing} className="btn-download-premium w-full">{paymentProcessing ? 'Processing…' : 'Unlock full report'}</button>
                   )}
-                      </div>
-                      </div>
-                      </div>
+                          </div>
+                          </div>
+                        </div>
             {/* Verdict stripe */}
             <div className={`px-6 py-4 ${bandBg} flex items-center justify-between`}>
               <div className="text-lg font-bold text-gray-900">{verdictText}</div>
@@ -2711,8 +2711,8 @@ const ResultScreen = () => {
                   </div>
             {/* Clouds background filler */}
             <div style={{ flex: 1, backgroundImage: "url('assets/result-left-bg.jpg')", backgroundSize: 'cover', backgroundPosition: 'center', borderBottomLeftRadius: 24, borderBottomRightRadius: 24 }}></div>
-              </div>
-        </div>
+                    </div>
+                  </div>
 
         {/* Right column */}
         {/* Right column */}
@@ -2743,24 +2743,24 @@ const ResultScreen = () => {
                     >
                       {c.score}/100
                     </span>
-                  </div>
+                      </div>
                 );
               })}
-        </div>
-      </div>
+                      </div>
+                      </div>
 
           {/* Blurred full report teaser */}
           <div className="relative" style={{ width: 600, height: 300, opacity: 1, borderRadius: 24, borderWidth: 1, padding: 4, display: 'flex', gap: 4 }}>
             <div className="backdrop-blur-sm overflow-hidden" style={{ backgroundImage: "url('assets/Rectangle26.png')", backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: 24, width: 600, height: 280 }}>
               <div className="h-full w-full bg-white/40 backdrop-blur-[2px]" style={{ borderRadius: 24, width: 600, height: 280 }}></div>
-            </div>
+                    </div>
             <div className="absolute inset-0 flex items-center justify-center" style={{ width: 600, height: 280 }}>
               {hasPaid ? (
                 <button onClick={() => generatePDFReport(tokenAnalysis, email, true)} className="btn-download-premium">Download full report</button>
               ) : (
                 <button onClick={handlePremiumDownload} disabled={paymentProcessing} className="btn-download-premium">Unlock full report</button>
-              )}
-            </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -2772,12 +2772,12 @@ const ResultScreen = () => {
             {/* Header */}
             <div className="flex justify-between items-start mb-6">
               <h2 className="text-2xl font-bold text-gray-900">Worth it? What does it mean?</h2>
-              <button 
+            <button
                 onClick={() => setShowExplanationModal(false)}
                 className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-300 transition-colors"
-              >
+            >
                 ✕
-              </button>
+            </button>
             </div>
 
             {/* Three Options */}
@@ -2815,12 +2815,12 @@ const ResultScreen = () => {
 
             {/* Got it button */}
             <div className="text-center">
-              <button 
+            <button
                 onClick={() => setShowExplanationModal(false)}
                 className="bg-white border-2 border-gray-300 text-gray-700 font-bold py-3 px-8 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 Got it
-              </button>
+            </button>
             </div>
           </div>
         </div>
@@ -2833,13 +2833,13 @@ const ResultScreen = () => {
             {/* Header */}
             <div className="flex justify-between items-start mb-6">
               <h2 className="text-2xl font-bold text-gray-900">Share Analysis Results</h2>
-              <button 
+            <button
                 onClick={() => setShowShareModal(false)}
                 className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-300 transition-colors"
-              >
+            >
                 ✕
-              </button>
-            </div>
+            </button>
+          </div>
 
             {/* Preview */}
             <div className="mb-6 p-4 bg-gray-50 rounded-lg">
@@ -2848,8 +2848,8 @@ const ResultScreen = () => {
                 <div className="text-3xl font-bold text-blue-600 mb-2">{tokenDisplay || 'Token'}</div>
                 <div className="text-2xl font-bold text-green-600 mb-2">{overallScore}/100</div>
                 <div className="text-sm text-gray-600">Overall Score</div>
-              </div>
-            </div>
+          </div>
+        </div>
 
             {/* Social Media Options */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -2862,7 +2862,7 @@ const ResultScreen = () => {
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
                     <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.665 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
                   </svg>
-                </div>
+      </div>
                 <span className="text-sm font-medium text-gray-700">Twitter</span>
               </button>
 
@@ -2875,32 +2875,32 @@ const ResultScreen = () => {
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
                     <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .237.077c.28.56.96 1.956 1.427 2.87a.535.535 0 0 1 .096.295.495.495 0 0 1-.189.351c-.048.047-.112.09-.2.116a.509.509 0 0 1-.42-.049 9.902 9.902 0 0 1-1.98-1.093.49.49 0 0 1-.196-.247.478.478 0 0 1 .015-.386.507.507 0 0 1 .244-.215c.258-.108.56-.16.882-.128a.457.457 0 0 1 .066.013z"/>
                   </svg>
-                </div>
+            </div>
                 <span className="text-sm font-medium text-gray-700">Telegram</span>
               </button>
-
+            
               {/* Reddit */}
-              <button 
+              <button
                 onClick={shareToReddit}
                 className="flex flex-col items-center p-4 rounded-lg border border-gray-200 hover:border-orange-300 hover:bg-orange-50 transition-colors"
               >
                 <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center mb-2">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
                     <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .31-.093c.587.29 1.243.442 1.942.442zm-9.25 3.821c.263 0 .484.22.484.484s-.22.484-.484.484-.484-.22-.484-.484.22-.484.484-.484zm5.5 0c.263 0 .484.22.484.484s-.22.484-.484.484-.484-.22-.484-.484.22-.484.484-.484z"/>
-                  </svg>
+                </svg>
                 </div>
                 <span className="text-sm font-medium text-gray-700">Reddit</span>
               </button>
 
               {/* Download */}
-              <button 
+              <button
                 onClick={downloadShareImage}
                 className="flex flex-col items-center p-4 rounded-lg border border-gray-200 hover:border-green-300 hover:bg-green-50 transition-colors"
               >
                 <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mb-2">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
                     <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
-                  </svg>
+                </svg>
                 </div>
                 <span className="text-sm font-medium text-gray-700">Download</span>
               </button>
