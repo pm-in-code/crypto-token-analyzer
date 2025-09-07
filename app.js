@@ -1516,8 +1516,12 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           <div class="overall-conclusion">
             <p>${(() => {
               const token = analysisData.token || 'this token';
-              const score = analysisData.overallScore || 0;
-              const categories = analysisData.categories || [];
+              
+              // Parse the analysis data to get correct score and categories
+              const { categories: parsedCategories, overallScore: parsedOverall } = parseAnalysisSummary(analysisData.summary);
+              const categories = parsedCategories || [];
+              const score = parsedOverall != null ? parsedOverall : 
+                (categories.length > 0 ? Math.round(categories.reduce((a, c) => a + (c.score || 0), 0) / categories.length) : 0);
               
               // Generate dynamic conclusion based on score and analysis
               if (score >= 80) {
