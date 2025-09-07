@@ -1514,7 +1514,23 @@ const generatePDFReport = async (analysisData, userEmail, isPremium = false) => 
           </div>
           
           <div class="overall-conclusion">
-            <p>In conclusion, while ${analysisData.token || 'this token'} demonstrates a solid foundation and potential for growth, addressing its weaknesses and leveraging its strengths will be crucial for future success in the competitive cryptocurrency landscape.</p>
+            <p>${(() => {
+              const token = analysisData.token || 'this token';
+              const score = analysisData.overallScore || 0;
+              const categories = analysisData.categories || [];
+              
+              // Generate dynamic conclusion based on score and analysis
+              if (score >= 80) {
+                return `In conclusion, ${token} demonstrates exceptional potential with a strong overall score of ${score}/100. ${categories.length > 0 ? `Particularly strong performance in ${categories.filter(c => c.score >= 80).map(c => c.name).slice(0, 2).join(' and ')} positions this token as a compelling investment opportunity.` : ''} With proper market conditions and continued development, ${token} shows significant promise for long-term growth.`;
+              } else if (score >= 60) {
+                const strongCategories = categories.filter(c => c.score >= 70).map(c => c.name);
+                const weakCategories = categories.filter(c => c.score < 60).map(c => c.name);
+                return `In conclusion, ${token} shows moderate potential with an overall score of ${score}/100. ${strongCategories.length > 0 ? `Strengths in ${strongCategories.slice(0, 2).join(' and ')} provide a solid foundation.` : ''} ${weakCategories.length > 0 ? `However, addressing concerns in ${weakCategories.slice(0, 2).join(' and ')} will be essential for improved market performance.` : ''} Investors should carefully consider both opportunities and risks before making investment decisions.`;
+              } else {
+                const weakestCategories = categories.filter(c => c.score < 50).map(c => c.name);
+                return `In conclusion, ${token} faces significant challenges with an overall score of ${score}/100. ${weakestCategories.length > 0 ? `Critical issues in ${weakestCategories.slice(0, 2).join(' and ')} require immediate attention.` : ''} While every cryptocurrency has potential for improvement, ${token} currently presents considerable risks that investors should carefully evaluate. Substantial improvements in fundamentals would be necessary before considering this as a viable investment option.`;
+              }
+            })()}</p>
           </div>
           
           <div class="footer">
