@@ -121,7 +121,7 @@ Provide actionable insights and recommendations.`;
 // Stripe payment intent endpoint
 app.post('/api/create-payment-intent', async (req, res) => {
   try {
-    const { amount = 999 } = req.body; // $9.99 in cents
+    const { amount = 299 } = req.body; // $2.99 in cents
     
     if (!STRIPE_SECRET_KEY) {
       return res.status(500).json({ error: 'Stripe not configured' });
