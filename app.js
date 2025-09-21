@@ -1971,6 +1971,15 @@ const TokenSearch = () => {
     setShowError(false);
   };
 
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    // Only allow English letters, numbers, spaces, and common symbols
+    const englishOnlyRegex = /^[a-zA-Z0-9\s\-_\.]*$/;
+    if (englishOnlyRegex.test(value)) {
+      setTokenInput(value);
+    }
+  };
+
   const handleLogoClick = () => {
     setCurrentScreen('home');
   };
@@ -2062,7 +2071,7 @@ const TokenSearch = () => {
           <input
             type="text"
             value={tokenInput}
-            onChange={(e) => setTokenInput(e.target.value)}
+            onChange={handleInputChange}
             onKeyPress={handleKeyPress}
               placeholder="Enter Token name or address"
               className="input-field"
@@ -2116,7 +2125,6 @@ const TokenSearch = () => {
                 </div>
                 <div className="token-spacer"></div>
                 <div className="token-actions">
-                  <div className="token-rank">{token.rank}</div>
                   <button 
                     className="analyse-button"
                     onClick={() => handleTokenAnalyze(token)}
