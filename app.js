@@ -2744,25 +2744,26 @@ const ResultScreen = () => {
       {/* Removed top success title and subtitle per design request */}
 
       {/* Central block layout */}
-      <div className="mb-8" style={{ width: 1200, height: 600, maxWidth: '1200px', display: 'flex', gap: 8, opacity: 1, margin: '0 auto' }}>
+      <div className="mb-8 px-4 md:px-0" style={{ maxWidth: '1200px', margin: '0 auto' }}>
+        <div className="flex flex-col lg:flex-row gap-2 lg:gap-8">
         {/* Left hero card */}
-        <div>
-          <div className={`overflow-hidden border ${bandBorder}`} style={{ width: 560, height: 600, maxWidth: '560px', borderRadius: 24, display: 'flex', flexDirection: 'column', gap: '0px', opacity: 1, position: 'relative' }}>
+        <div className="w-full lg:w-auto lg:flex-1">
+          <div className={`overflow-hidden border ${bandBorder} w-full lg:w-[560px] h-[400px] lg:h-[600px] flex flex-col relative`} style={{ borderRadius: 24 }}>
             {/* Floating inner card by Figma spec */}
-            <div style={{ position: 'absolute', top: 170, left: 64, width: 432, height: 384, borderRadius: 24, borderWidth: 1, padding: 4, display: 'flex', flexDirection: 'column', gap: 4, background: 'transparent' }} className={`border ${bandBorder}`}>
+            <div className={`absolute top-4 left-4 right-4 lg:top-[170px] lg:left-16 lg:right-16 bottom-20 lg:bottom-auto lg:h-96 border ${bandBorder} flex flex-col gap-1 bg-transparent p-1`} style={{ borderRadius: 24 }}>
               <div className="bg-white rounded-2xl shadow-sm p-6 flex-1 flex flex-col">
                 {/* Token header */}
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xl">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                    <div className="flex items-center gap-2 lg:gap-4">
+                    <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-lg lg:text-xl">
                       {(tokenDisplay || 'T').charAt(0)}
                       </div>
                     <div>
-                      <div className="text-2xl font-semibold text-gray-900">{tokenDisplay || 'Token'}</div>
+                      <div className="text-lg lg:text-2xl font-semibold text-gray-900">{tokenDisplay || 'Token'}</div>
                       <div className="text-xs uppercase text-gray-500">{tokenTicker}</div>
                         </div>
                       </div>
-                  <div className={`px-4 py-2 rounded-full text-2xl font-bold ${bandPill}`}>{overallScore}/100</div>
+                  <div className={`px-3 py-1 lg:px-4 lg:py-2 rounded-full text-lg lg:text-2xl font-bold ${bandPill}`}>{overallScore}/100</div>
                     </div>
 
                 {/* Buttons row */}
@@ -2798,23 +2799,20 @@ const ResultScreen = () => {
                   </div>
 
         {/* Right column */}
-        {/* Right column */}
-        <div className="space-y-2" style={{ width: 640, height: 600, display: 'flex', flexDirection: 'column', gap: 8, opacity: 1 }}>
+        <div className="w-full lg:w-[640px] flex flex-col gap-2 lg:gap-8">
           {/* Categories overview */}
-          <div className="card" style={{ width: 640, height: 280, opacity: 1 }}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4" style={{ gridTemplateColumns: '1fr 1fr', width: '100%' }}>
+          <div className="card w-full h-auto lg:h-[280px] p-4 lg:p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
               {['Market Metrics','Social Metrics','Tokenomics','Team & Investors','Development Activity','Risk Assessment'].map((name) => {
                 const c = categories.find((x) => (x.name||'').toLowerCase() === name.toLowerCase()) || { score: 0 };
                 const b = scoreBand(c.score);
                 const pill = b === 'green' ? 'bg-lime-300' : b === 'yellow' ? 'bg-amber-300' : 'bg-pink-300';
                 return (
-                  <div key={name} className="flex items-center justify-between p-4 rounded-lg bg-white/80 border h-16" style={{ width: '100%', minWidth: 0 }}>
-                    <span className="text-gray-800 text-sm font-medium truncate flex-1 mr-4">{name}</span>
+                  <div key={name} className="flex items-center justify-between p-3 lg:p-4 rounded-lg bg-white/80 border h-12 lg:h-16">
+                    <span className="text-gray-800 text-xs lg:text-sm font-medium truncate flex-1 mr-2 lg:mr-4">{name}</span>
                     <span
-                      className={`rounded-full text-xs font-bold flex-shrink-0 ${pill}`}
+                      className={`rounded-full text-xs font-bold flex-shrink-0 ${pill} w-16 h-8 lg:w-[100px] lg:h-[40px] flex items-center justify-center`}
                       style={{
-                        width: 100,
-                        height: 40,
                         borderRadius: 156,
                         padding: '12px 16px',
                         display: 'flex',
@@ -2833,20 +2831,22 @@ const ResultScreen = () => {
                       </div>
 
           {/* Blurred full report teaser */}
-          <div className="relative" style={{ width: 600, height: 300, opacity: 1, borderRadius: 24, borderWidth: 1, padding: 4, display: 'flex', gap: 4 }}>
-            <div className="backdrop-blur-sm overflow-hidden" style={{ backgroundImage: "url('assets/Rectangle26.png')", backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: 24, width: 600, height: 280 }}>
-              <div className="h-full w-full bg-white/40 backdrop-blur-[2px]" style={{ borderRadius: 24, width: 600, height: 280 }}></div>
+          <div className="relative w-full h-48 lg:h-[300px] border p-1 lg:p-4 flex gap-1 lg:gap-4" style={{ borderRadius: 24 }}>
+            <div className="backdrop-blur-sm overflow-hidden w-full h-full" style={{ backgroundImage: "url('assets/Rectangle26.png')", backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: 24 }}>
+              <div className="h-full w-full bg-white/40 backdrop-blur-[2px]" style={{ borderRadius: 24 }}></div>
                     </div>
-            <div className="absolute inset-0 flex items-center justify-center" style={{ width: 600, height: 280 }}>
+            <div className="absolute inset-0 flex items-center justify-center">
               {hasPaid ? (
-                <button onClick={() => generatePDFReport(tokenAnalysis, email, true)} className="btn-download-premium" style={{ width: '240px' }}>Download full report</button>
+                <button onClick={() => generatePDFReport(tokenAnalysis, email, true)} className="btn-download-premium w-32 lg:w-60 text-sm lg:text-base">Download full report</button>
               ) : (
-                <button onClick={handlePremiumDownload} disabled={paymentProcessing} className="btn-download-premium" style={{ width: '240px' }}>Unlock full report</button>
+                <button onClick={handlePremiumDownload} disabled={paymentProcessing} className="btn-download-premium w-32 lg:w-60 text-sm lg:text-base">Unlock full report</button>
                 )}
               </div>
             </div>
           </div>
         </div>
+        </div>
+      </div>
 
       {/* Explanation Modal */}
       {showExplanationModal && (
