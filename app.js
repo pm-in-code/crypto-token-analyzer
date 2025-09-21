@@ -2779,12 +2779,14 @@ const ResultScreen = () => {
             <div className={`px-6 py-4 ${bandBg} flex items-center justify-between`}>
               <div className="text-lg font-bold text-gray-900">{verdictText}</div>
               <div className="flex items-center gap-2">
-                <button onClick={handleExplanationClick} className="w-9 h-9 rounded-lg bg-white/70 flex items-center justify-center text-gray-700 hover:bg-white/90 transition-colors">?</button>
-                <button onClick={handleShareClick} className="w-9 h-9 rounded-lg bg-white/70 flex items-center justify-center text-gray-700 hover:bg-white/90 transition-colors">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#3B82F6"/>
-                    <path d="M2 17L12 22L22 17" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M2 12L12 17L22 12" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <button onClick={handleExplanationClick} className="w-8 h-8 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors shadow-sm">
+                  <span className="text-sm font-medium">?</span>
+                </button>
+                <button onClick={handleShareClick} className="w-8 h-8 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors shadow-sm">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="currentColor"/>
+                    <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </button>
                     </div>
