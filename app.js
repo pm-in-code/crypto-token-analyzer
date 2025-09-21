@@ -1776,7 +1776,7 @@ const TrendingTokens = () => {
         }
       };
       setTokenAnalysis(mockAnalysis);
-      setTimeout(() => setCurrentScreen('result'), 350);
+      setTimeout(() => setCurrentScreen('result'), 1500);
     }, 2000);
   };
 
@@ -1954,7 +1954,7 @@ const TokenSearch = () => {
           summary: data.analysis,
           usage: data.usage
         });
-        setTimeout(() => setCurrentScreen('result'), 350); // короткая пауза: видны финальные галочки
+        setTimeout(() => setCurrentScreen('result'), 1500); // пауза, чтобы пользователь увидел все галочки
       } else {
         console.error('Backend error:', data);
         setShowError(true);
@@ -2059,7 +2059,7 @@ const TokenSearch = () => {
           summary: data.analysis,
           usage: data.usage
         });
-        setTimeout(() => setCurrentScreen('result'), 350);
+        setTimeout(() => setCurrentScreen('result'), 1500);
       } else {
         console.error('Backend error:', data);
         setShowError(true);
@@ -2229,7 +2229,7 @@ const LoadingScreen = () => {
     setCompleted(0);
     const interval = setInterval(() => {
       setCompleted((prev) => Math.min(prev + 1, steps.length));
-    }, 500);
+    }, 1200);
 
     return () => clearInterval(interval);
   }, []);
