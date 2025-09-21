@@ -1919,6 +1919,15 @@ const TokenSearch = () => {
 
     setIsSubmitting(true);
     setShowError(false);
+
+    // First validate if token exists
+    const validation = await validateToken(tokenInput.trim());
+    if (!validation.exists) {
+      setShowError(true);
+      setIsSubmitting(false);
+      return;
+    }
+
     setCurrentScreen('loading');
 
     // PROMPT ДЛЯ OPENAI
@@ -1980,6 +1989,43 @@ const TokenSearch = () => {
     }
   };
 
+  // Function to validate if token exists
+  const validateToken = async (tokenQuery) => {
+    try {
+      // First try to search in CoinGecko
+      const searchResponse = await fetch(`https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(tokenQuery)}`);
+      const searchData = await searchResponse.json();
+      
+      if (searchData.coins && searchData.coins.length > 0) {
+        // Token found in search results
+        return { exists: true, tokenData: searchData.coins[0] };
+      }
+
+      // If not found in search, try to get by id directly
+      try {
+        const coinResponse = await fetch(`https://api.coingecko.com/api/v3/coins/${tokenQuery.toLowerCase()}`);
+        if (coinResponse.ok) {
+          const coinData = await coinResponse.json();
+          return { exists: true, tokenData: coinData };
+        }
+      } catch (e) {
+        // Ignore error for direct ID lookup
+      }
+
+      // Check if it's a common symbol
+      const commonTokens = ['BTC', 'ETH', 'ADA', 'SOL', 'MATIC', 'DOT', 'LINK', 'UNI', 'AAVE', 'CRV', 'USDT', 'USDC', 'DAI', 'BNB', 'XRP', 'AVAX', 'ATOM', 'NEAR', 'FTM', 'ALGO'];
+      if (commonTokens.includes(tokenQuery.toUpperCase())) {
+        return { exists: true, tokenData: { symbol: tokenQuery.toUpperCase() } };
+      }
+
+      return { exists: false };
+    } catch (error) {
+      console.error('Token validation error:', error);
+      // In case of API error, allow the request to proceed
+      return { exists: true };
+    }
+  };
+
   const handleLogoClick = () => {
     setCurrentScreen('home');
   };
@@ -2033,7 +2079,13 @@ const TokenSearch = () => {
       <div className="card">
         <div className="error-card">
           <div className="error-title">Oops</div>
-          <div className="error-message">WE CAN'T FIND THIS TOKEN</div>
+          <div className="error-message">TOKEN NOT FOUND</div>
+          <button 
+            onClick={() => setShowError(false)}
+            className="mt-4 px-6 py-2 bg-lime-400 text-gray-900 font-bold rounded-lg hover:bg-lime-500 transition-colors"
+          >
+            Try Again
+          </button>
         </div>
       </div>
     );
