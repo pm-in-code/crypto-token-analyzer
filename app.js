@@ -2845,7 +2845,6 @@ const ResultScreen = () => {
             </div>
           </div>
         </div>
-        </div>
       </div>
 
       {/* Explanation Modal */}
