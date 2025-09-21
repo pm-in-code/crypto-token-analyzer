@@ -2100,8 +2100,8 @@ const TokenSearch = () => {
           onClick={handleLogoClick}
           className="w-12 h-12 rounded-xl bg-lime-400 flex items-center justify-center text-gray-900 font-bold text-2xl shadow-lg hover:bg-lime-500 transition-colors cursor-pointer"
           style={{
-            background: 'linear-gradient(135deg, #bef264 0%, #84cc16 100%)',
-            boxShadow: '0 4px 12px rgba(190, 242, 100, 0.3)'
+            background: 'linear-gradient(135deg, #d9f99d 0%, #bef264 100%)',
+            boxShadow: '0 4px 12px rgba(217, 249, 157, 0.4)'
           }}
         >
           W
@@ -2265,8 +2265,8 @@ const LoadingScreen = () => {
           onClick={() => setCurrentScreen('home')}
           className="w-12 h-12 rounded-xl bg-lime-400 flex items-center justify-center text-gray-900 font-bold text-2xl shadow-lg hover:bg-lime-500 transition-colors cursor-pointer"
           style={{
-            background: 'linear-gradient(135deg, #bef264 0%, #84cc16 100%)',
-            boxShadow: '0 4px 12px rgba(190, 242, 100, 0.3)'
+            background: 'linear-gradient(135deg, #d9f99d 0%, #bef264 100%)',
+            boxShadow: '0 4px 12px rgba(217, 249, 157, 0.4)'
           }}
         >
           W
@@ -2694,8 +2694,8 @@ const ResultScreen = () => {
           onClick={handleLogoClick}
           className="w-12 h-12 rounded-xl bg-lime-400 flex items-center justify-center text-gray-900 font-bold text-2xl shadow-lg hover:bg-lime-500 transition-colors cursor-pointer"
           style={{
-            background: 'linear-gradient(135deg, #bef264 0%, #84cc16 100%)',
-            boxShadow: '0 4px 12px rgba(190, 242, 100, 0.3)'
+            background: 'linear-gradient(135deg, #d9f99d 0%, #bef264 100%)',
+            boxShadow: '0 4px 12px rgba(217, 249, 157, 0.4)'
           }}
         >
           W
