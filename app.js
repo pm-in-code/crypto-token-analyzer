@@ -2836,9 +2836,9 @@ const ResultScreen = () => {
                     </div>
             <div className="absolute inset-0 flex items-center justify-center" style={{ width: 600, height: 280 }}>
               {hasPaid ? (
-                <button onClick={() => generatePDFReport(tokenAnalysis, email, true)} className="btn-download-premium">Download full report</button>
+                <button onClick={() => generatePDFReport(tokenAnalysis, email, true)} className="btn-download-premium" style={{ width: '240px' }}>Download full report</button>
               ) : (
-                <button onClick={handlePremiumDownload} disabled={paymentProcessing} className="btn-download-premium">Unlock full report</button>
+                <button onClick={handlePremiumDownload} disabled={paymentProcessing} className="btn-download-premium" style={{ width: '240px' }}>Unlock full report</button>
                 )}
               </div>
             </div>
