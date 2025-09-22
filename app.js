@@ -2317,6 +2317,20 @@ const ResultScreen = () => {
   const [showExplanationModal, setShowExplanationModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
 
+  // Check for successful payment on component mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('payment') === 'success') {
+      setHasPaid(true);
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+      // Auto-download PDF after successful payment
+      setTimeout(() => {
+        generatePDFReport(tokenAnalysis, email, true);
+      }, 1000);
+    }
+  }, []);
+
   // Initialize Stripe Elements when payment modal opens (must be before any conditional returns)
   React.useEffect(() => {
     if (showPaymentModal && elements && !cardElement) {
@@ -2598,14 +2612,9 @@ const ResultScreen = () => {
   const handlePremiumDownload = async () => {
     try {
       setPaymentProcessing(true);
-      // reset previous Stripe state so modal re-initializes correctly
-      setStripe(null);
-      setElements(null);
-      setCardElement(null);
-      setClientSecret(null);
       
-      // Создаем Payment Intent
-      const response = await fetch(`${BACKEND_API_URL}/create-payment-intent`, {
+      // Создаем Checkout Session
+      const response = await fetch(`${BACKEND_API_URL}/create-checkout-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amount: 299 }) // $2.99
@@ -2617,22 +2626,16 @@ const ResultScreen = () => {
         throw new Error(data.error || 'Ошибка создания платежа');
       }
       
-      // Инициализируем Stripe
-      const stripeInstance = Stripe(data.publishableKey);
-      setStripe(stripeInstance);
-      
-      // Сохраняем client secret
-      setClientSecret(data.clientSecret);
-      
-      // Создаем элементы
-      const elementsInstance = stripeInstance.elements();
-      setElements(elementsInstance);
-      
-      setShowPaymentModal(true);
+      // Перенаправляем на Stripe Checkout
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('Не получен URL для оплаты');
+      }
       
     } catch (error) {
-      console.error('Ошибка инициализации платежа:', error);
-      alert('Ошибка при инициализации платежа: ' + error.message);
+      console.error('Ошибка создания платежа:', error);
+      alert('Ошибка при создании платежа: ' + error.message);
     } finally {
       setPaymentProcessing(false);
     }
@@ -2845,7 +2848,7 @@ const ResultScreen = () => {
             </div>
           </div>
         </div>
-      </div>
+        </div>
 
       {/* Explanation Modal */}
       {showExplanationModal && (

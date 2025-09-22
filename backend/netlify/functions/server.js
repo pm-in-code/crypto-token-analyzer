@@ -565,32 +565,37 @@ app.post('/api/get-pdf-template', async (req, res) => {
   }
 });
 
-// Stripe payment intent endpoint
-app.post('/api/create-payment-intent', async (req, res) => {
+// Stripe Checkout Session endpoint
+app.post('/api/create-checkout-session', async (req, res) => {
   try {
-    console.log('Stripe endpoint called with body:', req.body);
+    console.log('Stripe checkout endpoint called with body:', req.body);
     
     if (!STRIPE_SECRET_KEY) {
       console.log('Stripe secret key not configured');
       return res.status(500).json({ error: 'Stripe not configured' });
     }
 
-    const { amount, currency = 'usd' } = req.body;
+    const { amount = 299, currency = 'usd' } = req.body;
 
     if (!amount) {
       console.log('Amount is missing');
       return res.status(400).json({ error: 'Amount is required' });
     }
 
-    console.log('Creating payment intent with:', { amount, currency });
+    console.log('Creating checkout session with:', { amount, currency });
 
-    // Create payment intent with Stripe
+    // Create checkout session with Stripe
     const formData = new URLSearchParams();
-    formData.append('amount', amount.toString());
-    formData.append('currency', currency);
-    formData.append('automatic_payment_methods[enabled]', 'true');
+    formData.append('mode', 'payment');
+    formData.append('line_items[0][price_data][currency]', currency);
+    formData.append('line_items[0][price_data][product_data][name]', 'Premium Crypto Analysis Report');
+    formData.append('line_items[0][price_data][product_data][description]', 'Detailed AI-powered cryptocurrency analysis with actionable insights');
+    formData.append('line_items[0][price_data][unit_amount]', amount.toString());
+    formData.append('line_items[0][quantity]', '1');
+    formData.append('success_url', 'https://itsworth.app?payment=success');
+    formData.append('cancel_url', 'https://itsworth.app?payment=cancelled');
 
-    const stripeResponse = await fetch('https://api.stripe.com/v1/payment_intents', {
+    const stripeResponse = await fetch('https://api.stripe.com/v1/checkout/sessions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${STRIPE_SECRET_KEY}`,
@@ -600,17 +605,17 @@ app.post('/api/create-payment-intent', async (req, res) => {
     });
 
     console.log('Stripe response status:', stripeResponse.status);
-    const paymentIntent = await stripeResponse.json();
-    console.log('Stripe response:', paymentIntent);
-    console.log('Publishable key:', STRIPE_PUBLISHABLE_KEY);
+    const session = await stripeResponse.json();
+    console.log('Stripe response:', session);
 
-    if (paymentIntent.error) {
-      console.error('Stripe error:', paymentIntent.error);
-      return res.status(400).json({ error: paymentIntent.error.message });
+    if (session.error) {
+      console.error('Stripe error:', session.error);
+      return res.status(400).json({ error: session.error.message });
     }
 
     res.json({
-      clientSecret: paymentIntent.client_secret,
+      sessionId: session.id,
+      url: session.url,
       publishableKey: STRIPE_PUBLISHABLE_KEY
     });
   } catch (error) {
