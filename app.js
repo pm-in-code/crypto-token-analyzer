@@ -1664,21 +1664,23 @@ const AppProvider = ({ children }) => {
     localStorage.setItem('paidTokens', JSON.stringify(paidTokens));
   }, [paidTokens]);
 
-  // Optional: Clean up old payments (older than 30 days)
+  // Clean up expired payments (older than 1 hour)
   useEffect(() => {
     const cleanupInterval = setInterval(() => {
-      const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+      const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
+      const currentTime = Date.now();
+      
       setPaidTokens(prev => {
         const cleaned = {};
-        Object.entries(prev).forEach(([token, value]) => {
-          // Keep recent payments (value is true or timestamp)
-          if (value === true || (typeof value === 'number' && value > thirtyDaysAgo)) {
-            cleaned[token] = value;
+        Object.entries(prev).forEach(([token, timestamp]) => {
+          // Keep only payments that are less than 1 hour old
+          if (typeof timestamp === 'number' && (currentTime - timestamp < oneHour)) {
+            cleaned[token] = timestamp;
           }
         });
         return cleaned;
       });
-    }, 24 * 60 * 60 * 1000); // Run daily
+    }, 5 * 60 * 1000); // Run every 5 minutes
 
     return () => clearInterval(cleanupInterval);
   }, [setPaidTokens]);
@@ -2352,9 +2354,27 @@ const ResultScreen = () => {
   const [showExplanationModal, setShowExplanationModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
 
-  // Check if current token has been paid for
+  // Check if current token has been paid for and payment is still valid (1 hour)
   const currentTokenSymbol = tokenAnalysis?.token || '';
-  const hasPaid = paidTokens[currentTokenSymbol] || false;
+  const paymentTimestamp = paidTokens[currentTokenSymbol];
+  const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
+  const hasPaid = paymentTimestamp && (Date.now() - paymentTimestamp < oneHour);
+  
+  // Calculate remaining time for premium access
+  const [currentTime, setCurrentTime] = useState(Date.now());
+  const remainingTime = hasPaid ? Math.max(0, oneHour - (currentTime - paymentTimestamp)) : 0;
+  const remainingMinutes = Math.ceil(remainingTime / (60 * 1000));
+
+  // Update timer every minute
+  useEffect(() => {
+    if (hasPaid && remainingTime > 0) {
+      const timer = setInterval(() => {
+        setCurrentTime(Date.now());
+      }, 60000); // Update every minute
+      
+      return () => clearInterval(timer);
+    }
+  }, [hasPaid, remainingTime]);
 
   // Initialize Stripe Elements when payment modal opens (must be before any conditional returns)
   React.useEffect(() => {
@@ -2804,7 +2824,12 @@ const ResultScreen = () => {
                 {/* Buttons row */}
                 <div className="mt-6 grid grid-cols-1 gap-4">
                   {hasPaid ? (
-                    <button onClick={() => generatePDFReport(tokenAnalysis, email, true)} className="btn-download-premium w-full">Download full report</button>
+                    <div className="space-y-2">
+                      <button onClick={() => generatePDFReport(tokenAnalysis, email, true)} className="btn-download-premium w-full">Download full report</button>
+                      <div className="text-xs text-gray-500 text-center">
+                        Premium access expires in {remainingMinutes} minute{remainingMinutes !== 1 ? 's' : ''}
+                      </div>
+                    </div>
                   ) : (
                     <button onClick={handlePremiumDownload} disabled={paymentProcessing} className="btn-download-premium w-full">{paymentProcessing ? 'Processing…' : 'Unlock full report'}</button>
                   )}
@@ -3114,10 +3139,10 @@ const AppContent = () => {
             // Определяем токен для которого была оплата
             const tokenSymbol = tokenAnalysis?.token || 'UNKNOWN';
             
-            // Добавляем токен в список оплаченных
+            // Добавляем токен в список оплаченных с timestamp
             setPaidTokens(prev => ({
               ...prev,
-              [tokenSymbol]: true
+              [tokenSymbol]: Date.now() // Сохраняем время оплаты
             }));
             
             setCurrentScreen('result');
