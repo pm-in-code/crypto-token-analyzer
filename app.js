@@ -2674,11 +2674,13 @@ const ResultScreen = () => {
       setPaymentProcessing(true);
       
       // Сохраняем данные токена в localStorage перед оплатой
-      localStorage.setItem('pendingPaymentToken', JSON.stringify({
+      const paymentData = {
         tokenAnalysis: tokenAnalysis,
         email: email,
         timestamp: Date.now()
-      }));
+      };
+      console.log('Saving payment data before redirect:', paymentData);
+      localStorage.setItem('pendingPaymentToken', JSON.stringify(paymentData));
       
       // Создаем Checkout Session
       const response = await fetch(`${BACKEND_API_URL}/create-checkout-session`, {
@@ -3143,9 +3145,12 @@ const AppContent = () => {
     if (urlParams.get('payment') === 'success') {
       // Восстанавливаем данные токена из localStorage
       const savedData = localStorage.getItem('pendingPaymentToken');
+      console.log('Raw saved data:', savedData);
       if (savedData) {
         try {
-          const { tokenAnalysis, email, timestamp } = JSON.parse(savedData);
+          const parsedData = JSON.parse(savedData);
+          console.log('Parsed payment data:', parsedData);
+          const { tokenAnalysis, email, timestamp } = parsedData;
           // Проверяем что данные не старше 1 часа
           if (Date.now() - timestamp < 3600000) {
             setTokenAnalysis(tokenAnalysis);
@@ -3153,18 +3158,29 @@ const AppContent = () => {
             
             // Определяем токен для которого была оплата
             const tokenSymbol = tokenAnalysis?.token || 'UNKNOWN';
+            console.log('Payment success - setting paid token:', tokenSymbol, Date.now());
             
             // Добавляем токен в список оплаченных с timestamp
-            setPaidTokens(prev => ({
-              ...prev,
-              [tokenSymbol]: Date.now() // Сохраняем время оплаты
-            }));
+            setPaidTokens(prev => {
+              const updated = {
+                ...prev,
+                [tokenSymbol]: Date.now() // Сохраняем время оплаты
+              };
+              console.log('Updated paidTokens:', updated);
+              return updated;
+            });
             
             setCurrentScreen('result');
             // Показываем сообщение об успешной оплате
             setTimeout(() => {
               alert('Оплата прошла успешно! Теперь вы можете скачать полный отчет.');
             }, 500);
+            
+            // Форсированно обновляем состояние через небольшую задержку
+            setTimeout(() => {
+              console.log('Force updating paidTokens state...');
+              setPaidTokens(prev => ({ ...prev }));
+            }, 100);
           }
           // Очищаем сохраненные данные
           localStorage.removeItem('pendingPaymentToken');
