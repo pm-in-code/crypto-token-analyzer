@@ -1648,6 +1648,7 @@ const AppProvider = ({ children }) => {
   const [currentScreen, setCurrentScreen] = useState('home');
   const [tokenAnalysis, setTokenAnalysis] = useState(null);
   const [email, setEmail] = useState('');
+  const [hasPaid, setHasPaid] = useState(false);
 
   return (
     <AppContext.Provider value={{
@@ -1657,6 +1658,8 @@ const AppProvider = ({ children }) => {
       setTokenAnalysis,
       email,
       setEmail,
+      hasPaid,
+      setHasPaid,
     }}>
       {children}
     </AppContext.Provider>
@@ -2301,13 +2304,12 @@ const LoadingScreen = () => {
 
 // Result Screen Component
 const ResultScreen = () => {
-  const { tokenAnalysis, email, setState, setCurrentScreen, setTokenAnalysis } = useAppContext();
+  const { tokenAnalysis, email, setState, setCurrentScreen, setTokenAnalysis, hasPaid } = useAppContext();
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [tempEmail, setTempEmail] = useState('');
   const [emailError, setEmailError] = useState('');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentProcessing, setPaymentProcessing] = useState(false);
-  const [hasPaid, setHasPaid] = useState(false);
   const [stripe, setStripe] = useState(null);
   const [elements, setElements] = useState(null);
   const [cardElement, setCardElement] = useState(null);
@@ -2317,18 +2319,9 @@ const ResultScreen = () => {
   const [showExplanationModal, setShowExplanationModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
 
-  // Check for successful payment on component mount
+  // Check if user has paid (will be set by AppContent after successful payment)
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('payment') === 'success') {
-      setHasPaid(true);
-      // Clean up URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-      // Auto-download PDF after successful payment
-      setTimeout(() => {
-        generatePDFReport(tokenAnalysis, email, true);
-      }, 1000);
-    }
+    // This will be handled by AppContent now
   }, []);
 
   // Initialize Stripe Elements when payment modal opens (must be before any conditional returns)
@@ -2612,6 +2605,13 @@ const ResultScreen = () => {
   const handlePremiumDownload = async () => {
     try {
       setPaymentProcessing(true);
+      
+      // Сохраняем данные токена в localStorage перед оплатой
+      localStorage.setItem('pendingPaymentToken', JSON.stringify({
+        tokenAnalysis: tokenAnalysis,
+        email: email,
+        timestamp: Date.now()
+      }));
       
       // Создаем Checkout Session
       const response = await fetch(`${BACKEND_API_URL}/create-checkout-session`, {
@@ -3062,8 +3062,39 @@ const ResultScreen = () => {
 
 // Main App Component
 const AppContent = () => {
-  const { currentScreen, setCurrentScreen } = useAppContext();
+  const { currentScreen, setCurrentScreen, setTokenAnalysis, setEmail, setHasPaid } = useAppContext();
   console.log('AppContent rendered, currentScreen:', currentScreen);
+
+  // Handle payment success on app load
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('payment') === 'success') {
+      // Восстанавливаем данные токена из localStorage
+      const savedData = localStorage.getItem('pendingPaymentToken');
+      if (savedData) {
+        try {
+          const { tokenAnalysis, email, timestamp } = JSON.parse(savedData);
+          // Проверяем что данные не старше 1 часа
+          if (Date.now() - timestamp < 3600000) {
+            setTokenAnalysis(tokenAnalysis);
+            setEmail(email);
+            setHasPaid(true);
+            setCurrentScreen('result');
+            // Показываем сообщение об успешной оплате
+            setTimeout(() => {
+              alert('Оплата прошла успешно! Теперь вы можете скачать полный отчет.');
+            }, 500);
+          }
+          // Очищаем сохраненные данные
+          localStorage.removeItem('pendingPaymentToken');
+        } catch (error) {
+          console.error('Error restoring payment data:', error);
+        }
+      }
+      // Очищаем URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [setTokenAnalysis, setEmail, setCurrentScreen, setHasPaid]);
 
   return (
     <div className="w-full">
