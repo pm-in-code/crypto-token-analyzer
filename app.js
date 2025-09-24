@@ -1958,8 +1958,27 @@ const TokenSearch = () => {
     setIsSubmitting(true);
     setShowError(false);
 
+    // Correct common token name variations
+    const correctTokenName = (input) => {
+      const corrections = {
+        'openloot': 'OL',
+        'open loot': 'OL', 
+        'trump': 'TRUMP',
+        'donald trump': 'TRUMP',
+        'trump token': 'TRUMP',
+        'trump coin': 'TRUMP',
+        'maga coin': 'MAGA',
+        'maga token': 'MAGA'
+      };
+      
+      const normalized = input.toLowerCase().trim();
+      return corrections[normalized] || input.trim();
+    };
+
+    const correctedTokenName = correctTokenName(tokenInput);
+
     // First validate if token exists
-    const validation = await validateToken(tokenInput.trim());
+    const validation = await validateToken(correctedTokenName);
     if (!validation.exists) {
       setShowError(true);
       setIsSubmitting(false);
@@ -1979,7 +1998,7 @@ const TokenSearch = () => {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          tokenName: tokenInput.trim(),
+          tokenName: correctedTokenName,
           prompt: prompt
         })
       });
@@ -1988,7 +2007,7 @@ const TokenSearch = () => {
 
       if (response.ok && data.success) {
         setTokenAnalysis({
-          token: data.token,
+          token: correctedTokenName, // Use corrected token name
           summary: data.analysis,
           usage: data.usage
         });

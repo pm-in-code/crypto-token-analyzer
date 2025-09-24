@@ -109,12 +109,13 @@ app.post('/api/analyze-token', async (req, res) => {
 
     // Compose messages: secure system prompt + explicit JSON instruction for stable parsing
     const jsonInstruction = `IMPORTANT: Search for the token "${tokenName.trim()}" using these strategies:
-1. For "Trump" - search for "TRUMP token", "Donald Trump coin", "TRUMP47", "MAGA Coin", or political tokens
-2. For "Openloot" - search for "OPENLOOT token", "Open Loot", gaming tokens, or NFT gaming projects
-3. Try different variations: full name, symbol, official names, common abbreviations
-4. Check multiple sources: CoinMarketCap, CoinGecko, DexScreener, DEXTools for meme coins and new tokens
-5. For meme coins, search social media mentions and community data
-6. If not found on major exchanges, check DEX data and on-chain metrics
+1. For "Trump" - search for "TRUMP", "TRUMP47", "MAGA", "Donald Trump coin", political meme tokens
+2. For "Openloot" - search for "OL" symbol, "Open Loot", gaming/NFT tokens (CoinMarketCap symbol: OL)
+3. Common token variations to try: full name, ticker symbol, alternative spellings, project name
+4. Check multiple data sources: CoinMarketCap, CoinGecko, DexScreener, DEXTools, Dune Analytics
+5. For new/meme coins: check DEX data, social metrics, on-chain analytics, community channels
+6. Search by: exact symbol, full project name, common abbreviations, related keywords
+7. If not on major CEX, check DEX listings and contract addresses
 
 You MUST respond with strict JSON only, no prose. Schema:
 {
