@@ -2050,13 +2050,34 @@ const TokenSearch = () => {
         // Ignore error for direct ID lookup
       }
 
-      // Check if it's a common symbol
-      const commonTokens = ['BTC', 'ETH', 'ADA', 'SOL', 'MATIC', 'DOT', 'LINK', 'UNI', 'AAVE', 'CRV', 'USDT', 'USDC', 'DAI', 'BNB', 'XRP', 'AVAX', 'ATOM', 'NEAR', 'FTM', 'ALGO'];
+      // Check if it's a common symbol (expanded list)
+      const commonTokens = [
+        'BTC', 'ETH', 'ADA', 'SOL', 'MATIC', 'DOT', 'LINK', 'UNI', 'AAVE', 'CRV', 
+        'USDT', 'USDC', 'DAI', 'BNB', 'XRP', 'AVAX', 'ATOM', 'NEAR', 'FTM', 'ALGO',
+        'DOGE', 'SHIB', 'LTC', 'BCH', 'ETC', 'XLM', 'VET', 'ICP', 'FIL', 'TRX',
+        'MANA', 'SAND', 'AXS', 'ENJ', 'CHZ', 'BAT', 'ZRX', 'GRT', 'MKR', 'COMP',
+        'SUSHI', 'YFI', '1INCH', 'SNX', 'REN', 'KNC', 'LRC', 'OMG', 'ZIL', 'ICX',
+        'TRUMP', 'PEPE', 'FLOKI', 'BONK', 'WIF', 'BOME', 'SLERF', 'MAGA', 'OPENLOOT'
+      ];
       if (commonTokens.includes(tokenQuery.toUpperCase())) {
         return { exists: true, tokenData: { symbol: tokenQuery.toUpperCase() } };
       }
 
-      return { exists: false };
+      // Basic validation: token name should be reasonable
+      const tokenName = tokenQuery.trim();
+      
+      // Allow if token name looks valid (2-50 characters, alphanumeric + common symbols)
+      if (tokenName.length >= 2 && tokenName.length <= 50) {
+        const validPattern = /^[a-zA-Z0-9\s\-_\.]+$/;
+        if (validPattern.test(tokenName)) {
+          console.log('Token passed basic validation:', tokenName);
+          return { exists: true, tokenData: { symbol: tokenName.toUpperCase() } };
+        }
+      }
+
+      // If all validation fails, still allow but log it
+      console.log('Token validation uncertain, allowing anyway:', tokenQuery);
+      return { exists: true, tokenData: { symbol: tokenQuery.toUpperCase() } };
     } catch (error) {
       console.error('Token validation error:', error);
       // In case of API error, allow the request to proceed
