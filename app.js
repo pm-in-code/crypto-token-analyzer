@@ -1648,7 +1648,40 @@ const AppProvider = ({ children }) => {
   const [currentScreen, setCurrentScreen] = useState('home');
   const [tokenAnalysis, setTokenAnalysis] = useState(null);
   const [email, setEmail] = useState('');
-  const [hasPaid, setHasPaid] = useState(false);
+  
+  // Initialize paid tokens from localStorage
+  const [paidTokens, setPaidTokens] = useState(() => {
+    try {
+      const saved = localStorage.getItem('paidTokens');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  // Save paid tokens to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('paidTokens', JSON.stringify(paidTokens));
+  }, [paidTokens]);
+
+  // Optional: Clean up old payments (older than 30 days)
+  useEffect(() => {
+    const cleanupInterval = setInterval(() => {
+      const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+      setPaidTokens(prev => {
+        const cleaned = {};
+        Object.entries(prev).forEach(([token, value]) => {
+          // Keep recent payments (value is true or timestamp)
+          if (value === true || (typeof value === 'number' && value > thirtyDaysAgo)) {
+            cleaned[token] = value;
+          }
+        });
+        return cleaned;
+      });
+    }, 24 * 60 * 60 * 1000); // Run daily
+
+    return () => clearInterval(cleanupInterval);
+  }, [setPaidTokens]);
 
   return (
     <AppContext.Provider value={{
@@ -1658,8 +1691,8 @@ const AppProvider = ({ children }) => {
       setTokenAnalysis,
       email,
       setEmail,
-      hasPaid,
-      setHasPaid,
+      paidTokens,
+      setPaidTokens,
     }}>
       {children}
     </AppContext.Provider>
@@ -2304,7 +2337,7 @@ const LoadingScreen = () => {
 
 // Result Screen Component
 const ResultScreen = () => {
-  const { tokenAnalysis, email, setState, setCurrentScreen, setTokenAnalysis, hasPaid } = useAppContext();
+  const { tokenAnalysis, email, setState, setCurrentScreen, setTokenAnalysis, paidTokens } = useAppContext();
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [tempEmail, setTempEmail] = useState('');
   const [emailError, setEmailError] = useState('');
@@ -2319,10 +2352,9 @@ const ResultScreen = () => {
   const [showExplanationModal, setShowExplanationModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
 
-  // Check if user has paid (will be set by AppContent after successful payment)
-  useEffect(() => {
-    // This will be handled by AppContent now
-  }, []);
+  // Check if current token has been paid for
+  const currentTokenSymbol = tokenAnalysis?.token || '';
+  const hasPaid = paidTokens[currentTokenSymbol] || false;
 
   // Initialize Stripe Elements when payment modal opens (must be before any conditional returns)
   React.useEffect(() => {
@@ -3062,7 +3094,7 @@ const ResultScreen = () => {
 
 // Main App Component
 const AppContent = () => {
-  const { currentScreen, setCurrentScreen, setTokenAnalysis, setEmail, setHasPaid } = useAppContext();
+  const { currentScreen, setCurrentScreen, setTokenAnalysis, setEmail, paidTokens, setPaidTokens } = useAppContext();
   console.log('AppContent rendered, currentScreen:', currentScreen);
 
   // Handle payment success on app load
@@ -3078,7 +3110,16 @@ const AppContent = () => {
           if (Date.now() - timestamp < 3600000) {
             setTokenAnalysis(tokenAnalysis);
             setEmail(email);
-            setHasPaid(true);
+            
+            // Определяем токен для которого была оплата
+            const tokenSymbol = tokenAnalysis?.token || 'UNKNOWN';
+            
+            // Добавляем токен в список оплаченных
+            setPaidTokens(prev => ({
+              ...prev,
+              [tokenSymbol]: true
+            }));
+            
             setCurrentScreen('result');
             // Показываем сообщение об успешной оплате
             setTimeout(() => {
@@ -3094,7 +3135,7 @@ const AppContent = () => {
       // Очищаем URL
       window.history.replaceState({}, document.title, window.location.pathname);
     }
-  }, [setTokenAnalysis, setEmail, setCurrentScreen, setHasPaid]);
+  }, [setTokenAnalysis, setEmail, setCurrentScreen, setPaidTokens]);
 
   return (
     <div className="w-full">
