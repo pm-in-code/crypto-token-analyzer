@@ -2355,7 +2355,20 @@ const ResultScreen = () => {
   const [showShareModal, setShowShareModal] = useState(false);
 
   // Check if current token has been paid for and payment is still valid (1 hour)
-  const currentTokenSymbol = tokenAnalysis?.token || '';
+  // Определяем символ текущего токена таким же способом как при сохранении
+  let currentTokenSymbol = tokenAnalysis?.token;
+  
+  if (!currentTokenSymbol) {
+    // Пытаемся извлечь из summary JSON
+    try {
+      const summaryData = JSON.parse(tokenAnalysis?.summary || '{}');
+      currentTokenSymbol = summaryData.tokenSymbol || summaryData.tokenName;
+    } catch (e) {
+      console.log('Could not parse summary for current token symbol');
+    }
+  }
+  
+  currentTokenSymbol = currentTokenSymbol || '';
   const paymentTimestamp = paidTokens[currentTokenSymbol];
   const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
   
@@ -3157,7 +3170,21 @@ const AppContent = () => {
             setEmail(email);
             
             // Определяем токен для которого была оплата
-            const tokenSymbol = tokenAnalysis?.token || 'UNKNOWN';
+            // Пробуем разные способы получить символ токена
+            let tokenSymbol = tokenAnalysis?.token;
+            
+            if (!tokenSymbol) {
+              // Пытаемся извлечь из summary JSON
+              try {
+                const summaryData = JSON.parse(tokenAnalysis?.summary || '{}');
+                tokenSymbol = summaryData.tokenSymbol || summaryData.tokenName;
+              } catch (e) {
+                console.log('Could not parse summary for token symbol');
+              }
+            }
+            
+            tokenSymbol = tokenSymbol || 'UNKNOWN';
+            console.log('Determined token symbol for payment:', tokenSymbol);
             console.log('Payment success - setting paid token:', tokenSymbol, Date.now());
             
             // Добавляем токен в список оплаченных с timestamp
