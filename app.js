@@ -2358,12 +2358,27 @@ const ResultScreen = () => {
   const currentTokenSymbol = tokenAnalysis?.token || '';
   const paymentTimestamp = paidTokens[currentTokenSymbol];
   const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
-  const hasPaid = paymentTimestamp && (Date.now() - paymentTimestamp < oneHour);
   
   // Calculate remaining time for premium access
   const [currentTime, setCurrentTime] = useState(Date.now());
+  const hasPaid = paymentTimestamp && (currentTime - paymentTimestamp < oneHour);
   const remainingTime = hasPaid ? Math.max(0, oneHour - (currentTime - paymentTimestamp)) : 0;
   const remainingMinutes = Math.ceil(remainingTime / (60 * 1000));
+
+  // Debug logging
+  console.log('ResultScreen Debug:', {
+    currentTokenSymbol,
+    paymentTimestamp,
+    currentTime,
+    hasPaid,
+    remainingMinutes,
+    paidTokens
+  });
+
+  // Update currentTime when paidTokens changes (for immediate UI update after payment)
+  useEffect(() => {
+    setCurrentTime(Date.now());
+  }, [paidTokens]);
 
   // Update timer every minute
   useEffect(() => {
