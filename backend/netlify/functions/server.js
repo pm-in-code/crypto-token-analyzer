@@ -108,7 +108,15 @@ app.post('/api/analyze-token', async (req, res) => {
     }
 
     // Compose messages: secure system prompt + explicit JSON instruction for stable parsing
-    const jsonInstruction = `You MUST respond with strict JSON only, no prose. Schema:
+    const jsonInstruction = `IMPORTANT: Search for the token "${tokenName.trim()}" using these strategies:
+1. For "Trump" - search for "TRUMP token", "Donald Trump coin", "TRUMP47", "MAGA Coin", or political tokens
+2. For "Openloot" - search for "OPENLOOT token", "Open Loot", gaming tokens, or NFT gaming projects
+3. Try different variations: full name, symbol, official names, common abbreviations
+4. Check multiple sources: CoinMarketCap, CoinGecko, DexScreener, DEXTools for meme coins and new tokens
+5. For meme coins, search social media mentions and community data
+6. If not found on major exchanges, check DEX data and on-chain metrics
+
+You MUST respond with strict JSON only, no prose. Schema:
 {
   "tokenName": string,
   "tokenSymbol": string,
@@ -158,7 +166,12 @@ app.post('/api/analyze-token', async (req, res) => {
     }
   ]
 }
-Guidelines: ALL content MUST be specific to the token ${tokenName.trim()}, reflecting current data and reasoning, not generic templates. Return valid JSON only.`;
+Guidelines: 
+- Use the search strategies above to find accurate data for "${tokenName.trim()}"
+- ALL content MUST be specific to this exact token, not generic templates
+- If token exists but has limited data, use available information from DEX/on-chain sources
+- If truly not found after thorough search, indicate this in the analysis
+- Return valid JSON only with real data.`;
     const messages = [
       { role: 'system', content: securePrompt },
       { role: 'user', content: `Token: ${tokenName.trim()}\n${jsonInstruction}` }
