@@ -1988,7 +1988,9 @@ const TokenSearch = () => {
     }
 
     // Check if it's a stablecoin
+    console.log('Validation result:', validation);
     if (validation.isStablecoin) {
+      console.log('Showing stablecoin modal for:', correctedTokenName);
       setStablecoinSymbol(correctedTokenName);
       setShowStablecoinModal(true);
       setIsSubmitting(false);
@@ -2082,10 +2084,12 @@ const TokenSearch = () => {
       // Check if it's a stablecoin (should not be analyzed)
       const stablecoins = [
         'USDT', 'USDC', 'DAI', 'BUSD', 'TUSD', 'USDP', 'USDD', 'FRAX', 'LUSD', 'SUSD',
-        'GUSD', 'USDN', 'DUSD', 'RSV', 'USDN', 'USDX', 'USDJ', 'USDS', 'USDM', 'USDK',
-        'USDX', 'USDN', 'USDT', 'USDC', 'DAI', 'BUSD', 'TUSD', 'USDP', 'USDD', 'FRAX'
+        'GUSD', 'USDN', 'DUSD', 'RSV', 'USDX', 'USDJ', 'USDS', 'USDM', 'USDK', 'USDR',
+        'UST', 'USTC', 'MIM', 'DOLA', 'FEI', 'TRIBE', 'OHM', 'ALUSD', 'FLOAT', 'BOND',
+        'HUSD', 'PAX', 'PAXG', 'NUSD'
       ];
       if (stablecoins.includes(tokenQuery.toUpperCase())) {
+        console.log('Stablecoin detected:', tokenQuery.toUpperCase());
         return { 
           exists: true, 
           isStablecoin: true, 
