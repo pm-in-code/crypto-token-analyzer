@@ -12,6 +12,9 @@ app.use(express.json({ limit: '1mb' }));
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const STRIPE_PUBLISHABLE_KEY = process.env.STRIPE_PUBLISHABLE_KEY;
+const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID || 'AcGq4K7pDqR6xZHMWDo5Q7wZJJN4jYzW2zLVxX7cGvGnOC8JYm4lXOy2gzgzJzQ5OzKnKzNzKzMzLzI'; // Sandbox client ID
+const PAYPAL_SECRET = process.env.PAYPAL_SECRET || 'ELtwjJWFUXLMHbKu9eFNXhtgrmmvzokC2Jh_vqUh453jBnseTCxiSkPFAAZsoAm66j2z-Io8y3Rz-Vcx'; // User's sandbox secret
+const PAYPAL_API_URL = process.env.PAYPAL_API_URL || 'https://api-m.sandbox.paypal.com'; // Sandbox API URL
 const GIST_ID = process.env.GIST_ID; // GitHub Gist ID
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN; // GitHub Personal Access Token
 const ANALYSIS_PROMPT = process.env.ANALYSIS_PROMPT; // fallback single-var storage
@@ -635,6 +638,134 @@ app.post('/api/create-checkout-session', async (req, res) => {
   } catch (error) {
     console.error('Error creating payment intent:', error);
     res.status(500).json({ error: 'Failed to create payment intent' });
+  }
+});
+
+// Helper function to get PayPal access token
+async function getPayPalAccessToken() {
+  const auth = Buffer.from(`${PAYPAL_CLIENT_ID}:${PAYPAL_SECRET}`).toString('base64');
+  
+  const response = await fetch(`${PAYPAL_API_URL}/v1/oauth2/token`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Basic ${auth}`,
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: 'grant_type=client_credentials'
+  });
+  
+  const data = await response.json();
+  return data.access_token;
+}
+
+// PayPal Create Order endpoint
+app.post('/api/create-paypal-order', async (req, res) => {
+  try {
+    console.log('PayPal order endpoint called with body:', req.body);
+    
+    if (!PAYPAL_SECRET) {
+      console.log('PayPal secret not configured');
+      return res.status(500).json({ error: 'PayPal not configured' });
+    }
+    
+    const { amount = 2.99 } = req.body;
+    
+    if (!amount) {
+      console.log('Amount is missing');
+      return res.status(400).json({ error: 'Amount is required' });
+    }
+    
+    console.log('Creating PayPal order with amount:', amount);
+    
+    // Get access token
+    const accessToken = await getPayPalAccessToken();
+    
+    // Create order
+    const orderResponse = await fetch(`${PAYPAL_API_URL}/v2/checkout/orders`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        intent: 'CAPTURE',
+        purchase_units: [{
+          amount: {
+            currency_code: 'USD',
+            value: amount.toFixed(2)
+          },
+          description: 'Premium Crypto Analysis Report'
+        }],
+        application_context: {
+          brand_name: 'ItsWorth',
+          landing_page: 'NO_PREFERENCE',
+          user_action: 'PAY_NOW',
+          return_url: 'https://itsworth.app?payment=success',
+          cancel_url: 'https://itsworth.app?payment=cancelled'
+        }
+      })
+    });
+    
+    const order = await orderResponse.json();
+    console.log('PayPal order response:', order);
+    
+    if (order.error) {
+      console.error('PayPal error:', order.error);
+      return res.status(400).json({ error: order.error.message || 'PayPal error' });
+    }
+    
+    // Find approval URL
+    const approvalUrl = order.links?.find(link => link.rel === 'approve')?.href;
+    
+    res.json({
+      orderId: order.id,
+      approvalUrl: approvalUrl
+    });
+  } catch (error) {
+    console.error('Error creating PayPal order:', error);
+    res.status(500).json({ error: 'Failed to create PayPal order' });
+  }
+});
+
+// PayPal Capture Order endpoint (called after user approves payment)
+app.post('/api/capture-paypal-order', async (req, res) => {
+  try {
+    const { orderId } = req.body;
+    
+    if (!orderId) {
+      return res.status(400).json({ error: 'Order ID is required' });
+    }
+    
+    console.log('Capturing PayPal order:', orderId);
+    
+    // Get access token
+    const accessToken = await getPayPalAccessToken();
+    
+    // Capture order
+    const captureResponse = await fetch(`${PAYPAL_API_URL}/v2/checkout/orders/${orderId}/capture`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    const capture = await captureResponse.json();
+    console.log('PayPal capture response:', capture);
+    
+    if (capture.error) {
+      console.error('PayPal capture error:', capture.error);
+      return res.status(400).json({ error: capture.error.message || 'Capture failed' });
+    }
+    
+    res.json({
+      success: true,
+      captureId: capture.id,
+      status: capture.status
+    });
+  } catch (error) {
+    console.error('Error capturing PayPal order:', error);
+    res.status(500).json({ error: 'Failed to capture PayPal order' });
   }
 });
 

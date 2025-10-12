@@ -2384,6 +2384,7 @@ const ResultScreen = () => {
   const [tempEmail, setTempEmail] = useState('');
   const [emailError, setEmailError] = useState('');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showPaymentMethodModal, setShowPaymentMethodModal] = useState(false); // New: payment method selection
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [stripe, setStripe] = useState(null);
   const [elements, setElements] = useState(null);
@@ -2722,9 +2723,15 @@ const ResultScreen = () => {
 
   
 
-  const handlePremiumDownload = async () => {
+  const handlePremiumDownload = () => {
+    // Open payment method selection modal
+    setShowPaymentMethodModal(true);
+  };
+
+  const handleStripePayment = async () => {
     try {
       setPaymentProcessing(true);
+      setShowPaymentMethodModal(false);
       
       // Сохраняем данные токена в localStorage перед оплатой
       const paymentData = {
@@ -2758,6 +2765,48 @@ const ResultScreen = () => {
     } catch (error) {
       console.error('Ошибка создания платежа:', error);
       alert('Ошибка при создании платежа: ' + error.message);
+    } finally {
+      setPaymentProcessing(false);
+    }
+  };
+
+  const handlePayPalPayment = async () => {
+    try {
+      setPaymentProcessing(true);
+      setShowPaymentMethodModal(false);
+      
+      // Сохраняем данные токена в localStorage перед оплатой
+      const paymentData = {
+        tokenAnalysis: tokenAnalysis,
+        email: email,
+        timestamp: Date.now()
+      };
+      console.log('Saving payment data before redirect:', paymentData);
+      localStorage.setItem('pendingPaymentToken', JSON.stringify(paymentData));
+      
+      // Создаем PayPal Order
+      const response = await fetch(`${BACKEND_API_URL}/create-paypal-order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: 2.99 }) // $2.99
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Ошибка создания PayPal платежа');
+      }
+      
+      // Перенаправляем на PayPal
+      if (data.approvalUrl) {
+        window.location.href = data.approvalUrl;
+      } else {
+        throw new Error('Не получен URL для оплаты PayPal');
+      }
+      
+    } catch (error) {
+      console.error('Ошибка создания PayPal платежа:', error);
+      alert('Ошибка при создании платежа PayPal: ' + error.message);
     } finally {
       setPaymentProcessing(false);
     }
@@ -2898,7 +2947,7 @@ const ResultScreen = () => {
                       <button onClick={() => generatePDFReport(tokenAnalysis, email, true)} className="btn-download-premium w-full">Download full report</button>
                       <div className="text-xs text-gray-500 text-center">
                         Premium access expires in {remainingMinutes} minute{remainingMinutes !== 1 ? 's' : ''}
-                      </div>
+                  </div>
                     </div>
                   ) : (
                     <button onClick={handlePremiumDownload} disabled={paymentProcessing} className="btn-download-premium w-full">{paymentProcessing ? 'Processing…' : 'Unlock full report'}</button>
@@ -2953,12 +3002,12 @@ const ResultScreen = () => {
                       }}
                     >
                       {c.score}/100
-                    </span>
-                      </div>
+                            </span>
+                          </div>
                 );
               })}
-                      </div>
-                      </div>
+                          </div>
+                        </div>
 
           {/* Blurred full report teaser */}
           <div className="relative w-full h-48 lg:h-[300px] border p-1 lg:p-4 flex gap-1 lg:gap-4" style={{ borderRadius: 24 }}>
@@ -3001,14 +3050,14 @@ const ResultScreen = () => {
                 </div>
                 <p className="text-gray-600 text-sm">
                   This token shows strong fundamentals, good market performance, and positive indicators across multiple categories. Consider it for your portfolio with proper risk management.
-                </p>
-              </div>
+                      </p>
+                    </div>
 
               {/* Maybe */}
               <div className="text-center">
                 <div className="bg-amber-400 text-amber-800 font-bold text-lg py-3 px-6 rounded-lg mb-3">
                   Maybe
-                </div>
+                  </div>
                 <p className="text-gray-600 text-sm">
                   This token has mixed signals - some positive aspects but also areas of concern. Research further and consider your risk tolerance before investing.
                 </p>
@@ -3018,11 +3067,11 @@ const ResultScreen = () => {
               <div className="text-center">
                 <div className="bg-pink-400 text-pink-800 font-bold text-lg py-3 px-6 rounded-lg mb-3">
                   Nope
-                </div>
+                      </div>
                 <p className="text-gray-600 text-sm">
                   This token shows significant weaknesses, poor fundamentals, or high risks. We recommend avoiding this investment opportunity.
                 </p>
-              </div>
+                      </div>
             </div>
 
             {/* Got it button */}
@@ -3033,10 +3082,10 @@ const ResultScreen = () => {
               >
                 Got it
             </button>
-            </div>
-          </div>
-        </div>
-      )}
+                      </div>
+                    </div>
+                  </div>
+                )}
 
       {/* Share Modal */}
       {showShareModal && (
@@ -3051,7 +3100,7 @@ const ResultScreen = () => {
             >
                 ✕
             </button>
-          </div>
+              </div>
 
             {/* Preview */}
             <div className="mb-6 p-4 bg-gray-50 rounded-lg">
@@ -3079,50 +3128,122 @@ const ResultScreen = () => {
               </button>
 
               {/* Telegram */}
-              <button 
+            <button
                 onClick={shareToTelegram}
                 className="flex flex-col items-center p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors"
-              >
+            >
                 <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mb-2">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
                     <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .237.077c.28.56.96 1.956 1.427 2.87a.535.535 0 0 1 .096.295.495.495 0 0 1-.189.351c-.048.047-.112.09-.2.116a.509.509 0 0 1-.42-.049 9.902 9.902 0 0 1-1.98-1.093.49.49 0 0 1-.196-.247.478.478 0 0 1 .015-.386.507.507 0 0 1 .244-.215c.258-.108.56-.16.882-.128a.457.457 0 0 1 .066.013z"/>
-                  </svg>
+              </svg>
             </div>
                 <span className="text-sm font-medium text-gray-700">Telegram</span>
-              </button>
+            </button>
             
               {/* Reddit */}
-              <button
+            <button
                 onClick={shareToReddit}
                 className="flex flex-col items-center p-4 rounded-lg border border-gray-200 hover:border-orange-300 hover:bg-orange-50 transition-colors"
               >
                 <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center mb-2">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
                     <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .31-.093c.587.29 1.243.442 1.942.442zm-9.25 3.821c.263 0 .484.22.484.484s-.22.484-.484.484-.484-.22-.484-.484.22-.484.484-.484zm5.5 0c.263 0 .484.22.484.484s-.22.484-.484.484-.484-.22-.484-.484.22-.484.484-.484z"/>
-                </svg>
+                  </svg>
                 </div>
                 <span className="text-sm font-medium text-gray-700">Reddit</span>
-              </button>
-
+            </button>
+            
               {/* Download */}
-              <button
+            <button
                 onClick={downloadShareImage}
                 className="flex flex-col items-center p-4 rounded-lg border border-gray-200 hover:border-green-300 hover:bg-green-50 transition-colors"
-              >
+            >
                 <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mb-2">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
                     <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
-                </svg>
+              </svg>
                 </div>
                 <span className="text-sm font-medium text-gray-700">Download</span>
-              </button>
-            </div>
+            </button>
+          </div>
 
             {/* Info */}
             <div className="text-center text-sm text-gray-600">
               <p>Share your token analysis results with the community!</p>
               <p className="mt-1">The image includes your overall score and category breakdown.</p>
+          </div>
+        </div>
+      </div>
+      )}
+
+      {/* Payment Method Selection Modal */}
+      {showPaymentMethodModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 md:p-8 max-w-md w-full shadow-2xl">
+            <h3 className="text-2xl font-bold text-gray-900 mb-2 text-center">
+              Choose Payment Method
+            </h3>
+            <p className="text-gray-600 mb-6 text-center">
+              Select your preferred payment option
+            </p>
+            
+            <div className="space-y-3">
+              {/* Stripe Card Payment */}
+              <button
+                onClick={handleStripePayment}
+                disabled={paymentProcessing}
+                className="w-full p-4 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 flex items-center justify-between group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+                  </div>
+                  <div className="text-left">
+                    <div className="font-semibold text-gray-900">Credit / Debit Card</div>
+                    <div className="text-sm text-gray-500">Pay with Stripe</div>
+                  </div>
+                </div>
+                <svg className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+
+              {/* PayPal Payment */}
+              <button
+                onClick={handlePayPalPayment}
+                disabled={paymentProcessing}
+                className="w-full p-4 border-2 border-gray-200 rounded-xl hover:border-[#0070ba] hover:bg-blue-50 transition-all duration-200 flex items-center justify-between group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-[#0070ba] rounded-lg flex items-center justify-center">
+                    <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c-.013.076-.026.175-.041.254-.93 4.778-4.005 7.201-9.138 7.201h-2.19a.563.563 0 0 0-.556.479l-1.187 7.527h-.506L9.072 14.21h2.19c4.5 0 7.743-1.83 8.817-7.15.032-.16.06-.31.082-.458a6.347 6.347 0 0 1 .06.315z"/>
+                </svg>
+                  </div>
+                  <div className="text-left">
+                    <div className="font-semibold text-gray-900">PayPal</div>
+                    <div className="text-sm text-gray-500">Fast & secure</div>
+                  </div>
+                </div>
+                <svg className="w-5 h-5 text-gray-400 group-hover:text-[#0070ba] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
             </div>
+
+            <div className="mt-6 text-center">
+              <div className="text-2xl font-bold text-gray-900 mb-2">$2.99</div>
+              <div className="text-sm text-gray-500 mb-4">One-time payment • 1 hour access</div>
+            </div>
+
+            <button
+              onClick={() => setShowPaymentMethodModal(false)}
+              className="w-full mt-4 px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              Cancel
+            </button>
           </div>
         </div>
       )}
