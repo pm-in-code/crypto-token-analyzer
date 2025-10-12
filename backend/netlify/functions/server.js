@@ -643,6 +643,15 @@ app.post('/api/create-checkout-session', async (req, res) => {
 
 // Helper function to get PayPal access token
 async function getPayPalAccessToken() {
+  console.log('Getting PayPal access token...');
+  console.log('PAYPAL_CLIENT_ID:', PAYPAL_CLIENT_ID ? 'SET' : 'NOT SET');
+  console.log('PAYPAL_SECRET:', PAYPAL_SECRET ? 'SET' : 'NOT SET');
+  console.log('PAYPAL_API_URL:', PAYPAL_API_URL);
+  
+  if (!PAYPAL_CLIENT_ID || !PAYPAL_SECRET || !PAYPAL_API_URL) {
+    throw new Error('PayPal credentials not configured');
+  }
+  
   const auth = Buffer.from(`${PAYPAL_CLIENT_ID}:${PAYPAL_SECRET}`).toString('base64');
   
   const response = await fetch(`${PAYPAL_API_URL}/v1/oauth2/token`, {
@@ -654,7 +663,18 @@ async function getPayPalAccessToken() {
     body: 'grant_type=client_credentials'
   });
   
+  console.log('PayPal token response status:', response.status);
   const data = await response.json();
+  console.log('PayPal token response:', data);
+  
+  if (!response.ok) {
+    throw new Error(`PayPal token request failed: ${data.error_description || data.error || 'Unknown error'}`);
+  }
+  
+  if (!data.access_token) {
+    throw new Error('No access token received from PayPal');
+  }
+  
   return data.access_token;
 }
 
@@ -679,6 +699,7 @@ app.post('/api/create-paypal-order', async (req, res) => {
     
     // Get access token
     const accessToken = await getPayPalAccessToken();
+    console.log('Got PayPal access token, creating order...');
     
     // Create order
     const orderResponse = await fetch(`${PAYPAL_API_URL}/v2/checkout/orders`, {
@@ -706,8 +727,16 @@ app.post('/api/create-paypal-order', async (req, res) => {
       })
     });
     
+    console.log('PayPal order response status:', orderResponse.status);
     const order = await orderResponse.json();
     console.log('PayPal order response:', order);
+    
+    if (!orderResponse.ok) {
+      console.error('PayPal order request failed:', order);
+      return res.status(400).json({ 
+        error: order.details?.[0]?.description || order.message || 'PayPal order creation failed' 
+      });
+    }
     
     if (order.error) {
       console.error('PayPal error:', order.error);
