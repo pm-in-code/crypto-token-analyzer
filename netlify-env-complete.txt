@@ -1,0 +1,58 @@
+# ==================================================
+# COMPLETE ENVIRONMENT VARIABLES FOR NETLIFY
+# ==================================================
+# Copy this file and add all variables to Netlify:
+# Dashboard → Site configuration → Environment variables
+# ==================================================
+
+# ============================================
+# OpenAI Configuration
+# ============================================
+OPENAI_API_KEY=your_openai_api_key_here
+# Example: sk-proj-xxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# ============================================
+# Stripe Configuration
+# ============================================
+STRIPE_SECRET_KEY=your_stripe_secret_key_here
+# Example: sk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key_here
+# Example: pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# ============================================
+# PayPal Configuration (Sandbox - for testing)
+# ============================================
+PAYPAL_CLIENT_ID=AcGq4K7pDqR6xZHMWDo5Q7wZJJN4jYzW2zLVxX7cGvGnOC8JYm4lXOy2gzgzJzQ5OzKnKzNzKzMzLzI
+PAYPAL_SECRET=ELtwjJWFUXLMHbKu9eFNXhtgrmmvzokC2Jh_vqUh453jBnseTCxiSkPFAAZsoAm66j2z-Io8y3Rz-Vcx
+PAYPAL_API_URL=https://api-m.sandbox.paypal.com
+
+# For PRODUCTION PayPal (when ready):
+# PAYPAL_CLIENT_ID=your_production_paypal_client_id
+# PAYPAL_SECRET=your_production_paypal_secret
+# PAYPAL_API_URL=https://api-m.paypal.com
+
+# ============================================
+# GitHub Gist (for storing large prompts)
+# ============================================
+GIST_ID=your_github_gist_id_here
+# Example: 1a2b3c4d5e6f7g8h9i0j
+
+GITHUB_TOKEN=your_github_personal_access_token_here
+# Example: ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# ============================================
+# Analysis Prompt (alternative to Gist)
+# ============================================
+# If not using Gist, can store prompt directly
+# ANALYSIS_PROMPT=your_full_analysis_prompt_here
+
+# ============================================
+# DEPLOYMENT NOTES:
+# ============================================
+# 1. Never commit this file with real values to git
+# 2. Add all variables in Netlify Dashboard
+# 3. After adding variables, trigger a new deploy
+# 4. Check Netlify Functions logs for any errors
+# 5. Test both Stripe and PayPal payments
+

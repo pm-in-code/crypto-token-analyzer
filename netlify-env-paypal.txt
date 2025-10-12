@@ -1,0 +1,30 @@
+# PayPal Configuration for Netlify
+# Add these environment variables to: Netlify Dashboard → Site configuration → Environment variables
+
+# PayPal Sandbox Client ID
+PAYPAL_CLIENT_ID=AcGq4K7pDqR6xZHMWDo5Q7wZJJN4jYzW2zLVxX7cGvGnOC8JYm4lXOy2gzgzJzQ5OzKnKzNzKzMzLzI
+
+# PayPal Sandbox Secret Key
+PAYPAL_SECRET=ELtwjJWFUXLMHbKu9eFNXhtgrmmvzokC2Jh_vqUh453jBnseTCxiSkPFAAZsoAm66j2z-Io8y3Rz-Vcx
+
+# PayPal API URL (Sandbox for testing)
+PAYPAL_API_URL=https://api-m.sandbox.paypal.com
+
+# ============================================
+# IMPORTANT NOTES:
+# ============================================
+# 1. This is SANDBOX configuration for testing
+# 2. For PRODUCTION, change to:
+#    - Your production PayPal Client ID
+#    - Your production PayPal Secret
+#    - PAYPAL_API_URL=https://api-m.paypal.com
+# 
+# 3. How to add to Netlify:
+#    - Go to Netlify Dashboard
+#    - Select your site
+#    - Site configuration → Environment variables
+#    - Click "Add a variable" for each one
+#    - Or use "Import from .env" feature
+#
+# 4. After adding, redeploy your site for changes to take effect
+
