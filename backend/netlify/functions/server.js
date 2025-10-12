@@ -94,6 +94,65 @@ app.get('/api/health', async (req, res) => {
   });
 });
 
+// Helper function to get real token data from CoinGecko
+async function getRealTokenData(tokenSymbol) {
+  try {
+    console.log('Fetching real data for token:', tokenSymbol);
+    
+    // First, search for the token
+    const searchResponse = await fetch(`https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(tokenSymbol)}`);
+    const searchData = await searchResponse.json();
+    
+    if (!searchData.coins || searchData.coins.length === 0) {
+      console.log('Token not found in CoinGecko search:', tokenSymbol);
+      return { success: false, error: 'Token not found' };
+    }
+    
+    // Get the first (most relevant) result
+    const coinId = searchData.coins[0].id;
+    console.log('Found coin ID:', coinId);
+    
+    // Get detailed market data
+    const coinResponse = await fetch(`https://api.coingecko.com/api/v3/coins/${coinId}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false`);
+    const coinData = await coinResponse.json();
+    
+    if (!coinResponse.ok) {
+      console.error('CoinGecko API error:', coinData);
+      return { success: false, error: 'API request failed' };
+    }
+    
+    const marketData = coinData.market_data;
+    
+    return {
+      success: true,
+      data: {
+        name: coinData.name,
+        symbol: coinData.symbol.toUpperCase(),
+        current_price: marketData.current_price?.usd || 0,
+        market_cap: marketData.market_cap?.usd || 0,
+        market_cap_rank: coinData.market_cap_rank || null,
+        volume_24h: marketData.total_volume?.usd || 0,
+        price_change_24h: marketData.price_change_24h || 0,
+        price_change_percentage_24h: marketData.price_change_percentage_24h || 0,
+        ath: marketData.ath?.usd || 0,
+        ath_date: marketData.ath_date?.usd || null,
+        atl: marketData.atl?.usd || 0,
+        atl_date: marketData.atl_date?.usd || null,
+        circulating_supply: marketData.circulating_supply || 0,
+        total_supply: marketData.total_supply || 0,
+        max_supply: marketData.max_supply || null,
+        // Additional useful data
+        price_change_percentage_7d: marketData.price_change_percentage_7d || 0,
+        price_change_percentage_30d: marketData.price_change_percentage_30d || 0,
+        price_change_percentage_1y: marketData.price_change_percentage_1y || 0
+      }
+    };
+  } catch (error) {
+    console.error('Error fetching real token data:', error);
+    return { success: false, error: error.message };
+  }
+}
+
 // Token analysis endpoint
 app.post('/api/analyze-token', async (req, res) => {
   try {
@@ -108,6 +167,41 @@ app.post('/api/analyze-token', async (req, res) => {
     }
     if (!tokenName || typeof tokenName !== 'string') {
       return res.status(400).json({ error: 'tokenName is required' });
+    }
+
+    // Get real token data from CoinGecko
+    console.log('Fetching real data for analysis...');
+    const realDataResult = await getRealTokenData(tokenName.trim());
+    
+    let realDataSection = '';
+    if (realDataResult.success) {
+      const data = realDataResult.data;
+      realDataSection = `
+
+REAL MARKET DATA (USE ONLY THESE EXACT VALUES):
+Token Name: ${data.name}
+Symbol: ${data.symbol}
+Current Price: $${data.current_price}
+Market Cap: $${data.market_cap}
+Market Cap Rank: #${data.market_cap_rank || 'N/A'}
+24h Volume: $${data.volume_24h}
+24h Price Change: ${data.price_change_24h} (${data.price_change_percentage_24h}%)
+7d Price Change: ${data.price_change_percentage_7d}%
+30d Price Change: ${data.price_change_percentage_30d}%
+1y Price Change: ${data.price_change_percentage_1y}%
+All-Time High: $${data.ath} (${data.ath_date || 'N/A'})
+All-Time Low: $${data.atl} (${data.atl_date || 'N/A'})
+Circulating Supply: ${data.circulating_supply}
+Total Supply: ${data.total_supply || 'N/A'}
+Max Supply: ${data.max_supply || 'N/A'}
+
+CRITICAL: Use ONLY these exact real values in your analysis. Do not estimate, approximate, or make up any numbers.`;
+    } else {
+      console.log('Could not fetch real data, proceeding with original prompt:', realDataResult.error);
+      realDataSection = `
+
+REAL DATA UNAVAILABLE: Could not fetch real market data for this token.
+Please proceed with analysis but clearly indicate when data is estimated or unavailable.`;
     }
 
     // Compose messages: secure system prompt + explicit JSON instruction for stable parsing
@@ -178,7 +272,7 @@ Guidelines:
 - Return valid JSON only with real data.`;
     const messages = [
       { role: 'system', content: securePrompt },
-      { role: 'user', content: `Token: ${tokenName.trim()}\n${jsonInstruction}` }
+      { role: 'user', content: `Token: ${tokenName.trim()}\n${realDataSection}\n${jsonInstruction}` }
     ];
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
