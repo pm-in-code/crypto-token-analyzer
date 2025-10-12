@@ -2980,14 +2980,29 @@ const ResultScreen = () => {
       </div>
 
       {/* Social links - Fixed Position Top Right (visible on results too) */}
-      <div className="fixed top-4 right-4 flex gap-3 z-40">
-        <a href="https://x.com/itsworth_app" target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-xl bg-amber-50 border border-amber-100 text-gray-800 shadow-sm hover:bg-amber-100 transition-colors">Twitter</a>
-        <a href="https://www.reddit.com/r/Its_worth_app/" target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-xl bg-amber-50 border border-amber-100 text-gray-800 shadow-sm hover:bg-amber-100 transition-colors">Reddit</a>
-        <a href="https://t.me/+AUgtdKZ7FqQ3NzAy" target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-xl bg-amber-50 border border-amber-100 text-gray-800 shadow-sm hover:bg-amber-100 transition-colors">Telegram</a>
+      <div className="fixed top-4 right-4 flex gap-1 md:gap-3 z-40">
+        <a href="https://x.com/itsworth_app" target="_blank" rel="noopener noreferrer" className="hidden sm:block px-2 md:px-4 py-2 rounded-xl bg-amber-50 border border-amber-100 text-gray-800 shadow-sm hover:bg-amber-100 transition-colors text-sm md:text-base">Twitter</a>
+        <a href="https://x.com/itsworth_app" target="_blank" rel="noopener noreferrer" className="sm:hidden p-2 rounded-xl bg-amber-50 border border-amber-100 text-gray-800 shadow-sm hover:bg-amber-100 transition-colors">
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+          </svg>
+        </a>
+        <a href="https://www.reddit.com/r/Its_worth_app/" target="_blank" rel="noopener noreferrer" className="hidden sm:block px-2 md:px-4 py-2 rounded-xl bg-amber-50 border border-amber-100 text-gray-800 shadow-sm hover:bg-amber-100 transition-colors text-sm md:text-base">Reddit</a>
+        <a href="https://www.reddit.com/r/Its_worth_app/" target="_blank" rel="noopener noreferrer" className="sm:hidden p-2 rounded-xl bg-amber-50 border border-amber-100 text-gray-800 shadow-sm hover:bg-amber-100 transition-colors">
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/>
+          </svg>
+        </a>
+        <a href="https://t.me/+AUgtdKZ7FqQ3NzAy" target="_blank" rel="noopener noreferrer" className="hidden sm:block px-2 md:px-4 py-2 rounded-xl bg-amber-50 border border-amber-100 text-gray-800 shadow-sm hover:bg-amber-100 transition-colors text-sm md:text-base">Telegram</a>
+        <a href="https://t.me/+AUgtdKZ7FqQ3NzAy" target="_blank" rel="noopener noreferrer" className="sm:hidden p-2 rounded-xl bg-amber-50 border border-amber-100 text-gray-800 shadow-sm hover:bg-amber-100 transition-colors">
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+          </svg>
+        </a>
       </div>
       {/* New Token Search Bar */}
-      <div className="mb-6 flex justify-center">
-        <form onSubmit={handleNewTokenSubmit} style={{ width: 640 }}>
+      <div className="mb-6 flex justify-center px-4">
+        <form onSubmit={handleNewTokenSubmit} className="w-full max-w-2xl">
           <div className="relative">
             <input
               type="text"
@@ -3022,10 +3037,10 @@ const ResultScreen = () => {
 
       {/* Central block layout */}
       <div className="mb-8 px-4 md:px-0" style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        <div className="flex flex-col lg:flex-row gap-2 lg:gap-8">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
         {/* Left hero card */}
         <div className="w-full lg:w-auto lg:flex-1">
-          <div className={`overflow-hidden border ${bandBorder} w-full lg:w-[560px] h-[400px] lg:h-[600px] flex flex-col relative`} style={{ borderRadius: 24 }}>
+          <div className={`overflow-hidden border ${bandBorder} w-full max-w-2xl lg:w-[560px] h-[500px] sm:h-[550px] lg:h-[600px] flex flex-col relative`} style={{ borderRadius: 24 }}>
             {/* Floating inner card by Figma spec */}
             <div className={`absolute top-4 left-4 right-4 lg:top-[170px] lg:left-16 lg:right-16 bottom-20 lg:bottom-auto lg:h-96 border ${bandBorder} flex flex-col gap-1 bg-transparent p-1`} style={{ borderRadius: 24 }}>
               <div className="bg-white rounded-2xl shadow-sm p-6 flex-1 flex flex-col">
@@ -3081,19 +3096,19 @@ const ResultScreen = () => {
                   </div>
 
         {/* Right column */}
-        <div className="w-full lg:w-[640px] flex flex-col gap-2 lg:gap-8">
+        <div className="w-full lg:w-[640px] flex flex-col gap-4 lg:gap-8">
           {/* Categories overview */}
           <div className="card w-full h-auto lg:h-[280px] p-4 lg:p-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-3 lg:gap-4">
               {['Market Metrics','Social Metrics','Tokenomics','Team & Investors','Development Activity','Risk Assessment'].map((name) => {
                 const c = categories.find((x) => (x.name||'').toLowerCase() === name.toLowerCase()) || { score: 0 };
                 const b = scoreBand(c.score);
                 const pill = b === 'green' ? 'bg-lime-300' : b === 'yellow' ? 'bg-amber-300' : 'bg-pink-300';
                 return (
-                  <div key={name} className="flex items-center justify-between p-3 lg:p-4 rounded-lg bg-white/80 border h-12 lg:h-16">
-                    <span className="text-gray-800 text-xs lg:text-sm font-medium truncate flex-1 mr-2 lg:mr-4">{name}</span>
+                  <div key={name} className="flex items-center justify-between p-3 lg:p-4 rounded-lg bg-white/80 border h-14 lg:h-16">
+                    <span className="text-gray-800 text-sm lg:text-sm font-medium truncate flex-1 mr-2 lg:mr-4">{name}</span>
                     <span
-                      className={`rounded-full text-xs font-bold flex-shrink-0 ${pill} w-16 h-8 lg:w-[100px] lg:h-[40px] flex items-center justify-center`}
+                      className={`rounded-full text-xs lg:text-sm font-bold flex-shrink-0 ${pill} w-16 h-8 lg:w-[100px] lg:h-[40px] flex items-center justify-center`}
                       style={{
                         borderRadius: 156,
                         padding: '12px 16px',
@@ -3119,9 +3134,9 @@ const ResultScreen = () => {
                     </div>
             <div className="absolute inset-0 flex items-center justify-center">
               {hasPaid ? (
-                <button onClick={() => generatePDFReport(tokenAnalysis, email, true)} className="btn-download-premium w-32 lg:w-60 text-sm lg:text-base">Download full report</button>
+                <button onClick={() => generatePDFReport(tokenAnalysis, email, true)} className="btn-download-premium w-40 sm:w-48 lg:w-60 text-sm lg:text-base">Download full report</button>
               ) : (
-                <button onClick={handlePremiumDownload} disabled={paymentProcessing} className="btn-download-premium w-32 lg:w-60 text-sm lg:text-base">Unlock full report</button>
+                <button onClick={handlePremiumDownload} disabled={paymentProcessing} className="btn-download-premium w-40 sm:w-48 lg:w-60 text-sm lg:text-base">Unlock full report</button>
                 )}
               </div>
             </div>
