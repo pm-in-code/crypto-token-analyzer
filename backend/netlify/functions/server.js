@@ -12,9 +12,9 @@ app.use(express.json({ limit: '1mb' }));
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const STRIPE_PUBLISHABLE_KEY = process.env.STRIPE_PUBLISHABLE_KEY;
-const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID || 'AcGq4K7pDqR6xZHMWDo5Q7wZJJN4jYzW2zLVxX7cGvGnOC8JYm4lXOy2gzgzJzQ5OzKnKzNzKzMzLzI'; // Sandbox client ID
-const PAYPAL_SECRET = process.env.PAYPAL_SECRET || 'ELtwjJWFUXLMHbKu9eFNXhtgrmmvzokC2Jh_vqUh453jBnseTCxiSkPFAAZsoAm66j2z-Io8y3Rz-Vcx'; // User's sandbox secret
-const PAYPAL_API_URL = process.env.PAYPAL_API_URL || 'https://api-m.sandbox.paypal.com'; // Sandbox API URL
+const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
+const PAYPAL_SECRET = process.env.PAYPAL_SECRET;
+const PAYPAL_API_URL = process.env.PAYPAL_API_URL || 'https://api-m.sandbox.paypal.com'; // Default to sandbox
 const GIST_ID = process.env.GIST_ID; // GitHub Gist ID
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN; // GitHub Personal Access Token
 const ANALYSIS_PROMPT = process.env.ANALYSIS_PROMPT; // fallback single-var storage
