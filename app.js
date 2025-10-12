@@ -1930,19 +1930,22 @@ const TokenSearch = () => {
       setIsLoadingTokens(true);
       try {
         const data = await fetchCryptoData();
-        // Take first 4 tokens for trending section with real ranks
-        const topTokens = data.slice(0, 4).map(token => ({
+        // Filter out stablecoins from trending tokens
+        const stablecoins = ['USDT', 'USDC', 'DAI', 'BUSD', 'TUSD', 'USDP', 'USDD', 'FRAX', 'LUSD', 'SUSD'];
+        const filteredData = data.filter(token => !stablecoins.includes(token.symbol?.toUpperCase()));
+        // Take first 4 non-stablecoin tokens for trending section with real ranks
+        const topTokens = filteredData.slice(0, 4).map(token => ({
           ...token,
           rank: token.market_cap_rank ? `#${token.market_cap_rank} CMC` : '#— CMC'
         }));
         setTrendingTokens(topTokens);
       } catch (error) {
         console.error('Error loading trending tokens:', error);
-        // Fallback to mock data
+        // Fallback to mock data (no stablecoins)
         setTrendingTokens([
-          { name: 'Ethereum', symbol: 'ETH', rank: '#2 CMC', image: 'https://assets.coingecko.com/coins/images/279/large/ethereum.png' },
           { name: 'Bitcoin', symbol: 'BTC', rank: '#1 CMC', image: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png' },
-          { name: 'Cardano', symbol: 'ADA', rank: '#8 CMC', image: 'https://assets.coingecko.com/coins/images/975/large/Cardano.png' },
+          { name: 'Ethereum', symbol: 'ETH', rank: '#2 CMC', image: 'https://assets.coingecko.com/coins/images/279/large/ethereum.png' },
+          { name: 'BNB', symbol: 'BNB', rank: '#4 CMC', image: 'https://assets.coingecko.com/coins/images/825/large/bnb-icon2_2x.png' },
           { name: 'Solana', symbol: 'SOL', rank: '#5 CMC', image: 'https://assets.coingecko.com/coins/images/4128/large/solana.png' }
         ]);
       } finally {
