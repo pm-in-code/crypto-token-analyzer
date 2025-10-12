@@ -1919,6 +1919,8 @@ const TokenSearch = () => {
   const [tokenInput, setTokenInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showError, setShowError] = useState(false);
+  const [showStablecoinModal, setShowStablecoinModal] = useState(false);
+  const [stablecoinSymbol, setStablecoinSymbol] = useState('');
   const [trendingTokens, setTrendingTokens] = useState([]);
   const [isLoadingTokens, setIsLoadingTokens] = useState(true);
 
@@ -1981,6 +1983,14 @@ const TokenSearch = () => {
     const validation = await validateToken(correctedTokenName);
     if (!validation.exists) {
       setShowError(true);
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Check if it's a stablecoin
+    if (validation.isStablecoin) {
+      setStablecoinSymbol(correctedTokenName);
+      setShowStablecoinModal(true);
       setIsSubmitting(false);
       return;
     }
@@ -2069,10 +2079,24 @@ const TokenSearch = () => {
         // Ignore error for direct ID lookup
       }
 
+      // Check if it's a stablecoin (should not be analyzed)
+      const stablecoins = [
+        'USDT', 'USDC', 'DAI', 'BUSD', 'TUSD', 'USDP', 'USDD', 'FRAX', 'LUSD', 'SUSD',
+        'GUSD', 'USDN', 'DUSD', 'RSV', 'USDN', 'USDX', 'USDJ', 'USDS', 'USDM', 'USDK',
+        'USDX', 'USDN', 'USDT', 'USDC', 'DAI', 'BUSD', 'TUSD', 'USDP', 'USDD', 'FRAX'
+      ];
+      if (stablecoins.includes(tokenQuery.toUpperCase())) {
+        return { 
+          exists: true, 
+          isStablecoin: true, 
+          tokenData: { symbol: tokenQuery.toUpperCase() } 
+        };
+      }
+
       // Check if it's a common symbol (expanded list)
       const commonTokens = [
         'BTC', 'ETH', 'ADA', 'SOL', 'MATIC', 'DOT', 'LINK', 'UNI', 'AAVE', 'CRV', 
-        'USDT', 'USDC', 'DAI', 'BNB', 'XRP', 'AVAX', 'ATOM', 'NEAR', 'FTM', 'ALGO',
+        'BNB', 'XRP', 'AVAX', 'ATOM', 'NEAR', 'FTM', 'ALGO',
         'DOGE', 'SHIB', 'LTC', 'BCH', 'ETC', 'XLM', 'VET', 'ICP', 'FIL', 'TRX',
         'MANA', 'SAND', 'AXS', 'ENJ', 'CHZ', 'BAT', 'ZRX', 'GRT', 'MKR', 'COMP',
         'SUSHI', 'YFI', '1INCH', 'SNX', 'REN', 'KNC', 'LRC', 'OMG', 'ZIL', 'ICX',
@@ -2284,6 +2308,77 @@ const TokenSearch = () => {
       >
         <span className="text-gray-900 text-xl font-bold">W</span>
       </button>
+
+      {/* Stablecoin Modal */}
+      {showStablecoinModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 md:p-8 max-w-md w-full shadow-2xl">
+            {/* Funny Icon */}
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <span className="text-3xl">💰</span>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                Really? {stablecoinSymbol}? 😄
+              </h3>
+            </div>
+
+            {/* Funny Message */}
+            <div className="text-center mb-6">
+              <p className="text-gray-700 mb-4">
+                Analyzing a stablecoin is like analyzing the weather in a climate-controlled room - 
+                it's always the same! 🌡️
+              </p>
+              <p className="text-gray-600 mb-4">
+                <strong>{stablecoinSymbol}</strong> is designed to stay at $1.00. 
+                There's no growth potential, no price volatility, and definitely no 
+                "to the moon" moments! 🚀➡️🏠
+              </p>
+              <p className="text-gray-700 font-medium">
+                Try analyzing a real cryptocurrency instead - something that can actually make you rich! 💎
+              </p>
+            </div>
+
+            {/* Suggested Tokens */}
+            <div className="mb-6">
+              <p className="text-sm text-gray-600 mb-3 text-center">Here are some exciting options:</p>
+              <div className="grid grid-cols-2 gap-2">
+                {['Bitcoin', 'Ethereum', 'Solana', 'Cardano'].map((token) => (
+                  <button
+                    key={token}
+                    onClick={() => {
+                      setTokenInput(token);
+                      setShowStablecoinModal(false);
+                    }}
+                    className="px-3 py-2 bg-blue-50 hover:bg-blue-100 rounded-lg text-sm font-medium text-blue-700 transition-colors"
+                  >
+                    {token}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowStablecoinModal(false)}
+                className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-colors"
+              >
+                Got it!
+              </button>
+              <button
+                onClick={() => {
+                  setTokenInput('');
+                  setShowStablecoinModal(false);
+                }}
+                className="flex-1 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors"
+              >
+                Try Another Token
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
