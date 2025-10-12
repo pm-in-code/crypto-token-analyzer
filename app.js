@@ -2061,7 +2061,24 @@ const TokenSearch = () => {
   // Function to validate if token exists
   const validateToken = async (tokenQuery) => {
     try {
-      // First try to search in CoinGecko
+      // FIRST: Check if it's a stablecoin (should not be analyzed)
+      const stablecoins = [
+        'USDT', 'USDC', 'DAI', 'BUSD', 'TUSD', 'USDP', 'USDD', 'FRAX', 'LUSD', 'SUSD',
+        'GUSD', 'USDN', 'DUSD', 'RSV', 'USDX', 'USDJ', 'USDS', 'USDM', 'USDK', 'USDR',
+        'UST', 'USTC', 'MIM', 'DOLA', 'FEI', 'TRIBE', 'OHM', 'ALUSD', 'FLOAT', 'BOND',
+        'HUSD', 'PAX', 'PAXG', 'NUSD'
+      ];
+      
+      if (stablecoins.includes(tokenQuery.toUpperCase())) {
+        console.log('Stablecoin detected:', tokenQuery.toUpperCase());
+        return { 
+          exists: true, 
+          isStablecoin: true, 
+          tokenData: { symbol: tokenQuery.toUpperCase() } 
+        };
+      }
+
+      // SECOND: Try to search in CoinGecko
       const searchResponse = await fetch(`https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(tokenQuery)}`);
       const searchData = await searchResponse.json();
       
@@ -2079,22 +2096,6 @@ const TokenSearch = () => {
         }
       } catch (e) {
         // Ignore error for direct ID lookup
-      }
-
-      // Check if it's a stablecoin (should not be analyzed)
-      const stablecoins = [
-        'USDT', 'USDC', 'DAI', 'BUSD', 'TUSD', 'USDP', 'USDD', 'FRAX', 'LUSD', 'SUSD',
-        'GUSD', 'USDN', 'DUSD', 'RSV', 'USDX', 'USDJ', 'USDS', 'USDM', 'USDK', 'USDR',
-        'UST', 'USTC', 'MIM', 'DOLA', 'FEI', 'TRIBE', 'OHM', 'ALUSD', 'FLOAT', 'BOND',
-        'HUSD', 'PAX', 'PAXG', 'NUSD'
-      ];
-      if (stablecoins.includes(tokenQuery.toUpperCase())) {
-        console.log('Stablecoin detected:', tokenQuery.toUpperCase());
-        return { 
-          exists: true, 
-          isStablecoin: true, 
-          tokenData: { symbol: tokenQuery.toUpperCase() } 
-        };
       }
 
       // Check if it's a common symbol (expanded list)
