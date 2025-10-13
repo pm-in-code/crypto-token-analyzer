@@ -2315,7 +2315,7 @@ const TokenSearch = () => {
         style={{ backgroundColor: '#D9FF00' }}
       >
         <span className="text-gray-900 text-xl font-bold">W</span>
-      </button>
+          </button>
 
       {/* Stablecoin Modal */}
       {showStablecoinModal && (
@@ -2325,7 +2325,7 @@ const TokenSearch = () => {
             <div className="text-center mb-6">
               <div className="w-16 h-16 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
                 <span className="text-3xl">💰</span>
-              </div>
+        </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2">
                 Really? {stablecoinSymbol}? 😄
               </h3>
@@ -2966,10 +2966,10 @@ const ResultScreen = () => {
   return (
     <div className="w-full">
       {/* Logo - Fixed Position Top Left */}
-      <div className="fixed top-4 left-4 z-40">
+      <div className="fixed top-3 left-3 sm:top-4 sm:left-4 z-40">
         <button 
           onClick={handleLogoClick}
-          className="w-12 h-12 rounded-xl bg-lime-400 flex items-center justify-center text-gray-900 font-bold text-2xl shadow-lg hover:bg-lime-500 transition-colors cursor-pointer"
+          className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-lime-400 flex items-center justify-center text-gray-900 font-bold text-lg sm:text-2xl shadow-lg hover:bg-lime-500 transition-colors cursor-pointer"
           style={{
             background: 'linear-gradient(135deg, #d9f99d 0%, #bef264 100%)',
             boxShadow: '0 4px 12px rgba(217, 249, 157, 0.4)'
@@ -2980,7 +2980,7 @@ const ResultScreen = () => {
       </div>
 
       {/* Social links - Fixed Position Top Right (visible on results too) */}
-      <div className="fixed top-4 right-4 flex gap-1 md:gap-3 z-40">
+      <div className="fixed top-3 right-3 sm:top-4 sm:right-4 flex gap-1 md:gap-3 z-40">
         <a href="https://x.com/itsworth_app" target="_blank" rel="noopener noreferrer" className="hidden sm:block px-2 md:px-4 py-2 rounded-xl bg-amber-50 border border-amber-100 text-gray-800 shadow-sm hover:bg-amber-100 transition-colors text-sm md:text-base">Twitter</a>
         <a href="https://x.com/itsworth_app" target="_blank" rel="noopener noreferrer" className="sm:hidden p-2 rounded-xl bg-amber-50 border border-amber-100 text-gray-800 shadow-sm hover:bg-amber-100 transition-colors">
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -2999,9 +2999,9 @@ const ResultScreen = () => {
             <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
           </svg>
         </a>
-      </div>
+        </div>
       {/* New Token Search Bar */}
-      <div className="mb-6 flex justify-center px-4">
+      <div className="mb-6 flex justify-center px-4 pt-24 sm:pt-20 md:pt-0">
         <form onSubmit={handleNewTokenSubmit} className="w-full max-w-2xl">
           <div className="relative">
             <input
@@ -3077,14 +3077,14 @@ const ResultScreen = () => {
             <div className={`px-6 py-4 ${bandBg} flex items-center justify-between`}>
               <div className="text-lg font-bold text-gray-900">{verdictText}</div>
               <div className="flex items-center gap-2">
-                <button onClick={handleExplanationClick} className="w-8 h-8 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors shadow-sm">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <button onClick={handleExplanationClick} className="w-9 h-9 sm:w-8 sm:h-8 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors shadow-sm">
+                  <svg width="18" height="18" className="sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5"/>
                     <path d="M12 8v4M12 16h.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                   </svg>
                 </button>
-                <button onClick={handleShareClick} className="w-8 h-8 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors shadow-sm">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <button onClick={handleShareClick} className="w-9 h-9 sm:w-8 sm:h-8 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors shadow-sm">
+                  <svg width="18" height="18" className="sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M3 7h18M3 12h18M3 17h18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                   </svg>
                 </button>
