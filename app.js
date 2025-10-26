@@ -3001,7 +3001,7 @@ const ResultScreen = () => {
         </a>
         </div>
       {/* New Token Search Bar */}
-      <div className="mb-6 flex justify-center px-4 pt-24 sm:pt-20 md:pt-0">
+      <div className="mb-6 flex justify-center px-4 pt-5 sm:pt-20 md:pt-0">
         <form onSubmit={handleNewTokenSubmit} className="w-full max-w-2xl">
           <div className="relative">
             <input
