@@ -3042,7 +3042,7 @@ const ResultScreen = () => {
         <div className="w-full lg:w-auto lg:flex-1">
           <div className={`overflow-hidden border ${bandBorder} w-full max-w-2xl lg:w-[560px] h-[500px] sm:h-[550px] lg:h-[600px] flex flex-col relative`} style={{ borderRadius: 24 }}>
             {/* Floating inner card by Figma spec */}
-            <div className={`absolute top-4 left-4 right-4 lg:top-[170px] lg:left-16 lg:right-16 bottom-20 lg:bottom-auto lg:h-96 border ${bandBorder} flex flex-col gap-1 bg-transparent p-1`} style={{ borderRadius: 24 }}>
+            <div className={`absolute top-14 left-4 right-4 lg:top-[170px] lg:left-16 lg:right-16 bottom-20 lg:bottom-auto lg:h-96 border ${bandBorder} flex flex-col gap-1 bg-transparent p-1`} style={{ borderRadius: 24 }}>
               <div className="bg-white rounded-2xl shadow-sm p-6 flex-1 flex flex-col">
                 {/* Token header */}
                 <div className="flex items-center justify-between flex-wrap gap-2">
