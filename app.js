@@ -12,53 +12,70 @@ const parseAnalysisSummary = (summary) => {
   let tokenSymbol;
   const summaries = {};
 
+  // Helper to extract number from "XX/100" or number
+  const extractScore = (val) => {
+    if (val === null || val === undefined) return null;
+    if (typeof val === 'number') return val;
+    if (typeof val === 'string') {
+      const m = val.match(/\d{1,3}/);
+      return m ? parseInt(m[0], 10) : null;
+    }
+    return null;
+  };
+
   // First, attempt JSON parsing because the model frequently returns JSON
   try {
     const parsed = JSON.parse(summary);
     if (parsed && (parsed.categories || parsed.overallScore || parsed.tokenName || parsed.token || parsed.tokenSymbol)) {
-      // Categories may be like: [{ name: "Market Metrics", score: "70/100", summary: "...", strengths: [...], weaknesses: [...] }]
+
+      // Build a lookup map from categoryDetails (new Gist schema)
+      const detailsMap = {};
+      if (Array.isArray(parsed.categoryDetails)) {
+        parsed.categoryDetails.forEach((d) => {
+          const key = (d.categoryName || d.name || '').trim();
+          if (key) detailsMap[key] = d;
+        });
+      }
+
+      // Categories: support both old schema (score as number) and new Gist schema (score as "XX/100")
       if (Array.isArray(parsed.categories)) {
         categories = parsed.categories
           .map((c) => {
             const name = c.name || c.category || c.title;
-            let scoreRaw = c.score;
-            if (typeof scoreRaw === 'string') {
-              const m = scoreRaw.match(/\d{1,3}/);
-              scoreRaw = m ? parseInt(m[0], 10) : NaN;
-            }
-            if (typeof scoreRaw === 'number') {
-              return { 
-                name, 
-                score: scoreRaw,
-                summary: c.summary || '',
-                strengths: Array.isArray(c.strengths) ? c.strengths : [],
-                weaknesses: Array.isArray(c.weaknesses) ? c.weaknesses : []
-              };
-            }
-            return null;
+            const score = extractScore(c.score);
+            if (score === null || !name) return null;
+
+            // Merge details from categoryDetails if available (new Gist schema)
+            const detail = detailsMap[name] || {};
+            return {
+              name,
+              score,
+              color: c.color || null,
+              summary: detail.description || c.summary || c.description || '',
+              strengths: Array.isArray(detail.strengths) ? detail.strengths : (Array.isArray(c.strengths) ? c.strengths : []),
+              weaknesses: Array.isArray(detail.weaknesses) ? detail.weaknesses : (Array.isArray(c.weaknesses) ? c.weaknesses : [])
+            };
           })
           .filter(Boolean)
           .filter((c) => c.name && Number.isFinite(c.score) && c.score >= 0 && c.score <= 100);
       }
 
       // Overall score may be "68/100" or a number
-      if (parsed.overallScore !== undefined && parsed.overallScore !== null) {
-        if (typeof parsed.overallScore === 'number') {
-          overallScore = parsed.overallScore;
-        } else if (typeof parsed.overallScore === 'string') {
-          const m = parsed.overallScore.match(/\d{1,3}/);
-          overallScore = m ? parseInt(m[0], 10) : null;
-        }
-      }
+      overallScore = extractScore(parsed.overallScore);
 
       tokenName = parsed.tokenName || parsed.token || undefined;
       tokenSymbol = parsed.tokenSymbol || undefined;
+
+      // Store verdict and insights for PDF
+      const overallVerdict = parsed.overallVerdict || null;
+      const insights = Array.isArray(parsed.insights) ? parsed.insights : [];
+      const conclusion = parsed.conclusion || '';
 
       // Early return if JSON parse succeeded meaningfully
       if ((categories && categories.length) || overallScore !== null || tokenName || tokenSymbol) {
         console.log('Parsed (JSON) categories:', categories);
         console.log('Parsed (JSON) overall score:', overallScore);
-        return { categories, overallScore, tokenName, tokenSymbol };
+        return { categories, overallScore, tokenName, tokenSymbol, overallVerdict, insights, conclusion };
       }
     }
   } catch (e) {

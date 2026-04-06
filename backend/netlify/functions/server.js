@@ -216,75 +216,9 @@ REAL DATA UNAVAILABLE: Could not fetch real market data for this token.
 Please proceed with analysis but clearly indicate when data is estimated or unavailable.`;
     }
 
-    // Compose messages: secure system prompt + explicit JSON instruction for stable parsing
-    const jsonInstruction = `IMPORTANT: Search for the token "${tokenName.trim()}" using these strategies:
-1. For "Trump" - search for "TRUMP", "TRUMP47", "MAGA", "Donald Trump coin", political meme tokens
-2. For "Openloot" - search for "OL" symbol, "Open Loot", gaming/NFT tokens (CoinMarketCap symbol: OL)
-3. Common token variations to try: full name, ticker symbol, alternative spellings, project name
-4. Check multiple data sources: CoinMarketCap, CoinGecko, DexScreener, DEXTools, Dune Analytics
-5. For new/meme coins: check DEX data, social metrics, on-chain analytics, community channels
-6. Search by: exact symbol, full project name, common abbreviations, related keywords
-7. If not on major CEX, check DEX listings and contract addresses
-
-You MUST respond with strict JSON only, no prose. Schema:
-{
-  "tokenName": string,
-  "tokenSymbol": string,
-  "overallScore": number, // 0-100
-  "categories": [
-    { 
-      "name": "Market Metrics", 
-      "score": number, 
-      "summary": string, // 2-4 sentences specific to this token
-      "strengths": [string, string, string], // 2-3 specific strengths
-      "weaknesses": [string, string, string] // 2-3 specific weaknesses
-    },
-    { 
-      "name": "Tokenomics", 
-      "score": number, 
-      "summary": string,
-      "strengths": [string, string, string],
-      "weaknesses": [string, string, string]
-    },
-    { 
-      "name": "Development Activity", 
-      "score": number, 
-      "summary": string,
-      "strengths": [string, string, string],
-      "weaknesses": [string, string, string]
-    },
-    { 
-      "name": "Social Metrics", 
-      "score": number, 
-      "summary": string,
-      "strengths": [string, string, string],
-      "weaknesses": [string, string, string]
-    },
-    { 
-      "name": "Team & Investors", 
-      "score": number, 
-      "summary": string,
-      "strengths": [string, string, string],
-      "weaknesses": [string, string, string]
-    },
-    { 
-      "name": "Risk Assessment", 
-      "score": number, 
-      "summary": string,
-      "strengths": [string, string, string],
-      "weaknesses": [string, string, string]
-    }
-  ]
-}
-Guidelines: 
-- Use the search strategies above to find accurate data for "${tokenName.trim()}"
-- ALL content MUST be specific to this exact token, not generic templates
-- If token exists but has limited data, use available information from DEX/on-chain sources
-- If truly not found after thorough search, indicate this in the analysis
-- Return valid JSON only with real data.`;
     const messages = [
       { role: 'system', content: securePrompt },
-      { role: 'user', content: `Token: ${tokenName.trim()}\n${realDataSection}\n${jsonInstruction}` }
+      { role: 'user', content: realDataSection.trim() }
     ];
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
