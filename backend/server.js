@@ -13,6 +13,29 @@ app.use(express.json());
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const STRIPE_PUBLISHABLE_KEY = process.env.STRIPE_PUBLISHABLE_KEY;
+const GIST_ID = process.env.GIST_ID;
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+
+// Load prompt from GitHub Gist
+async function loadPromptFromGist() {
+  if (!GIST_ID || !GITHUB_TOKEN) return '';
+  try {
+    const fetch = require('node-fetch');
+    const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+      headers: {
+        'Authorization': `token ${GITHUB_TOKEN}`,
+        'Accept': 'application/vnd.github.v3+json',
+      }
+    });
+    if (!response.ok) return '';
+    const gist = await response.json();
+    const firstFile = Object.values(gist.files)[0];
+    return firstFile ? firstFile.content : '';
+  } catch (error) {
+    console.error('Error fetching from Gist:', error);
+    return '';
+  }
+}
 
 // Simple test endpoint (no auth required)
 app.get('/', (req, res) => {
@@ -42,46 +65,12 @@ app.post('/api/analyze-token', async (req, res) => {
       return res.status(500).json({ error: 'OpenAI API key not configured' });
     }
 
-    const prompt = `📌 Execute this prompt: 🧠 Prompt for detailed cryptocurrency token analysis
-
-Please provide a comprehensive analysis of the cryptocurrency token "${tokenName}". 
-
-Analysis should include:
-
-1. Market Metrics (0-100 score)
-2. Tokenomics (0-100 score) 
-3. Development Activity (0-100 score)
-4. Social Metrics (0-100 score)
-5. Team & Investors (0-100 score)
-6. Risk Assessment (0-100 score)
-
-For each category, provide:
-- Detailed analysis with specific data points
-- Score from 0-100 with justification
-- Key strengths and weaknesses
-
-Format the response as:
-Category 1: Market Metrics - Score: [X]/100
-[Detailed analysis]
-
-Category 2: Tokenomics - Score: [X]/100
-[Detailed analysis]
-
-Category 3: Development Activity - Score: [X]/100
-[Detailed analysis]
-
-Category 4: Social Metrics - Score: [X]/100
-[Detailed analysis]
-
-Category 5: Team & Investors - Score: [X]/100
-[Detailed analysis]
-
-Category 6: Risk Assessment - Score: [X]/100
-[Detailed analysis]
-
-Overall Score: [Average of all scores]/100
-
-Provide actionable insights and recommendations.`;
+    // Load prompt from Gist and substitute token name
+    let prompt = await loadPromptFromGist();
+    if (!prompt) {
+      return res.status(500).json({ error: 'Analysis prompt not configured. Set GIST_ID and GITHUB_TOKEN.' });
+    }
+    prompt = prompt.replace('{{TOKEN_NAME}}', tokenName.trim());
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -91,9 +80,9 @@ Provide actionable insights and recommendations.`;
       },
       body: JSON.stringify({
         model: 'gpt-5.4-nano',
-        messages: [{ role: 'user', content: prompt }],
+        messages: [{ role: 'system', content: prompt }],
         max_tokens: 2000,
-        temperature: 0.7
+        temperature: 0.2
       })
     });
 

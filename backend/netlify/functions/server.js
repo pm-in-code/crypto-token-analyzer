@@ -161,10 +161,12 @@ app.post('/api/analyze-token', async (req, res) => {
     if (!OPENAI_API_KEY) {
       return res.status(500).json({ error: 'OpenAI API key not configured' });
     }
-    const securePrompt = await loadAnalysisPrompt();
+    let securePrompt = await loadAnalysisPrompt();
     if (!securePrompt) {
       return res.status(500).json({ error: 'Analysis prompt not configured' });
     }
+    // Substitute {{TOKEN_NAME}} placeholder with actual token name
+    securePrompt = securePrompt.replace('{{TOKEN_NAME}}', tokenName.trim());
     if (!tokenName || typeof tokenName !== 'string') {
       return res.status(400).json({ error: 'tokenName is required' });
     }
