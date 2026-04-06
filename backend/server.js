@@ -90,7 +90,7 @@ Provide actionable insights and recommendations.`;
         'Authorization': `Bearer ${OPENAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-5.4-nano',
         messages: [{ role: 'user', content: prompt }],
         max_tokens: 2000,
         temperature: 0.7
