@@ -240,13 +240,34 @@ IMPORTANT INSTRUCTION: You are analyzing a well-known public token. You MUST use
     });
 
     const data = await response.json();
-    
+
+    console.log('OpenAI response keys:', Object.keys(data));
+    console.log('OpenAI response structure:', JSON.stringify(data).substring(0, 500));
+
     if (data.error) {
       return res.status(500).json({ error: data.error.message });
     }
 
-    const analysis = data.choices?.[0]?.message?.content || '';
-    
+    // Support both old (choices[0].message.content) and new (output) response formats
+    let analysis = '';
+    if (data.choices?.[0]?.message?.content) {
+      analysis = data.choices[0].message.content;
+    } else if (data.output_text) {
+      analysis = data.output_text;
+    } else if (Array.isArray(data.output)) {
+      // New format: output is an array of message objects
+      const outputMsg = data.output.find(o => o.type === 'message' && o.role === 'assistant');
+      if (outputMsg && Array.isArray(outputMsg.content)) {
+        analysis = outputMsg.content
+          .filter(c => c.type === 'output_text')
+          .map(c => c.text)
+          .join('');
+      }
+    }
+
+    console.log('Parsed analysis length:', analysis.length);
+    console.log('Analysis preview:', analysis.substring(0, 200));
+
     res.json({
       success: true,
       analysis
