@@ -59,8 +59,7 @@ module.exports = async (req, res) => {
       body: JSON.stringify({
         model: 'gpt-5.4-nano',
         messages: [{ role: 'system', content: prompt }],
-        max_completion_tokens: 2000,
-        temperature: 0.2
+        max_completion_tokens: 16000
       })
     });
 

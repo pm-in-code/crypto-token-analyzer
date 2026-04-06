@@ -234,8 +234,7 @@ IMPORTANT INSTRUCTION: You are analyzing a well-known public token. You MUST use
       body: JSON.stringify({
         model: 'gpt-5.4-nano',
         messages,
-        max_completion_tokens: 2000,
-        temperature: 0.2
+        max_completion_tokens: 16000
       })
     });
 
