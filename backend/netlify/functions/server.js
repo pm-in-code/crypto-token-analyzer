@@ -216,9 +216,13 @@ REAL DATA UNAVAILABLE: Could not fetch real market data for this token.
 Please proceed with analysis but clearly indicate when data is estimated or unavailable.`;
     }
 
+    const userMessage = `${realDataSection.trim()}
+
+IMPORTANT INSTRUCTION: You are analyzing a well-known public token. You MUST use your training knowledge about this token's publicly available information — including tokenomics, team background, audit history, development activity, GitHub commits, social metrics, and investor history. Do NOT assign 0 scores simply because data was not provided above. Use your knowledge of publicly documented facts about this token to assign accurate scores according to the scoring criteria. Only assign 0 if the criterion truly does not apply or if the token genuinely has no public information for that criterion.`;
+
     const messages = [
       { role: 'system', content: securePrompt },
-      { role: 'user', content: realDataSection.trim() }
+      { role: 'user', content: userMessage }
     ];
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
