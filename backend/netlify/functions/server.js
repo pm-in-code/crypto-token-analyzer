@@ -268,6 +268,16 @@ IMPORTANT INSTRUCTION: You are analyzing a well-known public token. You MUST use
     console.log('Parsed analysis length:', analysis.length);
     console.log('Analysis preview:', analysis.substring(0, 200));
 
+    // Temporary debug: include raw response structure when analysis is empty
+    if (!analysis) {
+      return res.json({
+        success: false,
+        error: 'Empty analysis from model',
+        debug_keys: Object.keys(data),
+        debug_raw: JSON.stringify(data).substring(0, 1000)
+      });
+    }
+
     res.json({
       success: true,
       analysis
