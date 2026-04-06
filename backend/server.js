@@ -81,7 +81,7 @@ app.post('/api/analyze-token', async (req, res) => {
       body: JSON.stringify({
         model: 'gpt-5.4-nano',
         messages: [{ role: 'system', content: prompt }],
-        max_tokens: 2000,
+        max_completion_tokens: 2000,
         temperature: 0.2
       })
     });

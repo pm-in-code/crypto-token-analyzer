@@ -296,7 +296,7 @@ Guidelines:
       body: JSON.stringify({
         model: 'gpt-5.4-nano',
         messages,
-        max_tokens: 2000,
+        max_completion_tokens: 2000,
         temperature: 0.2
       })
     });
