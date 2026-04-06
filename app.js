@@ -211,8 +211,8 @@ const fetchCryptoData = async () => {
       symbol: coin.symbol.toUpperCase(),
       logo: getCryptoLogo(coin.symbol),
       price: `$${coin.current_price.toLocaleString()}`,
-      change24h: parseFloat(coin.price_change_percentage_24h.toFixed(2)),
-      marketCap: `$${(coin.market_cap / 1e9).toFixed(1)}B`,
+      change24h: parseFloat((coin.price_change_percentage_24h ?? 0).toFixed(2)),
+      marketCap: `$${((coin.market_cap ?? 0) / 1e9).toFixed(1)}B`,
       color: getCryptoColor(coin.symbol),
       image: coin.image,
       market_cap_rank: coin.market_cap_rank

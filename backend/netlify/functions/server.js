@@ -31,22 +31,32 @@ function loadPromptFromEnvParts() {
 
 // Load prompt from GitHub Gist (primary method)
 async function loadPromptFromGist() {
-  if (!GIST_ID || !GITHUB_TOKEN) return '';
-  
+  if (!GIST_ID) return '';
+
   try {
-    const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
-      headers: {
-        'Authorization': `token ${GITHUB_TOKEN}`,
-        'Accept': 'application/vnd.github.v3+json',
-        'User-Agent': 'Crypto-Token-Analyzer'
-      }
-    });
-    
+    // Try with token first, fallback to public access
+    const headers = {
+      'Accept': 'application/vnd.github.v3+json',
+      'User-Agent': 'Crypto-Token-Analyzer'
+    };
+    if (GITHUB_TOKEN) {
+      headers['Authorization'] = `token ${GITHUB_TOKEN}`;
+    }
+
+    let response = await fetch(`https://api.github.com/gists/${GIST_ID}`, { headers });
+
+    // If token auth failed, retry without token (public gist fallback)
+    if (!response.ok && GITHUB_TOKEN) {
+      console.warn('Gist fetch with token failed (status:', response.status, '), retrying without auth...');
+      delete headers['Authorization'];
+      response = await fetch(`https://api.github.com/gists/${GIST_ID}`, { headers });
+    }
+
     if (!response.ok) {
       console.error('Failed to fetch Gist:', response.status);
       return '';
     }
-    
+
     const gist = await response.json();
     // Get the first file content (assuming it's the prompt)
     const firstFile = Object.values(gist.files)[0];
